@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jinletian · 个人主页</title>
+<meta name="description" content="Jinletian 的个人主页与图片集" />
+<meta name="theme-color" content="#0a0a0c" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0c;
+    --bg-2:#101014;
+    --fg:#ece9e2;
+    --dim:#8b8b96;
+    --line:rgba(255,255,255,.08);
+    --gold:#e3b566;
+    --gold-soft:rgba(227,181,102,.16);
+    --card:rgba(255,255,255,.035);
+    --radius:16px;
+    --max:1180px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+    font-weight:400;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body.locked{overflow:hidden;height:100vh}
+  ::selection{background:var(--gold);color:#1a1408}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  .serif{font-family:'Playfair Display',Georgia,serif}
+  .eyebrow{
+    font-size:12px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--gold);font-weight:500;
+  }
+
+  /* ================= 开场动画 ================= */
+  #intro{
+    position:fixed;inset:0;z-index:200;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:
+      radial-gradient(900px 600px at 50% 42%, rgba(227,181,102,.10), transparent 60%),
+      radial-gradient(700px 500px at 80% 80%, rgba(139,123,255,.10), transparent 60%),
+      #070709;
+    transition:opacity .9s ease, visibility .9s ease;
+  }
+  #intro.hidden{opacity:0;visibility:hidden;pointer-events:none}
+  .intro-name{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:clamp(38px,9vw,108px);
+    letter-spacing:.12em;
+    font-weight:600;
+    display:flex;gap:.02em;
+    line-height:1;
+    padding-left:.12em;
+  }
+  .intro-name span{
+    display:inline-block;opacity:0;transform:translateY(38px) rotateX(-35deg);
+    animation:letterIn .85s cubic-bezier(.2,.7,.2,1) forwards;
+    color:#f4efe4;
+    text-shadow:0 0 30px rgba(227,181,102,.18);
+  }
+  @keyframes letterIn{to{opacity:1;transform:none}}
+  .intro-line{
+    height:1px;width:0;background:linear-gradient(90deg,transparent,var(--gold),transparent);
+    margin:26px 0 18px;animation:lineGrow 1.1s .85s ease forwards;
+  }
+  @keyframes lineGrow{to{width:min(320px,70vw)}}
+  .intro-sub{
+    font-size:12px;letter-spacing:.42em;text-transform:uppercase;color:var(--dim);
+    opacity:0;animation:fadeUp .8s 1.35s ease forwards;
+  }
+  #enterBtn{
+    margin-top:40px;opacity:0;
+    animation:fadeUp .8s 1.7s ease forwards;
+    background:transparent;border:1px solid rgba(227,181,102,.5);
+    color:var(--gold);padding:13px 42px;border-radius:999px;
+    font-size:13px;letter-spacing:.28em;cursor:pointer;
+    transition:.35s;font-family:inherit;
+  }
+  #enterBtn:hover{background:var(--gold);color:#171102;border-color:var(--gold);letter-spacing:.36em}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .intro-hint{
+    position:absolute;bottom:34px;font-size:11px;letter-spacing:.3em;color:rgba(255,255,255,.28);
+    animation:fadeUp 1s 2.1s ease forwards;opacity:0;
+  }
+
+  /* ================= 滚动进度 ================= */
+  #progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:120;
+    background:linear-gradient(90deg,var(--gold),#f6d79a);box-shadow:0 0 12px rgba(227,181,102,.6)}
+
+  /* ================= 导航 ================= */
+  #nav{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px clamp(20px,5vw,56px);
+    transition:.4s;
+    border-bottom:1px solid transparent;
+  }
+  #nav.scrolled{
+    background:rgba(10,10,12,.72);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border-bottom-color:var(--line);
+    padding-top:11px;padding-bottom:11px;
+  }
+  .logo{font-family:'Playfair Display',serif;font-size:21px;letter-spacing:.02em;font-weight:600}
+  .logo b{color:var(--gold);font-weight:600}
+  #nav nav{display:flex;gap:clamp(14px,2.4vw,34px);align-items:center}
+  #nav nav a{font-size:13.5px;color:var(--dim);position:relative;padding:4px 0;transition:.25s;letter-spacing:.02em}
+  #nav nav a::after{content:"";position:absolute;left:0;bottom:-2px;height:1px;width:0;background:var(--gold);transition:.3s}
+  #nav nav a:hover,#nav nav a.active{color:var(--fg)}
+  #nav nav a.active::after{width:100%}
+  .unlock{
+    display:inline-flex;align-items:center;gap:7px;
+    background:var(--gold-soft);border:1px solid rgba(227,181,102,.35);
+    color:var(--gold);font-size:12.5px;font-family:inherit;
+    padding:8px 15px;border-radius:999px;cursor:pointer;transition:.3s;white-space:nowrap;
+  }
+  .unlock:hover{background:var(--gold);color:#171102}
+  .unlock.on{background:rgba(80,200,140,.14);border-color:rgba(80,200,140,.45);color:#6fe0a6}
+  .unlock.on:hover{background:rgba(80,200,140,.22);color:#8ff0bb}
+
+  /* ================= Hero ================= */
+  .hero{
+    position:relative;min-height:100vh;display:flex;align-items:center;
+    padding:0 clamp(22px,6vw,80px);overflow:hidden;
+  }
+  .hero-glow{
+    position:absolute;width:620px;height:620px;border-radius:50%;pointer-events:none;
+    background:radial-gradient(circle,rgba(227,181,102,.14),transparent 62%);
+    left:50%;top:50%;transform:translate(-50%,-50%);transition:transform .35s ease-out;
+    z-index:0;
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;z-index:0;opacity:.5;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:64px 64px;
+    mask-image:radial-gradient(circle at 50% 45%,#000 0%,transparent 72%);
+    -webkit-mask-image:radial-gradient(circle at 50% 45%,#000 0%,transparent 72%);
+  }
+  .hero-content{position:relative;z-index:2;max-width:820px}
+  .hero-content .eyebrow{margin-bottom:22px}
+  .hero h1{
+    font-family:'Playfair Display',serif;font-weight:600;
+    font-size:clamp(42px,8vw,96px);line-height:1.04;letter-spacing:-.01em;
+  }
+  .hero h1 span{
+    background:linear-gradient(100deg,var(--gold) 0%,#f7e3b8 45%,var(--gold) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero .lead{
+    margin-top:26px;font-size:clamp(15px,1.8vw,18px);color:var(--dim);max-width:540px;font-weight:300;
+  }
+  .hero-actions{margin-top:42px;display:flex;gap:14px;flex-wrap:wrap}
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;cursor:pointer;font-family:inherit;
+    font-size:13.5px;padding:13px 26px;border-radius:999px;transition:.35s;border:1px solid transparent;
+  }
+  .btn.primary{background:var(--gold);color:#181103;font-weight:500}
+  .btn.primary:hover{box-shadow:0 10px 34px -8px rgba(227,181,102,.6);transform:translateY(-2px)}
+  .btn.ghost{background:rgba(255,255,255,.04);border-color:var(--line);color:var(--fg)}
+  .btn.ghost:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.2)}
+  .btn.small{padding:8px 16px;font-size:12.5px}
+  .scroll-cue{
+    position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:2;
+    font-size:11px;letter-spacing:.3em;color:rgba(255,255,255,.34);animation:bob 2.4s ease-in-out infinite;
+  }
+  @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,9px)}}
+
+  /* ================= 通用 section ================= */
+  .section{max-width:var(--max);margin:0 auto;padding:clamp(80px,12vw,150px) clamp(22px,5vw,40px)}
+  .section-head{margin-bottom:54px}
+  .section-head h2,.placeholder h2{
+    font-family:'Playfair Display',serif;font-weight:600;
+    font-size:clamp(32px,5vw,54px);line-height:1.1;margin:16px 0 14px;
+  }
+  .section-head h2 .count{
+    font-size:.5em;vertical-align:super;color:var(--gold);
+    border:1px solid rgba(227,181,102,.4);border-radius:999px;padding:2px 12px;margin-left:10px;font-family:'Inter';
+  }
+  .section-desc{color:var(--dim);font-size:14.5px;font-weight:300;max-width:560px}
+  .section-desc a{color:var(--gold);border-bottom:1px solid rgba(227,181,102,.4);cursor:pointer}
+
+  /* ================= 画廊 ================= */
+  .grid{columns:4;column-gap:16px}
+  @media(max-width:1080px){.grid{columns:3}}
+  @media(max-width:760px){.grid{columns:2;column-gap:12px}}
+  @media(max-width:440px){.grid{columns:1}}
+  .ph{
+    break-inside:avoid;margin-bottom:16px;border-radius:var(--radius);overflow:hidden;
+    position:relative;cursor:pointer;background:var(--card);
+    opacity:0;transform:translateY(26px) scale(.98);
+    transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1);
+  }
+  .ph.in{opacity:1;transform:none}
+  .ph img{width:100%;height:auto;transition:transform .7s cubic-bezier(.2,.7,.2,1);display:block}
+  .ph:hover img{transform:scale(1.045)}
+  .ph .veil{
+    position:absolute;inset:0;opacity:0;transition:.4s;
+    background:linear-gradient(to top,rgba(8,8,10,.82) 0%,rgba(8,8,10,.15) 42%,transparent 68%);
+    display:flex;align-items:flex-end;justify-content:space-between;padding:14px 15px;
+  }
+  .ph:hover .veil{opacity:1}
+  .ph .veil .idx{font-family:'Playfair Display',serif;font-size:19px;color:#fff;letter-spacing:.05em}
+  .ph .veil .dl{
+    width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+    background:rgba(255,255,255,.14);backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.28);color:#fff;font-size:15px;transition:.25s;
+  }
+  .ph .veil .dl:hover{background:var(--gold);color:#171102;border-color:var(--gold)}
+  .ph .veil .dl::after{content:"⬇";font-size:15px}
+  .ph .veil .dl.locked::after{content:"🔒";font-size:12px}
+  .gallery-foot{display:flex;justify-content:center;margin-top:44px}
+
+  /* 占位区 */
+  .placeholder .ph-card{
+    margin-top:26px;border:1px dashed rgba(255,255,255,.16);border-radius:var(--radius);
+    padding:clamp(40px,7vw,74px);text-align:center;color:var(--dim);
+    background:linear-gradient(180deg,rgba(255,255,255,.02),transparent);
+    font-size:14.5px;letter-spacing:.05em;
+  }
+  .placeholder .ph-card .big{font-family:'Playfair Display',serif;font-size:22px;color:rgba(255,255,255,.55);display:block;margin-bottom:10px}
+
+  /* ================= 页脚 ================= */
+  footer{
+    border-top:1px solid var(--line);padding:46px clamp(22px,5vw,40px);
+    max-width:var(--max);margin:0 auto;display:flex;justify-content:space-between;
+    align-items:center;flex-wrap:wrap;gap:12px;color:var(--dim);font-size:13px;
+  }
+  footer .tiny{font-size:12px;color:rgba(255,255,255,.3)}
+
+  /* ================= 灯箱 ================= */
+  .lightbox{
+    position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;
+    background:rgba(6,6,8,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    opacity:0;visibility:hidden;transition:.35s;padding:56px 72px;
+  }
+  .lightbox.open{opacity:1;visibility:visible}
+  #lbImg{
+    max-width:100%;max-height:calc(100vh - 150px);border-radius:8px;
+    box-shadow:0 40px 120px -20px rgba(0,0,0,.9);
+    transform:scale(.96);transition:transform .4s cubic-bezier(.2,.7,.2,1);
+  }
+  .lightbox.open #lbImg{transform:scale(1)}
+  .lb-close,.lb-prev,.lb-next{
+    position:absolute;background:rgba(255,255,255,.06);border:1px solid var(--line);
+    color:#fff;cursor:pointer;border-radius:50%;display:grid;place-items:center;
+    transition:.25s;font-family:inherit;z-index:2;
+  }
+  .lb-close{top:22px;right:22px;width:44px;height:44px;font-size:26px;line-height:1}
+  .lb-prev,.lb-next{top:50%;transform:translateY(-50%);width:52px;height:52px;font-size:30px;line-height:1}
+  .lb-prev{left:16px}.lb-next{right:16px}
+  .lb-close:hover,.lb-prev:hover,.lb-next:hover{background:var(--gold);color:#171102;border-color:var(--gold)}
+  .lb-bar{
+    position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+    display:flex;align-items:center;gap:22px;background:rgba(20,20,24,.72);
+    border:1px solid var(--line);padding:9px 12px 9px 20px;border-radius:999px;
+  }
+  #lbCounter{font-size:13px;color:var(--dim);letter-spacing:.1em}
+  #lbDownload{background:var(--gold);color:#181103;border:none;border-radius:999px;padding:8px 18px;font-size:12.5px;cursor:pointer;font-family:inherit;display:inline-flex;gap:7px;align-items:center;transition:.25s}
+  #lbDownload:hover{box-shadow:0 8px 24px -6px rgba(227,181,102,.6)}
+  #lbDownload.locked{background:rgba(255,255,255,.1);color:var(--fg)}
+
+  /* ================= 登录弹窗 ================= */
+  .modal{
+    position:fixed;inset:0;z-index:180;display:flex;align-items:center;justify-content:center;
+    background:rgba(4,4,6,.7);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:.3s;padding:24px;
+  }
+  .modal.open{opacity:1;visibility:visible}
+  .modal-card{
+    width:min(420px,100%);background:linear-gradient(180deg,#15151a,#0e0e12);
+    border:1px solid var(--line);border-radius:20px;padding:34px 30px;
+    transform:translateY(16px) scale(.97);transition:.35s cubic-bezier(.2,.7,.2,1);
+    box-shadow:0 40px 90px -20px rgba(0,0,0,.8);
+  }
+  .modal.open .modal-card{transform:none}
+  .modal-card h3{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;margin-bottom:10px}
+  .modal-card p{color:var(--dim);font-size:13.5px;font-weight:300;line-height:1.65}
+  #passInput{
+    width:100%;margin-top:22px;padding:13px 16px;border-radius:12px;
+    background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--fg);
+    font-size:15px;font-family:inherit;outline:none;transition:.25s;letter-spacing:.06em;
+  }
+  #passInput:focus{border-color:rgba(227,181,102,.6);background:rgba(227,181,102,.05)}
+  .err{color:#ff7a7a;font-size:12.5px;margin-top:10px;min-height:16px;opacity:0;transition:.2s}
+  .err.show{opacity:1}
+  .modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
+  .modal-card.shake{animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+  /* ================= Toast ================= */
+  .toast{
+    position:fixed;left:50%;bottom:38px;transform:translate(-50%,24px);z-index:190;
+    background:rgba(20,20,24,.95);border:1px solid var(--line);color:var(--fg);
+    padding:12px 22px;border-radius:999px;font-size:13.5px;
+    opacity:0;visibility:hidden;transition:.35s;backdrop-filter:blur(10px);
+    box-shadow:0 18px 50px -12px rgba(0,0,0,.7);
+  }
+  .toast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+
+  @media(max-width:640px){
+    #nav nav{display:none}
+    .lightbox{padding:60px 12px}
+    .lb-prev,.lb-next{width:44px;height:44px;font-size:24px}
+    .lb-prev{left:6px}.lb-next{right:6px}
+    .hero{min-height:92vh}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  }
+</style>
+</head>
+<body class="locked">
+
+<!-- ================= 开场动画 ================= -->
+<div id="intro">
+  <div class="intro-name" id="introName">JINLETIAN</div>
+  <div class="intro-line"></div>
+  <div class="intro-sub">Personal Space · 个人主页</div>
+  <button id="enterBtn">进 入</button>
+  <div class="intro-hint">点击任意处进入</div>
+</div>
+
+<div id="progress"></div>
+
+<!-- ================= 导航 ================= -->
+<header id="nav">
+  <a class="logo" href="#home">Jin<b>letian</b></a>
+  <nav>
+    <a href="#home" class="active">首页</a>
+    <a href="#gallery">图片集</a>
+    <a href="#about">关于</a>
+    <a href="#contact">联系</a>
+  </nav>
+  <button class="unlock" id="unlockBtn"><span class="ic">🔒</span><span class="tx">解锁下载</span></button>
+</header>
+
+<main>
+  <!-- Hero -->
+  <section class="hero" id="home">
+    <div class="hero-glow" id="heroGlow"></div>
+    <div class="hero-content">
+      <p class="eyebrow">WELCOME · 欢迎来到</p>
+      <h1>你好，我是<br><span>Jinletian</span></h1>
+      <p class="lead">这是我的个人空间。网站内容正在陆续整理中——先来逛逛我的图片集吧。游客可以自由浏览，登录后即可下载原图。</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#gallery">浏览图片集 →</a>
+        <a class="btn ghost" href="#about">了解更多</a>
+      </div>
+    </div>
+    <div class="scroll-cue">SCROLL ↓</div>
+  </section>
+
+  <!-- 图片集 -->
+  <section class="section" id="gallery">
+    <div class="section-head reveal">
+      <p class="eyebrow">PHOTO GALLERY</p>
+      <h2>图片集 <span class="count">25</span></h2>
+      <p class="section-desc">游客可自由浏览全部照片；点击右下角锁形按钮或<a id="unlockInline">解锁下载</a>后可保存原图。</p>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="gallery-foot">
+      <button class="btn ghost" id="downloadAll">⬇ 下载全部原图</button>
+    </div>
+  </section>
+
+  <!-- 关于（占位） -->
+  <section class="section placeholder" id="about">
+    <div class="reveal">
+      <p class="eyebrow">ABOUT</p>
+      <h2>关于我</h2>
+    </div>
+    <div class="ph-card reveal"><span class="big">内容整理中</span>这一板块的具体内容还在构思，后续会补充个人介绍、经历与兴趣。</div>
+  </section>
+
+  <!-- 联系（占位） -->
+  <section class="section placeholder" id="contact">
+    <div class="reveal">
+      <p class="eyebrow">CONTACT</p>
+      <h2>联系我</h2>
+    </div>
+    <div class="ph-card reveal"><span class="big">敬请期待</span>联系方式与更多内容即将上线。</div>
+  </section>
+</main>
+
+<footer>
+  <div>© 2026 Jinletian · 个人主页</div>
+  <div class="tiny">Personal site · 图片版权归本人所有</div>
+</footer>
+
+<!-- ================= 灯箱 ================= -->
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="lb-close" id="lbClose" aria-label="关闭">×</button>
+  <button class="lb-prev" id="lbPrev" aria-label="上一张">‹</button>
+  <img id="lbImg" src="" alt="" />
+  <button class="lb-next" id="lbNext" aria-label="下一张">›</button>
+  <div class="lb-bar">
+    <span id="lbCounter">1 / 25</span>
+    <button id="lbDownload">⬇ 下载</button>
+  </div>
+</div>
+
+<!-- ================= 登录弹窗 ================= -->
+<div class="modal" id="loginModal" aria-hidden="true">
+  <div class="modal-card" id="modalCard">
+    <h3>登录以解锁下载</h3>
+    <p>游客可自由浏览图片；输入下载口令后即可保存原图。</p>
+    <input id="passInput" type="password" placeholder="请输入下载口令" autocomplete="off" />
+    <p class="err" id="passErr">口令不正确，请重试</p>
+    <div class="modal-actions">
+      <button class="btn ghost" id="loginCancel">取消</button>
+      <button class="btn primary" id="loginOk">解锁</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 图片清单（内联，按编号 01-25） ============ */
+const PHOTOS = [{id:'01',w:1500,h:1125},{id:'02',w:1500,h:1125},{id:'03',w:1000,h:1500},{id:'04',w:1000,h:1500},{id:'05',w:1125,h:1500},{id:'06',w:1500,h:1125},{id:'07',w:1500,h:1125},{id:'08',w:1500,h:1125},{id:'09',w:1500,h:1125},{id:'10',w:1500,h:1000},{id:'11',w:1500,h:1125},{id:'12',w:1500,h:1167},{id:'13',w:1500,h:1090},{id:'14',w:1500,h:1125},{id:'15',w:1500,h:1405},{id:'16',w:1000,h:1500},{id:'17',w:1500,h:1125},{id:'18',w:1500,h:1125},{id:'19',w:1500,h:1125},{id:'20',w:1500,h:1125},{id:'21',w:1500,h:1000},{id:'22',w:1500,h:1125},{id:'23',w:1500,h:1125},{id:'24',w:1000,h:1500},{id:'25',w:1500,h:1125}];
+
+/* ============ 下载口令（前端伪鉴权，可自行修改） ============ */
+const PASSCODE = "Jinletian2026";
+const STORE_KEY = "jl_dl_unlocked";
+let unlocked = sessionStorage.getItem(STORE_KEY) === "1";
+
+const THUMB = id => `assets/photos/thumb/${id}.jpg`;
+const FULL  = id => `assets/photos/full/${id}.jpg`;
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ---------- 开场动画 ---------- */
+(function introInit(){
+  const nameEl = document.getElementById('introName');
+  const txt = nameEl.textContent;
+  nameEl.textContent = '';
+  [...txt].forEach((ch,i)=>{
+    const s = document.createElement('span');
+    s.textContent = ch;
+    s.style.animationDelay = (0.15 + i*0.07) + 's';
+    nameEl.appendChild(s);
+  });
+  const intro = document.getElementById('intro');
+  let done = false;
+  function enter(){
+    if(done) return; done = true;
+    intro.classList.add('hidden');
+    document.body.classList.remove('locked');
+    // 触发首屏 reveal
+    setTimeout(()=>{ window.dispatchEvent(new Event('scroll')); }, 60);
+    setTimeout(()=>{ intro.style.display='none'; }, 1000);
+  }
+  document.getElementById('enterBtn').addEventListener('click', e=>{ e.stopPropagation(); enter(); });
+  intro.addEventListener('click', enter);
+  setTimeout(enter, 4200); // 自动进入兜底
+})();
+
+/* ---------- 构建画廊 ---------- */
+const grid = document.getElementById('grid');
+PHOTOS.forEach((p,i)=>{
+  const fig = document.createElement('figure');
+  fig.className = 'ph';
+  fig.dataset.index = i;
+  fig.innerHTML = `
+    <img src="${THUMB(p.id)}" width="${p.w}" height="${p.h}" loading="lazy" alt="照片 ${p.id}">
+    <div class="veil">
+      <span class="idx">${p.id} <span style="font-size:12px;opacity:.7">/ ${PHOTOS.length}</span></span>
+      <span class="dl ${unlocked?'':'locked'}" data-dl="${p.id}" title="下载原图"></span>
+    </div>`;
+  fig.addEventListener('click', ()=>openLightbox(i));
+  // 角标下载按钮（阻止冒泡，避免打开灯箱）
+  const dl = fig.querySelector('.dl');
+  dl.addEventListener('click', e=>{
+    e.stopPropagation();
+    requestDownload(p.id);
+  });
+  grid.appendChild(fig);
+});
+
+/* ---------- 灯箱 ---------- */
+const lightbox = document.getElementById('lightbox');
+const lbImg = document.getElementById('lbImg');
+const lbCounter = document.getElementById('lbCounter');
+const lbDownload = document.getElementById('lbDownload');
+let cur = 0;
+
+function openLightbox(i){
+  cur = i;
+  updateLightbox();
+  lightbox.classList.add('open');
+  lightbox.setAttribute('aria-hidden','false');
+}
+function updateLightbox(){
+  const p = PHOTOS[cur];
+  lbImg.src = FULL(p.id);
+  lbImg.alt = `照片 ${p.id}`;
+  lbCounter.textContent = `${cur+1} / ${PHOTOS.length}`;
+  syncDownloadUI();
+}
+function closeLightbox(){
+  lightbox.classList.remove('open');
+  lightbox.setAttribute('aria-hidden','true');
+  lbImg.src = '';
+}
+function nav(d){
+  cur = (cur + d + PHOTOS.length) % PHOTOS.length;
+  updateLightbox();
+}
+document.getElementById('lbClose').addEventListener('click', closeLightbox);
+document.getElementById('lbPrev').addEventListener('click', e=>{e.stopPropagation();nav(-1);});
+document.getElementById('lbNext').addEventListener('click', e=>{e.stopPropagation();nav(1);});
+lightbox.addEventListener('click', e=>{ if(e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', e=>{
+  if(!lightbox.classList.contains('open')) return;
+  if(e.key === 'Escape') closeLightbox();
+  if(e.key === 'ArrowLeft') nav(-1);
+  if(e.key === 'ArrowRight') nav(1);
+});
+// 触摸滑动
+let touchX = null;
+lightbox.addEventListener('touchstart', e=>{ touchX = e.changedTouches[0].clientX; }, {passive:true});
+lightbox.addEventListener('touchend', e=>{
+  if(touchX === null) return;
+  const dx = e.changedTouches[0].clientX - touchX;
+  if(Math.abs(dx) > 50) nav(dx < 0 ? 1 : -1);
+  touchX = null;
+});
+
+/* ---------- 下载 & 登录门 ---------- */
+function syncDownloadUI(){
+  lbDownload.classList.toggle('locked', !unlocked);
+  lbDownload.innerHTML = unlocked ? '⬇ 下载原图' : '🔒 登录后下载';
+  document.querySelectorAll('.dl').forEach(el=>{
+    el.classList.toggle('locked', !unlocked);
+    el.title = unlocked ? '下载原图' : '登录后可下载';
+  });
+  const btn = document.getElementById('unlockBtn');
+  btn.classList.toggle('on', unlocked);
+  btn.querySelector('.ic').textContent = unlocked ? '✅' : '🔒';
+  btn.querySelector('.tx').textContent = unlocked ? '已解锁下载' : '解锁下载';
+}
+
+function requestDownload(id){
+  if(!unlocked){ openLogin(); return; }
+  const a = document.createElement('a');
+  a.href = FULL(id);
+  a.download = `Jinletian-${id}.jpg`;
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('开始下载原图…');
+}
+lbDownload.addEventListener('click', e=>{ e.stopPropagation(); requestDownload(PHOTOS[cur].id); });
+
+document.getElementById('downloadAll').addEventListener('click', ()=>{
+  if(!unlocked){ openLogin(); return; }
+  toast('正在批量下载 25 张原图…');
+  PHOTOS.forEach((p,i)=>{
+    setTimeout(()=>{
+      const a = document.createElement('a');
+      a.href = FULL(p.id); a.download = `Jinletian-${p.id}.jpg`;
+      document.body.appendChild(a); a.click(); a.remove();
+    }, i*350);
+  });
+});
+
+/* 登录弹窗 */
+const loginModal = document.getElementById('loginModal');
+const modalCard = document.getElementById('modalCard');
+const passInput = document.getElementById('passInput');
+const passErr = document.getElementById('passErr');
+
+function openLogin(){
+  loginModal.classList.add('open');
+  loginModal.setAttribute('aria-hidden','false');
+  passErr.classList.remove('show');
+  passInput.value = '';
+  setTimeout(()=>passInput.focus(), 120);
+}
+function closeLogin(){
+  loginModal.classList.remove('open');
+  loginModal.setAttribute('aria-hidden','true');
+}
+function tryUnlock(){
+  if(passInput.value === PASSCODE){
+    unlocked = true;
+    sessionStorage.setItem(STORE_KEY,'1');
+    syncDownloadUI();
+    closeLogin();
+    toast('✅ 已解锁下载权限');
+  }else{
+    passErr.classList.add('show');
+    modalCard.classList.remove('shake');
+    void modalCard.offsetWidth;
+    modalCard.classList.add('shake');
+  }
+}
+document.getElementById('unlockBtn').addEventListener('click', ()=>{
+  if(unlocked){ toast('下载权限已解锁，可直接下载原图'); }
+  else openLogin();
+});
+document.getElementById('unlockInline').addEventListener('click', ()=>{
+  unlocked ? toast('下载权限已解锁') : openLogin();
+});
+document.getElementById('loginOk').addEventListener('click', tryUnlock);
+document.getElementById('loginCancel').addEventListener('click', closeLogin);
+loginModal.addEventListener('click', e=>{ if(e.target === loginModal) closeLogin(); });
+passInput.addEventListener('keydown', e=>{ if(e.key === 'Enter') tryUnlock(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && loginModal.classList.contains('open')) closeLogin(); });
+
+syncDownloadUI();
+
+/* ---------- 滚动：进度 / 导航 / 视差 ---------- */
+const nav = document.getElementById('nav');
+const progress = document.getElementById('progress');
+const heroGlow = document.getElementById('heroGlow');
+const sections = [...document.querySelectorAll('main section')];
+const navLinks = [...document.querySelectorAll('#nav nav a')];
+
+function onScroll(){
+  const y = window.scrollY;
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = (h>0 ? (y/h*100) : 0) + '%';
+  nav.classList.toggle('scrolled', y > 40);
+
+  // 导航高亮
+  let activeId = 'home';
+  for(const s of sections){
+    if(y + 120 >= s.offsetTop) activeId = s.id;
+  }
+  navLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href') === '#'+activeId));
+
+  // 视差
+  if(heroGlow && y < window.innerHeight){
+    heroGlow.style.transform = `translate(-50%, calc(-50% + ${y*0.18}px))`;
+  }
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+
+/* ---------- 光标跟随光晕 ---------- */
+const hero = document.getElementById('home');
+hero.addEventListener('mousemove', e=>{
+  const r = hero.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+  heroGlow.style.left = x + 'px';
+  heroGlow.style.top = y + 'px';
+});
+
+/* ---------- 滚动进入动画 ---------- */
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){
+      en.target.classList.add('in');
+      io.unobserve(en.target);
+    }
+  });
+}, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+// 画廊逐张入场
+document.querySelectorAll('.ph').forEach((el,i)=>{
+  el.style.transitionDelay = (i % 8) * 0.045 + 's';
+  io.observe(el);
+});
+onScroll();
+</script>
+</body>
+</html>
