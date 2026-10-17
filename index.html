@@ -523,19 +523,19 @@ function closeLightbox(){
   lightbox.setAttribute('aria-hidden','true');
   lbImg.src = '';
 }
-function nav(d){
+function navTo(d){
   cur = (cur + d + PHOTOS.length) % PHOTOS.length;
   updateLightbox();
 }
 document.getElementById('lbClose').addEventListener('click', closeLightbox);
-document.getElementById('lbPrev').addEventListener('click', e=>{e.stopPropagation();nav(-1);});
-document.getElementById('lbNext').addEventListener('click', e=>{e.stopPropagation();nav(1);});
+document.getElementById('lbPrev').addEventListener('click', e=>{e.stopPropagation();navTo(-1);});
+document.getElementById('lbNext').addEventListener('click', e=>{e.stopPropagation();navTo(1);});
 lightbox.addEventListener('click', e=>{ if(e.target === lightbox) closeLightbox(); });
 document.addEventListener('keydown', e=>{
   if(!lightbox.classList.contains('open')) return;
   if(e.key === 'Escape') closeLightbox();
-  if(e.key === 'ArrowLeft') nav(-1);
-  if(e.key === 'ArrowRight') nav(1);
+  if(e.key === 'ArrowLeft') navTo(-1);
+  if(e.key === 'ArrowRight') navTo(1);
 });
 // 触摸滑动
 let touchX = null;
@@ -543,7 +543,7 @@ lightbox.addEventListener('touchstart', e=>{ touchX = e.changedTouches[0].client
 lightbox.addEventListener('touchend', e=>{
   if(touchX === null) return;
   const dx = e.changedTouches[0].clientX - touchX;
-  if(Math.abs(dx) > 50) nav(dx < 0 ? 1 : -1);
+  if(Math.abs(dx) > 50) navTo(dx < 0 ? 1 : -1);
   touchX = null;
 });
 
