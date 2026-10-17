@@ -295,12 +295,13 @@
   .modal.open .modal-card{transform:none}
   .modal-card h3{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;margin-bottom:10px}
   .modal-card p{color:var(--dim);font-size:13.5px;font-weight:300;line-height:1.65}
-  #passInput{
-    width:100%;margin-top:22px;padding:13px 16px;border-radius:12px;
+  .fld{
+    width:100%;margin-top:14px;padding:13px 16px;border-radius:12px;
     background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--fg);
-    font-size:15px;font-family:inherit;outline:none;transition:.25s;letter-spacing:.06em;
+    font-size:15px;font-family:inherit;outline:none;transition:.25s;letter-spacing:.04em;
   }
-  #passInput:focus{border-color:rgba(227,181,102,.6);background:rgba(227,181,102,.05)}
+  .fld:first-of-type{margin-top:22px}
+  .fld:focus{border-color:rgba(227,181,102,.6);background:rgba(227,181,102,.05)}
   .err{color:#ff7a7a;font-size:12.5px;margin-top:10px;min-height:16px;opacity:0;transition:.2s}
   .err.show{opacity:1}
   .modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
@@ -355,7 +356,7 @@
     <a href="#about">关于</a>
     <a href="#contact">联系</a>
   </nav>
-  <button class="unlock" id="unlockBtn"><span class="ic">🔒</span><span class="tx">解锁下载</span></button>
+  <button class="unlock" id="unlockBtn"><span class="ic">👤</span><span class="tx">登录</span></button>
 </header>
 
 <main>
@@ -379,7 +380,7 @@
     <div class="section-head reveal">
       <p class="eyebrow">PHOTO GALLERY</p>
       <h2>图片集 <span class="count">25</span></h2>
-      <p class="section-desc">游客可自由浏览全部照片；点击右下角锁形按钮或<a id="unlockInline">解锁下载</a>后可保存原图。</p>
+      <p class="section-desc">游客可自由浏览全部照片；<a id="unlockInline">登录</a>后即可下载原图。</p>
     </div>
     <div class="grid" id="grid"></div>
     <div class="gallery-foot">
@@ -426,13 +427,14 @@
 <!-- ================= 登录弹窗 ================= -->
 <div class="modal" id="loginModal" aria-hidden="true">
   <div class="modal-card" id="modalCard">
-    <h3>登录以解锁下载</h3>
-    <p>游客可自由浏览图片；输入下载口令后即可保存原图。</p>
-    <input id="passInput" type="password" placeholder="请输入下载口令" autocomplete="off" />
-    <p class="err" id="passErr">口令不正确，请重试</p>
+    <h3>登录</h3>
+    <p>游客可自由浏览图片；登录后即可下载原图。（本站为静态演示，登录状态仅保存在本机浏览器会话中）</p>
+    <input id="userInput" class="fld" type="text" placeholder="账号" autocomplete="username" />
+    <input id="passInput" class="fld" type="password" placeholder="密码" autocomplete="current-password" />
+    <p class="err" id="passErr">账号或密码不正确，请重试</p>
     <div class="modal-actions">
       <button class="btn ghost" id="loginCancel">取消</button>
-      <button class="btn primary" id="loginOk">解锁</button>
+      <button class="btn primary" id="loginOk">登录</button>
     </div>
   </div>
 </div>
@@ -571,8 +573,8 @@ function syncDownloadUI(){
   });
   const btn = document.getElementById('unlockBtn');
   btn.classList.toggle('on', unlocked);
-  btn.querySelector('.ic').textContent = unlocked ? '✅' : '🔒';
-  btn.querySelector('.tx').textContent = unlocked ? '已解锁下载' : '解锁下载';
+  btn.querySelector('.ic').textContent = unlocked ? '✅' : '👤';
+  btn.querySelector('.tx').textContent = unlocked ? '已登录' : '登录';
 }
 
 function requestDownload(id){
@@ -600,6 +602,7 @@ document.getElementById('downloadAll').addEventListener('click', ()=>{
 /* 登录弹窗 */
 const loginModal = document.getElementById('loginModal');
 const modalCard = document.getElementById('modalCard');
+const userInput = document.getElementById('userInput');
 const passInput = document.getElementById('passInput');
 const passErr = document.getElementById('passErr');
 
@@ -607,37 +610,43 @@ function openLogin(){
   loginModal.classList.add('open');
   loginModal.setAttribute('aria-hidden','false');
   passErr.classList.remove('show');
-  passInput.value = '';
-  setTimeout(()=>passInput.focus(), 120);
+  userInput.value = ''; passInput.value = '';
+  setTimeout(()=>userInput.focus(), 120);
 }
 function closeLogin(){
   loginModal.classList.remove('open');
   loginModal.setAttribute('aria-hidden','true');
 }
 function tryUnlock(){
+  if(!userInput.value.trim()){
+    passErr.textContent = '请输入账号';
+    passErr.classList.add('show');
+    modalCard.classList.remove('shake'); void modalCard.offsetWidth; modalCard.classList.add('shake');
+    return;
+  }
   if(passInput.value === PASSCODE){
     unlocked = true;
     sessionStorage.setItem(STORE_KEY,'1');
     syncDownloadUI();
     closeLogin();
-    toast('✅ 已解锁下载权限');
+    toast('✅ 已登录，可下载原图');
   }else{
+    passErr.textContent = '账号或密码不正确，请重试';
     passErr.classList.add('show');
-    modalCard.classList.remove('shake');
-    void modalCard.offsetWidth;
-    modalCard.classList.add('shake');
+    modalCard.classList.remove('shake'); void modalCard.offsetWidth; modalCard.classList.add('shake');
   }
 }
 document.getElementById('unlockBtn').addEventListener('click', ()=>{
-  if(unlocked){ toast('下载权限已解锁，可直接下载原图'); }
+  if(unlocked){ toast('已登录，可直接下载原图'); }
   else openLogin();
 });
 document.getElementById('unlockInline').addEventListener('click', ()=>{
-  unlocked ? toast('下载权限已解锁') : openLogin();
+  unlocked ? toast('已登录') : openLogin();
 });
 document.getElementById('loginOk').addEventListener('click', tryUnlock);
 document.getElementById('loginCancel').addEventListener('click', closeLogin);
 loginModal.addEventListener('click', e=>{ if(e.target === loginModal) closeLogin(); });
+userInput.addEventListener('keydown', e=>{ if(e.key === 'Enter') passInput.focus(); });
 passInput.addEventListener('keydown', e=>{ if(e.key === 'Enter') tryUnlock(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && loginModal.classList.contains('open')) closeLogin(); });
 
