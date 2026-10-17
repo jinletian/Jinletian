@@ -301,6 +301,10 @@
     font-size:15px;font-family:inherit;outline:none;transition:.25s;letter-spacing:.04em;
   }
   .fld:first-of-type{margin-top:22px}
+  .pwd-wrap{position:relative;margin-top:14px}
+  .pwd-wrap .fld{margin-top:0;padding-right:48px}
+  .pwd-wrap .eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--dim);cursor:pointer;font-size:16px;padding:6px;line-height:1}
+  .pwd-wrap .eye:hover{color:var(--fg)}
   .fld:focus{border-color:rgba(227,181,102,.6);background:rgba(227,181,102,.05)}
   .err{color:#ff7a7a;font-size:12.5px;margin-top:10px;min-height:16px;opacity:0;transition:.2s}
   .err.show{opacity:1}
@@ -436,7 +440,10 @@
     </div>
     <p id="authHint">游客可自由浏览图片；登录后即可下载原图。</p>
     <input id="emailInput" class="fld" type="email" placeholder="邮箱" autocomplete="email" />
-    <input id="passInput" class="fld" type="password" placeholder="密码（至少6位）" autocomplete="current-password" />
+    <div class="pwd-wrap">
+      <input id="passInput" class="fld" type="password" placeholder="密码（至少6位）" autocomplete="current-password" />
+      <button type="button" class="eye" id="eyeBtn" aria-label="显示或隐藏密码">👁</button>
+    </div>
     <p class="err" id="passErr"></p>
     <div class="modal-actions">
       <button class="btn ghost" id="loginCancel">取消</button>
@@ -711,6 +718,13 @@ document.getElementById('unlockInline').addEventListener('click', ()=>{
 });
 tabLogin.addEventListener('click', ()=>setAuthMode('login'));
 tabSignup.addEventListener('click', ()=>setAuthMode('signup'));
+const eyeBtn = document.getElementById('eyeBtn');
+eyeBtn.addEventListener('click', ()=>{
+  const p = document.getElementById('passInput');
+  const show = p.type === 'password';
+  p.type = show ? 'text' : 'password';
+  eyeBtn.textContent = show ? '🙈' : '👁';
+});
 loginOk.addEventListener('click', doSubmit);
 document.getElementById('loginCancel').addEventListener('click', closeLogin);
 loginModal.addEventListener('click', e=>{ if(e.target === loginModal) closeLogin(); });
