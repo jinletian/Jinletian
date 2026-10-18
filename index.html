@@ -564,7 +564,7 @@
     </div>
     <!-- 注册面板 -->
     <div id="paneSignup" hidden>
-      <p class="auth-hint">用邮箱注册，账号在所有设备通用。昵称和头像会展示在你的每一条留言旁。</p>
+      <p class="auth-hint">用邮箱注册，账号在所有设备通用。昵称必填，头像选填——不上传则用昵称首字生成彩色头像。</p>
       <input id="suEmail" class="fld" type="email" placeholder="邮箱" autocomplete="email" />
       <div class="pwd-wrap">
         <input id="suPass" class="fld" type="password" placeholder="设置密码（至少6位）" autocomplete="new-password" />
@@ -572,7 +572,7 @@
       </div>
       <input id="suNick" class="fld" placeholder="昵称（必填，留言时展示给大家）" maxlength="20" />
       <div class="avatar-pick">
-        <button type="button" class="tool-btn" id="suAvatarBtn">🖼 上传头像（必填）</button>
+        <button type="button" class="tool-btn" id="suAvatarBtn">🖼 上传头像（选填）</button>
         <span class="avatar-preview" id="suAvatarPv" hidden><img alt="头像预览" /><button type="button" id="suAvatarRm" aria-label="移除头像">×</button></span>
       </div>
     </div>
@@ -890,7 +890,7 @@ async function doLogin(){
   finally{ loginOk.disabled = false; }
 }
 
-/* —— 注册：邮箱 + 密码 + 昵称 + 头像（账号在所有设备通用） —— */
+/* —— 注册：邮箱 + 密码 + 昵称（头像选填，账号在所有设备通用） —— */
 async function doSignup(){
   const email = suEmail.value.trim();
   const password = suPass.value;
@@ -898,11 +898,10 @@ async function doSignup(){
   if(!email || !emailRe.test(email)){ showErr('请输入正确的邮箱'); return; }
   if(password.length < 6){ showErr('密码至少 6 位'); return; }
   if(!nickname){ showErr('请填写昵称'); return; }
-  if(!suAvatarBlob){ showErr('请上传头像'); return; }
   passErr.classList.remove('show');
   loginOk.disabled = true;
   try{
-    const avatarData = await blobToBase64(suAvatarBlob);
+    const avatarData = suAvatarBlob ? await blobToBase64(suAvatarBlob) : '';
     const data = await api('/api/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, nickname, avatarData, avatarType: 'image/webp' })
@@ -1025,7 +1024,7 @@ async function compressToLimit(file, maxEdge, quality, maxBytes){
     q = Math.max(0.4, q - 0.15);
     edge = Math.max(320, Math.round(edge * 0.85));
   }
-  throw new Error('图片压缩后仍超过 ' + Math.round(maxBytes / 1024) + 'KB，请换一张小一点的');
+  throw new Error('这张图压缩后仍超过 ' + Math.round(maxBytes / 1024) + 'KB，换一张或裁剪小一点再试');
 }
 function clearPendingImg(){
   if(pendingImgURL){ URL.revokeObjectURL(pendingImgURL); pendingImgURL = ''; }
@@ -1047,7 +1046,7 @@ function setPendingImg(blob){
   imgPreview.appendChild(pv);
 }
 async function attachImage(file){
-  try{ setPendingImg(await compressToLimit(file, 1280, 0.82, 80*1024)); }
+  try{ setPendingImg(await compressToLimit(file, 1280, 0.85, 150*1024)); }
   catch(e){ toast(e.message || '图片处理失败'); }
 }
 
@@ -1184,7 +1183,7 @@ avatarFileInput.addEventListener('change', ()=>{
 function chooseAvatar(which){ avatarPickerFor = which; avatarFileInput.click(); }
 async function pickAvatar(which, file){
   try{
-    const blob = await compressToLimit(file, 256, 0.85, 40*1024);
+    const blob = await compressToLimit(file, 256, 0.85, 60*1024);
     if(avatarPreviewURLs[which]) URL.revokeObjectURL(avatarPreviewURLs[which]);
     const url = URL.createObjectURL(blob);
     avatarPreviewURLs[which] = url;
@@ -1225,6 +1224,8 @@ async function saveProfile(){
     if(pfAvatarBlob){
       body.avatarData = await blobToBase64(pfAvatarBlob);
       body.avatarType = 'image/webp';
+    }else if(pfAvatarRemoved){
+      body.avatarRemoved = true;   // 通知服务端清除头像，刷新后不再回来
     }
     const data = await api('/api/me', { method: 'PATCH', body: JSON.stringify(body) });
     saveSession(localStorage.getItem(TOKEN_KEY), data.user);
