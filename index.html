@@ -519,9 +519,6 @@ PHOTOS.forEach((p,i)=>{
   const imgEl = fig.querySelector('img');
   const reveal = () => imgEl.classList.add('loaded');
   if (imgEl.complete) reveal(); else imgEl.addEventListener('load', reveal);
-  imgEl.addEventListener('error', ()=>{           // Supabase 未上传时回退 GitHub 旧图
-    if(!imgEl.dataset.fb){ imgEl.dataset.fb='1'; imgEl.src = `assets/photos/thumb/${p.id}.webp`; }
-  });
   fig.addEventListener('click', ()=>openLightbox(i));
   // 角标下载按钮（阻止冒泡，避免打开灯箱）
   const dl = fig.querySelector('.dl');
@@ -614,7 +611,7 @@ document.getElementById('downloadAll').addEventListener('click', ()=>{
   });
 });
 
-/* 登录 / 注册弹窗（Supabase 邮箱+密码） */
+/* 登录 / 注册弹窗（本地账户，邮箱+密码） */
 const loginModal = document.getElementById('loginModal');
 const modalCard = document.getElementById('modalCard');
 const emailInput = document.getElementById('emailInput');
