@@ -240,6 +240,68 @@
   }
   .placeholder .ph-card .big{font-family:'Playfair Display',serif;font-size:22px;color:rgba(255,255,255,.55);display:block;margin-bottom:10px}
 
+  /* ================= 留言板 · 想对我说的 ================= */
+  #board .composer{
+    border:1px solid var(--line);border-radius:var(--radius);
+    background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
+    padding:22px;margin-bottom:38px;transition:border-color .25s;
+  }
+  #board .composer-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  #board .who{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--dim)}
+  #board .who .ava{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:600;color:#fff;flex:none}
+  #board .who b{color:var(--fg);font-weight:500}
+  #board textarea{
+    width:100%;min-height:108px;resize:vertical;padding:14px 16px;border-radius:12px;
+    background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--fg);
+    font-size:15px;font-family:inherit;line-height:1.6;outline:none;transition:.25s;
+  }
+  #board textarea:focus{border-color:rgba(227,181,102,.6);background:rgba(227,181,102,.05)}
+  #board .composer-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap}
+  #board .composer-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  #board .tool-btn{
+    display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.05);
+    border:1px solid var(--line);color:var(--dim);font-size:12.5px;font-family:inherit;
+    padding:8px 14px;border-radius:999px;cursor:pointer;transition:.25s;
+  }
+  #board .tool-btn:hover{color:var(--fg);border-color:rgba(255,255,255,.22)}
+  #board .char-count{font-size:12px;color:rgba(255,255,255,.32);letter-spacing:.05em}
+  #board .img-preview{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  #board .img-preview .pv{position:relative;width:88px;height:88px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  #board .img-preview .pv img{width:100%;height:100%;object-fit:cover}
+  #board .img-preview .pv button{
+    position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:none;
+    background:rgba(0,0,0,.65);color:#fff;font-size:13px;cursor:pointer;line-height:1;display:grid;place-items:center;
+  }
+  #board .gate{
+    text-align:center;padding:36px 20px;border:1px dashed rgba(255,255,255,.16);border-radius:var(--radius);
+    color:var(--dim);font-size:14px;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent);
+  }
+  #board .gate .btn{margin-top:16px}
+  #board .local-note{
+    margin-top:16px;font-size:12.5px;color:rgba(255,255,255,.38);line-height:1.7;
+    border-left:2px solid rgba(227,181,102,.4);padding-left:12px;
+  }
+  #board .list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  #board .list-head .t{font-size:12.5px;letter-spacing:.22em;color:var(--dim)}
+  #board .clear-btn{background:transparent;border:none;color:rgba(255,255,255,.3);font-size:12px;cursor:pointer;font-family:inherit;padding:4px 8px;border-radius:6px;transition:.2s}
+  #board .clear-btn:hover{color:#ff9a9a;background:rgba(255,122,122,.08)}
+  #board .msg-list{display:flex;flex-direction:column;gap:16px}
+  #board .msg{display:flex;gap:14px;padding:20px;border-radius:var(--radius);border:1px solid var(--line);background:var(--card)}
+  #board .msg .ava{width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:16px;font-weight:600;color:#fff}
+  #board .msg .body{flex:1;min-width:0}
+  #board .msg .meta{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  #board .msg .meta .mail{font-size:13.5px;color:var(--gold);font-weight:500}
+  #board .msg .meta .time{font-size:12px;color:rgba(255,255,255,.3)}
+  #board .msg .text{font-size:14.5px;line-height:1.75;color:var(--fg);white-space:pre-wrap;word-break:break-word}
+  #board .msg .img{margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid var(--line);max-width:340px;cursor:zoom-in}
+  #board .msg .img img{width:100%;height:auto;display:block;transition:transform .4s cubic-bezier(.2,.7,.2,1)}
+  #board .msg .img:hover img{transform:scale(1.02)}
+  #board .empty{
+    text-align:center;padding:46px 20px;color:var(--dim);font-size:14px;
+    border:1px dashed rgba(255,255,255,.12);border-radius:var(--radius);
+  }
+  @media(max-width:640px){ #board .msg{padding:16px} #board .msg .img{max-width:100%} }
+
   /* ================= 页脚 ================= */
   footer{
     border-top:1px solid var(--line);padding:46px clamp(22px,5vw,40px);
@@ -360,6 +422,7 @@
   <nav>
     <a href="#home" class="active">首页</a>
     <a href="#gallery">图片集</a>
+    <a href="#board">想对我说的</a>
     <a href="#about">关于</a>
     <a href="#contact">联系</a>
   </nav>
@@ -373,7 +436,7 @@
     <div class="hero-content">
       <p class="eyebrow">WELCOME · 欢迎来到</p>
       <h1>你好，我是<br><span>Jinletian</span></h1>
-      <p class="lead">这是我的个人空间。网站内容正在陆续整理中——先来逛逛我的图片集吧。游客可以自由浏览，登录后即可下载原图。</p>
+      <p class="lead">这是我的个人空间。网站内容正在陆续整理中——先来逛逛我的图片集吧。游客可以自由浏览，登录后即可下载原图、在「想对我说的」给我留言。</p>
       <div class="hero-actions">
         <a class="btn primary" href="#gallery">浏览图片集 →</a>
         <a class="btn ghost" href="#about">了解更多</a>
@@ -393,6 +456,46 @@
     <div class="gallery-foot">
       <button class="btn ghost" id="downloadAll">⬇ 下载全部原图</button>
     </div>
+  </section>
+
+  <!-- 想对我说的（留言板） -->
+  <section class="section" id="board">
+    <div class="section-head reveal">
+      <p class="eyebrow">MESSAGES</p>
+      <h2>想对我说的 <span class="count" id="msgCount">0</span></h2>
+      <p class="section-desc">登录后即可在这里给我留言，支持文字和图片。本地模式下留言保存在本机浏览器，也可以一键邮件发到我的邮箱。</p>
+    </div>
+
+    <div class="composer reveal" id="composer">
+      <!-- 未登录：引导登录 -->
+      <div class="gate" id="boardGate">
+        留言需要先登录（用邮箱注册一个本地账号即可，游客可自由浏览留言）。
+        <div><button class="btn primary" id="boardLoginBtn">登录 / 注册</button></div>
+      </div>
+      <!-- 已登录：输入区 -->
+      <div id="boardEditor" hidden>
+        <div class="composer-top">
+          <div class="who"><span class="ava" id="boardAva"></span><span>当前身份 <b id="boardMail"></b></span></div>
+          <button class="tool-btn" id="boardMailto" title="把这条留言通过邮件发给站长">📮 邮件发给站长</button>
+        </div>
+        <textarea id="msgInput" maxlength="500" placeholder="说点什么吧…（可粘贴或拖入图片）"></textarea>
+        <div class="img-preview" id="imgPreview"></div>
+        <div class="composer-foot">
+          <div class="composer-tools">
+            <button class="tool-btn" id="imgBtn">🖼 上传图片</button>
+            <span class="char-count" id="charCount">0 / 500</span>
+          </div>
+          <button class="btn primary" id="publishBtn">发布留言</button>
+        </div>
+        <p class="local-note">本地模式：留言与图片仅保存在你自己的浏览器里，不上传服务器；登录账号同样只在本机生效。</p>
+      </div>
+    </div>
+
+    <div class="list-head reveal">
+      <span class="t">最新留言</span>
+      <button class="clear-btn" id="clearMsgs">清空本机留言</button>
+    </div>
+    <div class="msg-list" id="msgList"></div>
   </section>
 
   <!-- 关于（占位） -->
@@ -629,8 +732,8 @@ function setAuthMode(m){
   tabSignup.classList.toggle('active', m==='signup');
   loginOk.textContent = m==='login' ? '登录' : '注册';
   authHint.textContent = m==='login'
-    ? '游客可自由浏览图片；登录后即可下载原图（账号仅保存在本机浏览器）。'
-    : '用邮箱注册一个本地账号（密码至少6位），注册后即可登录下载。';
+    ? '游客可自由浏览图片；登录后可下载原图、在「想对我说的」留言（账号仅保存在本机浏览器）。'
+    : '用邮箱注册一个本地账号（密码至少6位），即可下载原图并留言。';
   passErr.classList.remove('show');
 }
 function openLogin(){
@@ -652,7 +755,7 @@ function showErr(msg){
 function onAuthed(email){
   unlocked = true;
   localStorage.setItem(SES_KEY, email);
-  syncDownloadUI(); closeLogin();
+  syncDownloadUI(); syncBoardUI(); closeLogin();
 }
 function doSubmit(){
   const email = emailInput.value.trim();
@@ -672,13 +775,13 @@ function doSubmit(){
     if(!acc[email]){ showErr('该邮箱尚未注册，请先注册'); return; }
     if(acc[email] !== password){ showErr('邮箱或密码不正确'); return; }
     onAuthed(email);
-    toast('✅ 已登录，可下载原图');
+    toast('✅ 已登录，可下载原图并留言');
   }
 }
 function doLogout(){
   unlocked = false;
   localStorage.removeItem(SES_KEY);
-  syncDownloadUI();
+  syncDownloadUI(); syncBoardUI();
   toast('已退出登录');
 }
 document.getElementById('unlockBtn').addEventListener('click', ()=>{
@@ -703,11 +806,285 @@ emailInput.addEventListener('keydown', e=>{ if(e.key === 'Enter') passInput.focu
 passInput.addEventListener('keydown', e=>{ if(e.key === 'Enter') doSubmit(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && loginModal.classList.contains('open')) closeLogin(); });
 
+/* ============ 想对我说的 · 留言板（本地 IndexedDB 存储） ============ */
+const OWNER_EMAIL = '';        // 站长邮箱：填写后「邮件发给站长」按钮才生效，例如 'me@example.com'
+const GB_DB = 'jl-guestbook', GB_STORE = 'msgs';
+const MAX_MSG_LEN = 500, MAX_IMG_MB = 8;
+
+const composer    = document.getElementById('composer');
+const boardGate   = document.getElementById('boardGate');
+const boardEditor = document.getElementById('boardEditor');
+const boardAva    = document.getElementById('boardAva');
+const boardMail   = document.getElementById('boardMail');
+const boardMailto = document.getElementById('boardMailto');
+const msgInput    = document.getElementById('msgInput');
+const charCount   = document.getElementById('charCount');
+const imgBtn      = document.getElementById('imgBtn');
+const imgPreview  = document.getElementById('imgPreview');
+const publishBtn  = document.getElementById('publishBtn');
+const msgList     = document.getElementById('msgList');
+const msgCount    = document.getElementById('msgCount');
+
+let pendingImg = null, pendingImgURL = '';
+const liveURLs = new Set();   // 列表中已创建的 objectURL，重渲染时统一回收
+
+function gbOpen(){
+  return new Promise((resolve, reject)=>{
+    const rq = indexedDB.open(GB_DB, 1);
+    rq.onupgradeneeded = ()=>{
+      const db = rq.result;
+      if(!db.objectStoreNames.contains(GB_STORE)){
+        db.createObjectStore(GB_STORE, {keyPath:'id', autoIncrement:true});
+      }
+    };
+    rq.onsuccess = ()=>resolve(rq.result);
+    rq.onerror   = ()=>reject(rq.error || new Error('本地存储打开失败'));
+  });
+}
+async function gbAdd(rec){
+  const db = await gbOpen();
+  return new Promise((resolve, reject)=>{
+    const rq = db.transaction(GB_STORE,'readwrite').objectStore(GB_STORE).add(rec);
+    rq.onsuccess = ()=>resolve(rq.result);
+    rq.onerror   = ()=>reject(rq.error);
+  });
+}
+async function gbAll(){
+  const db = await gbOpen();
+  return new Promise((resolve, reject)=>{
+    const rq = db.transaction(GB_STORE,'readonly').objectStore(GB_STORE).getAll();
+    rq.onsuccess = ()=>resolve(rq.result || []);
+    rq.onerror   = ()=>reject(rq.error);
+  });
+}
+async function gbClear(){
+  const db = await gbOpen();
+  return new Promise((resolve, reject)=>{
+    const rq = db.transaction(GB_STORE,'readwrite').objectStore(GB_STORE).clear();
+    rq.onsuccess = ()=>resolve();
+    rq.onerror   = ()=>reject(rq.error);
+  });
+}
+
+function avatarColor(email){
+  let h = 0;
+  for(let i=0;i<email.length;i++) h = (h*31 + email.charCodeAt(i)) % 360;
+  return `hsl(${h}, 52%, 46%)`;
+}
+function maskEmail(email){
+  const at = email.indexOf('@');
+  if(at < 0) return email;
+  const u = email.slice(0, at), d = email.slice(at);
+  return u.slice(0,1) + '*'.repeat(Math.max(1, u.length-1)) + d;
+}
+function timeAgo(ts){
+  const s = Math.floor((Date.now() - ts)/1000);
+  if(s < 60) return '刚刚';
+  if(s < 3600) return Math.floor(s/60) + ' 分钟前';
+  if(s < 86400) return Math.floor(s/3600) + ' 小时前';
+  if(s < 2592000) return Math.floor(s/86400) + ' 天前';
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+/* 图片压缩：最长边 1280px，输出 webp Blob */
+function compressImage(file){
+  return new Promise((resolve, reject)=>{
+    if(!file.type || !file.type.startsWith('image/')) return reject(new Error('请选择图片文件'));
+    if(file.size > MAX_IMG_MB*1024*1024) return reject(new Error(`图片不能超过 ${MAX_IMG_MB}MB`));
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{
+      const scale = Math.min(1, 1280 / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width*scale)), h = Math.max(1, Math.round(img.height*scale));
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      c.toBlob(b=>{
+        URL.revokeObjectURL(url);
+        b ? resolve(b) : reject(new Error('图片压缩失败'));
+      }, 'image/webp', 0.82);
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('图片读取失败')); };
+    img.src = url;
+  });
+}
+function clearPendingImg(){
+  if(pendingImgURL){ URL.revokeObjectURL(pendingImgURL); pendingImgURL = ''; }
+  pendingImg = null;
+  imgPreview.innerHTML = '';
+}
+function setPendingImg(blob){
+  clearPendingImg();
+  pendingImg = blob;
+  pendingImgURL = URL.createObjectURL(blob);
+  const pv = document.createElement('div');
+  pv.className = 'pv';
+  const im = document.createElement('img');
+  im.src = pendingImgURL; im.alt = '待发布图片';
+  const rm = document.createElement('button');
+  rm.type = 'button'; rm.textContent = '×'; rm.title = '移除图片';
+  rm.addEventListener('click', clearPendingImg);
+  pv.appendChild(im); pv.appendChild(rm);
+  imgPreview.appendChild(pv);
+}
+async function attachImage(file){
+  try{ setPendingImg(await compressImage(file)); }
+  catch(e){ toast(e.message || '图片处理失败'); }
+}
+
+function syncBoardUI(){
+  const u = currentUser();
+  const logged = unlocked && !!u;
+  boardGate.hidden = logged;
+  boardEditor.hidden = !logged;
+  if(logged){
+    boardMail.textContent = maskEmail(u);
+    boardAva.textContent = (u[0] || '?').toUpperCase();
+    boardAva.style.background = avatarColor(u);
+  }
+  boardMailto.style.display = OWNER_EMAIL ? '' : 'none';
+}
+
+function renderMsgs(list){
+  liveURLs.forEach(u=>URL.revokeObjectURL(u));
+  liveURLs.clear();
+  msgList.innerHTML = '';
+  msgCount.textContent = list.length;
+  if(!list.length){
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.textContent = '还没有留言，来抢第一条～';
+    msgList.appendChild(empty);
+    return;
+  }
+  list.sort((a,b)=>b.createdAt - a.createdAt).forEach(m=>{
+    const item = document.createElement('div');
+    item.className = 'msg';
+    const ava = document.createElement('span');
+    ava.className = 'ava';
+    ava.textContent = ((m.email || '?')[0] || '?').toUpperCase();
+    ava.style.background = avatarColor(m.email || '?');
+    const body = document.createElement('div');
+    body.className = 'body';
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    const mail = document.createElement('span');
+    mail.className = 'mail';
+    mail.textContent = maskEmail(m.email || '匿名');
+    const time = document.createElement('span');
+    time.className = 'time';
+    time.textContent = timeAgo(m.createdAt || Date.now());
+    meta.appendChild(mail); meta.appendChild(time);
+    body.appendChild(meta);
+    if(m.content){
+      const text = document.createElement('div');
+      text.className = 'text';
+      text.textContent = m.content;
+      body.appendChild(text);
+    }
+    if(m.img){
+      const url = URL.createObjectURL(m.img);
+      liveURLs.add(url);
+      const box = document.createElement('div');
+      box.className = 'img';
+      const im = document.createElement('img');
+      im.src = url; im.alt = '留言图片'; im.loading = 'lazy';
+      im.addEventListener('click', ()=>window.open(url, '_blank'));
+      box.appendChild(im);
+      body.appendChild(box);
+    }
+    item.appendChild(ava); item.appendChild(body);
+    msgList.appendChild(item);
+  });
+}
+async function loadMsgs(){
+  try{
+    renderMsgs(await gbAll());
+  }catch(e){
+    msgList.innerHTML = '';
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.textContent = '留言加载失败：当前浏览器可能不支持本地存储（如无痕模式）';
+    msgList.appendChild(empty);
+  }
+}
+
+async function publishMsg(){
+  if(!unlocked){ openLogin(); toast('请先登录后再留言'); return; }
+  const content = msgInput.value.trim();
+  if(!content && !pendingImg){ toast('先写点内容或加张图片吧'); return; }
+  publishBtn.disabled = true;
+  try{
+    await gbAdd({ email: currentUser(), content, img: pendingImg, createdAt: Date.now() });
+    msgInput.value = '';
+    charCount.textContent = `0 / ${MAX_MSG_LEN}`;
+    clearPendingImg();
+    await loadMsgs();
+    toast('✅ 留言已发布（保存在本机）');
+  }catch(e){
+    toast('发布失败：' + (e.message || '本地存储不可用'));
+  }finally{
+    publishBtn.disabled = false;
+  }
+}
+
+/* ---------- 留言板事件 ---------- */
+document.getElementById('boardLoginBtn').addEventListener('click', openLogin);
+publishBtn.addEventListener('click', publishMsg);
+msgInput.addEventListener('input', ()=>{
+  charCount.textContent = `${msgInput.value.length} / ${MAX_MSG_LEN}`;
+});
+const fileInput = document.createElement('input');
+fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none';
+document.body.appendChild(fileInput);
+imgBtn.addEventListener('click', ()=>fileInput.click());
+fileInput.addEventListener('change', ()=>{
+  if(fileInput.files && fileInput.files[0]) attachImage(fileInput.files[0]);
+  fileInput.value = '';
+});
+msgInput.addEventListener('paste', e=>{
+  const items = e.clipboardData && e.clipboardData.items;
+  if(!items) return;
+  for(const it of items){
+    if(it.kind === 'file' && it.type && it.type.startsWith('image/')){
+      const f = it.getAsFile();
+      if(f){ e.preventDefault(); attachImage(f); }
+      return;
+    }
+  }
+});
+['dragover','dragenter'].forEach(ev=>composer.addEventListener(ev, e=>{
+  e.preventDefault(); composer.style.borderColor = 'rgba(227,181,102,.6)';
+}));
+['dragleave','drop'].forEach(ev=>composer.addEventListener(ev, e=>{
+  e.preventDefault(); composer.style.borderColor = '';
+}));
+composer.addEventListener('drop', e=>{
+  const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if(f) attachImage(f);
+});
+boardMailto.addEventListener('click', ()=>{
+  if(!OWNER_EMAIL){ toast('站长暂未配置邮箱'); return; }
+  const content = msgInput.value.trim();
+  const subject = encodeURIComponent('来自 Jinletian 个人网站的留言');
+  const bodyText = content
+    ? `${content}\n\n—— ${currentUser()}（通过个人网站留言板发送）`
+    : `（图片请在邮件中手动附上）\n\n—— ${currentUser()}（通过个人网站留言板发送）`;
+  location.href = `mailto:${OWNER_EMAIL}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
+  if(pendingImg) toast('提示：邮件无法自动附带图片，请手动添加');
+});
+document.getElementById('clearMsgs').addEventListener('click', async ()=>{
+  if(!confirm('确定清空本机保存的所有留言？此操作不可恢复。')) return;
+  try{ await gbClear(); await loadMsgs(); toast('已清空本机留言'); }
+  catch(e){ toast('清空失败：' + (e.message || '存储不可用')); }
+});
+
 /* 启动时恢复本地登录态 */
 (function(){
   const u = currentUser();
   if(u && getAccounts()[u]) unlocked = true;
-  syncDownloadUI();
+  syncDownloadUI(); syncBoardUI(); loadMsgs();
 })();
 
 /* ---------- 滚动：进度 / 导航 / 视差 ---------- */
