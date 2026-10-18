@@ -136,14 +136,50 @@
   .shine:hover::after{transform:translateX(130%) skewX(-8deg)}
 
   /* ================= 开场动画 ================= */
+  /* —— 照片背景层：苹果式极慢动态（Ken Burns + 暖冷色调漂移） —— */
+  .bg-photo{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .bg-photo .layer{
+    position:absolute;inset:-6%;
+    background:url('assets/bg/hero-1920.webp') center/cover no-repeat;
+    animation:kenBurns 34s var(--ease) infinite alternate;
+    will-change:transform;
+  }
+  @media(max-width:760px){.bg-photo .layer{background-image:url('assets/bg/hero-960.webp')}}
+  @keyframes kenBurns{
+    from{transform:scale(1.02) translate(0,0)}
+    to{transform:scale(1.1) translate(-1.2%,.8%)}
+  }
+  /* 色调流动：暖金 / 冷蓝两团光斑极慢漂移 */
+  .bg-tint{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none}
+  .bg-tint i{position:absolute;border-radius:50%;filter:blur(60px);opacity:.16;display:block}
+  .bg-tint .warm{
+    width:62vw;height:62vw;left:-14vw;top:-20vw;
+    background:radial-gradient(circle,rgba(255,178,102,.55),transparent 65%);
+    animation:tintDriftA 26s var(--ease) infinite alternate;
+  }
+  .bg-tint .cool{
+    width:56vw;height:56vw;right:-15vw;bottom:-17vw;
+    background:radial-gradient(circle,rgba(96,140,255,.45),transparent 65%);
+    animation:tintDriftB 32s var(--ease) infinite alternate;
+  }
+  @keyframes tintDriftA{from{transform:translate(0,0) scale(1)}to{transform:translate(7vw,4vw) scale(1.12)}}
+  @keyframes tintDriftB{from{transform:translate(0,0) scale(1.08)}to{transform:translate(-6vw,-4vw) scale(1)}}
+
   #intro{
     position:fixed;inset:0;z-index:200;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:
-      radial-gradient(1000px 640px at 50% 40%, var(--intro-wash), transparent 62%),
-      var(--bg-2);
+    background:var(--bg-2);
     transition:opacity .9s var(--ease), visibility .9s var(--ease);
   }
+  /* 照片可读性遮罩：上浅下深，保证文字清晰 */
+  #intro .bg-shade{
+    position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(to bottom,rgba(0,0,0,.36) 0%,rgba(0,0,0,.12) 44%,rgba(0,0,0,.55) 100%);
+  }
+  :root[data-theme="dark"] #intro .bg-shade{
+    background:linear-gradient(to bottom,rgba(0,0,0,.44) 0%,rgba(0,0,0,.2) 44%,rgba(0,0,0,.62) 100%);
+  }
+  #intro .intro-name,#intro .intro-line,#intro .intro-sub,#intro #enterBtn,#intro .intro-hint{position:relative;z-index:2}
   #intro.hidden{opacity:0;visibility:hidden;pointer-events:none}
   .intro-name{
     font-family:inherit;
@@ -250,8 +286,11 @@
     position:absolute;width:720px;height:720px;border-radius:50%;pointer-events:none;
     background:radial-gradient(circle,var(--hero-wash),transparent 62%);
     left:50%;top:50%;transform:translate(-50%,-50%);transition:transform .35s ease-out;
-    z-index:0;filter:blur(10px);
+    z-index:1;filter:blur(10px);
   }
+  /* Hero 衬底：同一张照片重模糊低透明，与引导页连贯 */
+  .hero .bg-photo .layer{filter:blur(42px) saturate(1.18);opacity:.5}
+  :root[data-theme="dark"] .hero .bg-photo .layer{opacity:.42}
   .hero-content{position:relative;z-index:2;max-width:820px}
   .hero-content .eyebrow{margin-bottom:22px}
   .hero h1{
@@ -599,6 +638,32 @@
   .modal-card.shake{animation:shake .4s}
   @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 
+  /* ================= 管理面板（仅站长） ================= */
+  .modal-wide .modal-card{width:min(680px,100%);max-height:calc(100vh - 48px);overflow:auto}
+  .admin-list{display:flex;flex-direction:column;gap:10px;margin-top:16px;max-height:44vh;overflow:auto;padding-right:4px}
+  .admin-row{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:var(--r-md);background:var(--fill-2);border:1px solid transparent;transition:border-color .25s var(--ease)}
+  .admin-row:hover{border-color:var(--line)}
+  .admin-row .ava{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:14px;font-weight:600;color:#fff;overflow:hidden}
+  .admin-row .ava img{width:100%;height:100%;object-fit:cover;display:block}
+  .admin-row .info{flex:1;min-width:0}
+  .admin-row .nick{font-size:13px;font-weight:600;color:var(--fg)}
+  .admin-row .sub{font-size:12px;color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+  .admin-mini{font-size:12px;padding:6px 12px;border-radius:var(--pill);border:1px solid var(--line);background:transparent;color:var(--dim);cursor:pointer;font-family:inherit;transition:.2s;white-space:nowrap;flex:none}
+  .admin-mini:hover{color:var(--fg);background:var(--fill)}
+  .admin-mini.danger:hover{color:var(--danger);background:var(--danger-soft);border-color:var(--danger)}
+  .admin-upload{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
+  .admin-hint{font-size:12px;color:var(--faint)}
+  .admin-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;margin-top:16px}
+  .admin-photo{position:relative;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--glass-brd);aspect-ratio:1;background:var(--fill)}
+  .admin-photo img{width:100%;height:100%;object-fit:cover;display:block}
+  .admin-photo .ops{position:absolute;left:0;right:0;bottom:0;display:flex;gap:4px;padding:5px;background:linear-gradient(to top,rgba(0,0,0,.72),transparent)}
+  .admin-photo .ops button{flex:1;font-size:11px;padding:4px 0;border:none;border-radius:6px;background:rgba(255,255,255,.18);color:#fff;cursor:pointer;font-family:inherit;transition:.2s}
+  .admin-photo .ops button:hover{background:var(--accent)}
+  .admin-photo.off{opacity:.55}
+  .admin-photo.off::after{content:"已下架";position:absolute;inset:0;display:grid;place-items:center;font-size:12px;color:#fff;font-weight:600;background:rgba(0,0,0,.35)}
+  .admin-photo .size{position:absolute;top:5px;left:6px;font-size:10px;color:#fff;background:rgba(0,0,0,.55);padding:2px 6px;border-radius:var(--pill)}
+  .admin-empty{grid-column:1/-1;text-align:center;padding:26px 16px;color:var(--faint);font-size:13px}
+
   /* ================= Toast（液态玻璃胶囊） ================= */
   .toast{
     position:fixed;left:50%;bottom:38px;transform:translate(-50%,24px) scale(.9);z-index:190;
@@ -646,6 +711,9 @@
 
 <!-- ================= 开场动画 ================= -->
 <div id="intro">
+  <div class="bg-photo"><div class="layer"></div></div>
+  <div class="bg-shade"></div>
+  <div class="bg-tint"><i class="warm"></i><i class="cool"></i></div>
   <div class="intro-name" id="introName">JINLETIAN</div>
   <div class="intro-line"></div>
   <div class="intro-sub">Personal Space · 个人主页</div>
@@ -662,6 +730,7 @@
     <a href="#home" class="active">首页</a>
     <a href="#gallery">图片集</a>
     <a href="#board">想对我说的</a>
+    <a href="#" id="adminNavLink" hidden>管理</a>
     <a href="#about">关于</a>
     <a href="#contact">联系</a>
   </nav>
@@ -677,6 +746,8 @@
 <main>
   <!-- Hero -->
   <section class="hero" id="home">
+    <div class="bg-photo"><div class="layer"></div></div>
+    <div class="bg-tint"><i class="warm"></i><i class="cool"></i></div>
     <div class="hero-glow" id="heroGlow"></div>
     <div class="hero-content">
       <p class="eyebrow">WELCOME · 欢迎来到</p>
@@ -694,7 +765,7 @@
   <section class="section" id="gallery">
     <div class="section-head reveal">
       <p class="eyebrow">PHOTO GALLERY</p>
-      <h2>图片集 <span class="count">25</span></h2>
+      <h2>图片集 <span class="count" id="photoCount">25</span></h2>
       <p class="section-desc">游客可自由浏览全部照片；<a id="unlockInline">登录</a>后即可下载原图。</p>
     </div>
     <div class="grid" id="grid"></div>
@@ -895,6 +966,32 @@
   </div>
 </div>
 
+<!-- ================= 管理面板（仅站长可见） ================= -->
+<div class="modal" id="adminModal" aria-hidden="true">
+  <div class="modal-card modal-wide">
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" id="adminTabMsgs">留言管理</button>
+      <button type="button" class="auth-tab" id="adminTabPhotos">图片管理</button>
+    </div>
+    <!-- 留言管理 -->
+    <div id="adminPaneMsgs">
+      <p class="auth-hint">作为站长，你可以删除任意留言（包括他人的）。删除后所有人立即可见。</p>
+      <div class="admin-list" id="adminMsgList"></div>
+    </div>
+    <!-- 图片管理 -->
+    <div id="adminPanePhotos" hidden>
+      <div class="admin-upload">
+        <button type="button" class="btn primary" id="adminUploadBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="9.8" r="1.7"/><path d="M4.5 17.5l4.5-4 3.5 3 3-2.5 4 3.5"/></svg>上传新图片</button>
+        <span class="admin-hint">自动压缩至 280KB 以内；免费存储共 10MB，请合理安排。</span>
+      </div>
+      <div class="admin-photo-grid" id="adminPhotoList"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="adminClose">关闭</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1030,39 +1127,69 @@ function toast(msg){
   }
 })();
 
-/* ---------- 构建画廊 ---------- */
-const grid = document.getElementById('grid');
-PHOTOS.forEach((p,i)=>{
-  const fig = document.createElement('figure');
-  fig.className = 'ph';
-  fig.dataset.index = i;
-  fig.style.setProperty('--lq', `url('${p.lq}')`);
-  fig.innerHTML = `
-    <img src="${THUMB(p.id)}" width="${p.w}" height="${p.h}" loading="lazy" decoding="async" alt="照片 ${p.id}">
-    <div class="veil">
-      <span class="idx">${p.id} <span style="font-size:12px;opacity:.7">/ ${PHOTOS.length}</span></span>
-      <span class="dl locked" data-dl="${p.id}" title="下载原图"></span>
-    </div>`;
-  const imgEl = fig.querySelector('img');
-  const reveal = () => imgEl.classList.add('loaded');
-  if (imgEl.complete) reveal(); else imgEl.addEventListener('load', reveal);
-  fig.addEventListener('click', ()=>openLightbox(i));
-  // 角标下载按钮（阻止冒泡，避免打开灯箱）
-  const dl = fig.querySelector('.dl');
-  dl.addEventListener('click', e=>{
-    e.stopPropagation();
-    requestDownload(p.id);
-  });
-  grid.appendChild(fig);
-});
-
-/* ---------- 灯箱 ---------- */
+/* ---------- 画廊：内置 25 张 + 站长上传（远程） ---------- */
 const lightbox = document.getElementById('lightbox');
 const lbImg = document.getElementById('lbImg');
 const lbCounter = document.getElementById('lbCounter');
 const lbDownload = document.getElementById('lbDownload');
 let cur = 0;
+const grid = document.getElementById('grid');
+/* 管理面板元素引用（需在顶层 renderGallery 之前初始化，避免 TDZ） */
+const adminModal = document.getElementById('adminModal');
+const adminNavLink = document.getElementById('adminNavLink');
+const adminMsgList = document.getElementById('adminMsgList');
+const adminPhotoList = document.getElementById('adminPhotoList');
+const galleryItems = PHOTOS.map(p => ({ id: p.id, src: 'local', w: p.w, h: p.h, lq: p.lq }));
+let remotePhotos = [];
+let photoIO = null;   // 画廊入场观察器（文件末尾初始化）
+const allPhotos = () => galleryItems.concat(remotePhotos);
+const photoThumb = it => it.src === 'local' ? THUMB(it.id) : imgUrl(it.id);
+const photoFull  = it => it.src === 'local' ? FULL(it.id)  : imgUrl(it.id);
 
+function renderGallery(){
+  grid.innerHTML = '';
+  const all = allPhotos();
+  all.forEach((p, i) => {
+    const fig = document.createElement('figure');
+    fig.className = 'ph';
+    fig.dataset.index = i;
+    if (p.lq) fig.style.setProperty('--lq', `url('${p.lq}')`);
+    fig.innerHTML = `
+      <img src="${photoThumb(p)}" width="${p.w}" height="${p.h}" loading="lazy" decoding="async" alt="照片 ${i + 1}">
+      <div class="veil">
+        <span class="idx">${String(i + 1).padStart(2, '0')} <span style="font-size:12px;opacity:.7">/ ${all.length}</span></span>
+        <span class="dl locked" title="下载原图"></span>
+      </div>`;
+    const imgEl = fig.querySelector('img');
+    const reveal = () => imgEl.classList.add('loaded');
+    if (imgEl.complete) reveal(); else imgEl.addEventListener('load', reveal);
+    fig.addEventListener('click', ()=>openLightbox(i));
+    const dl = fig.querySelector('.dl');
+    dl.addEventListener('click', e=>{ e.stopPropagation(); requestDownloadAt(i); });
+    grid.appendChild(fig);
+  });
+  if (photoIO) grid.querySelectorAll('.ph').forEach((el, i)=>{
+    el.style.transitionDelay = (i % 8) * 0.045 + 's';
+    photoIO.observe(el);
+  });
+  syncDownloadUI();
+  const cnt = document.getElementById('photoCount');
+  if (cnt) cnt.textContent = all.length;
+}
+
+/* 拉取站长上传的图片（游客只看上架；站长含已下架） */
+async function loadRemotePhotos(){
+  if(!apiReady()) return;
+  try{
+    const data = await api('/api/photos');
+    remotePhotos = (data.photos || []).map(p => ({ id: p.id, src: 'remote', w: p.w, h: p.h, lq: '', hidden: p.hidden }));
+    renderGallery();
+  }catch(e){ console.warn('loadRemotePhotos', e); }
+}
+renderGallery();
+loadRemotePhotos();
+
+/* ---------- 灯箱 ---------- */
 function openLightbox(i){
   cur = i;
   updateLightbox();
@@ -1070,10 +1197,12 @@ function openLightbox(i){
   lightbox.setAttribute('aria-hidden','false');
 }
 function updateLightbox(){
-  const p = PHOTOS[cur];
-  lbImg.src = FULL(p.id);            // 原图预览：游客也可浏览
-  lbImg.alt = `照片 ${p.id}`;
-  lbCounter.textContent = `${cur+1} / ${PHOTOS.length}`;
+  const all = allPhotos();
+  const p = all[cur];
+  if(!p) return;
+  lbImg.src = photoFull(p);            // 原图预览：游客也可浏览
+  lbImg.alt = `照片 ${cur + 1}`;
+  lbCounter.textContent = `${cur+1} / ${all.length}`;
   syncDownloadUI();
 }
 function closeLightbox(){
@@ -1082,7 +1211,9 @@ function closeLightbox(){
   lbImg.src = '';
 }
 function navTo(d){
-  cur = (cur + d + PHOTOS.length) % PHOTOS.length;
+  const n = allPhotos().length;
+  if(!n) return;
+  cur = (cur + d + n) % n;
   updateLightbox();
 }
 document.getElementById('lbClose').addEventListener('click', closeLightbox);
@@ -1122,24 +1253,31 @@ function syncDownloadUI(){
   btn.classList.toggle('on', ok);
   btn.querySelector('.ic-slot').innerHTML = ok ? CHECK_ICO : PERSON_ICO;
   btn.querySelector('.tx').textContent = ok ? '退出登录' : '登录';
+  /* 管理员入口：仅站长可见 */
+  const adminLink = document.getElementById('adminNavLink');
+  if (adminLink) adminLink.hidden = !(ok && currentUser && currentUser.role === 'admin');
+  if (!(ok && currentUser && currentUser.role === 'admin')) closeAdmin();
 }
 function saveBlob(url, name){
   const a = document.createElement('a');
   a.href = url; a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
 }
-function requestDownload(id){
+function requestDownloadAt(i){
+  const p = allPhotos()[i];
+  if(!p) return;
   if(!isLoggedIn()){ openLogin(); return; }
-  saveBlob(FULL(id), `Jinletian-${id}.webp`);
+  saveBlob(photoFull(p), `Jinletian-${p.id}.webp`);
   toast('开始下载原图…');
 }
-lbDownload.addEventListener('click', e=>{ e.stopPropagation(); requestDownload(PHOTOS[cur].id); });
+lbDownload.addEventListener('click', e=>{ e.stopPropagation(); requestDownloadAt(cur); });
 
 document.getElementById('downloadAll').addEventListener('click', ()=>{
   if(!isLoggedIn()){ openLogin(); return; }
-  toast('正在批量下载 25 张原图…');
-  PHOTOS.forEach((p,i)=>{
-    setTimeout(()=>saveBlob(FULL(p.id), `Jinletian-${p.id}.webp`), i*350);
+  const all = allPhotos();
+  toast(`正在批量下载 ${all.length} 张原图…`);
+  all.forEach((p, i)=>{
+    setTimeout(()=>saveBlob(photoFull(p), `Jinletian-${p.id}.webp`), i*350);
   });
 });
 
@@ -1627,6 +1765,7 @@ msgInput.addEventListener('input', ()=>{
 });
 const fileInput = document.createElement('input');
 fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none';
+fileInput.id = 'msgImgInput';
 document.body.appendChild(fileInput);
 imgBtn.addEventListener('click', ()=>fileInput.click());
 fileInput.addEventListener('change', ()=>{
@@ -1726,12 +1865,137 @@ const io = new IntersectionObserver((entries)=>{
 }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
 
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
-// 画廊逐张入场
-document.querySelectorAll('.ph').forEach((el,i)=>{
-  el.style.transitionDelay = (i % 8) * 0.045 + 's';
-  io.observe(el);
-});
+photoIO = io;   // 画廊（含远程上传图）入场动画由 renderGallery 驱动
 onScroll();
+
+/* ---------- 管理面板（仅站长） ---------- */
+function escHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+const isAdminUser = () => !!(currentUser && currentUser.role === 'admin');
+
+function openAdmin(){
+  if(!isAdminUser()){ toast('仅站长可进入管理面板'); return; }
+  adminModal.classList.add('open');
+  adminModal.setAttribute('aria-hidden','false');
+  adminTab('msgs');
+  loadAdminMsgs();
+  loadAdminPhotos();
+}
+function closeAdmin(){
+  adminModal.classList.remove('open');
+  adminModal.setAttribute('aria-hidden','true');
+}
+function adminTab(which){
+  document.getElementById('adminTabMsgs').classList.toggle('active', which === 'msgs');
+  document.getElementById('adminTabPhotos').classList.toggle('active', which === 'photos');
+  document.getElementById('adminPaneMsgs').hidden = which !== 'msgs';
+  document.getElementById('adminPanePhotos').hidden = which !== 'photos';
+}
+adminNavLink.addEventListener('click', e=>{ e.preventDefault(); openAdmin(); });
+document.getElementById('adminClose').addEventListener('click', closeAdmin);
+adminModal.addEventListener('click', e=>{ if(e.target === adminModal) closeAdmin(); });
+document.getElementById('adminTabMsgs').addEventListener('click', ()=>adminTab('msgs'));
+document.getElementById('adminTabPhotos').addEventListener('click', ()=>adminTab('photos'));
+
+function fmtTime(ts){
+  const d = new Date(ts);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+async function loadAdminMsgs(){
+  adminMsgList.innerHTML = '<div class="admin-empty">加载中…</div>';
+  try{
+    const data = await api('/api/messages');
+    const msgs = data.messages || [];
+    if(!msgs.length){ adminMsgList.innerHTML = '<div class="admin-empty">还没有留言</div>'; return; }
+    adminMsgList.innerHTML = '';
+    msgs.forEach(m=>{
+      const row = document.createElement('div');
+      row.className = 'admin-row';
+      const avaHtml = m.avatar
+        ? `<img src="${imgUrl(m.avatar)}" alt="">`
+        : escHtml((m.nickname || '?').trim().charAt(0));
+      row.innerHTML = `
+        <span class="ava" ${m.avatar ? '' : `style="background:${avatarColor(m.nickname)}"`}>${avaHtml}</span>
+        <span class="info"><span class="nick">${escHtml(m.nickname)}</span><span class="sub">${escHtml(m.content || '[图片]')} · ${fmtTime(m.createdAt)}</span></span>
+        <button type="button" class="admin-mini danger">删除</button>`;
+      row.querySelector('button').addEventListener('click', async ()=>{
+        try{
+          await api('/api/messages/' + m.id, { method: 'DELETE' });
+          toast('已删除留言');
+          loadAdminMsgs();
+          loadMsgs();
+        }catch(e){ toast(e.message || '删除失败'); }
+      });
+      adminMsgList.appendChild(row);
+    });
+  }catch(e){
+    adminMsgList.innerHTML = '<div class="admin-empty">加载失败，请稍后重试</div>';
+  }
+}
+
+async function loadAdminPhotos(){
+  try{
+    const data = await api('/api/photos');
+    const photos = data.photos || [];
+    if(!photos.length){ adminPhotoList.innerHTML = '<div class="admin-empty">还没有上传过图片（当前画廊为内置 25 张）。</div>'; return; }
+    adminPhotoList.innerHTML = '';
+    photos.forEach(p=>{
+      const cell = document.createElement('div');
+      cell.className = 'admin-photo' + (p.hidden ? ' off' : '');
+      cell.innerHTML = `
+        <img src="${imgUrl(p.id)}" alt="已上传图片">
+        <span class="size">${Math.max(1, Math.round(p.size / 1024))}KB</span>
+        <span class="ops">
+          <button type="button" data-act="toggle">${p.hidden ? '上架' : '下架'}</button>
+          <button type="button" data-act="del">删除</button>
+        </span>`;
+      cell.querySelector('[data-act="toggle"]').addEventListener('click', async ()=>{
+        try{
+          await api('/api/photos/' + p.id, { method: 'PATCH', body: JSON.stringify({ hidden: !p.hidden }) });
+          toast(p.hidden ? '已上架' : '已下架');
+          loadAdminPhotos();
+          loadRemotePhotos();
+        }catch(e){ toast(e.message || '操作失败'); }
+      });
+      cell.querySelector('[data-act="del"]').addEventListener('click', async ()=>{
+        try{
+          await api('/api/photos/' + p.id, { method: 'DELETE' });
+          toast('已删除');
+          loadAdminPhotos();
+          loadRemotePhotos();
+        }catch(e){ toast(e.message || '删除失败'); }
+      });
+      adminPhotoList.appendChild(cell);
+    });
+  }catch(e){
+    adminPhotoList.innerHTML = '<div class="admin-empty">加载失败，请稍后重试</div>';
+  }
+}
+
+/* 上传新图片（自动压缩至限额内） */
+const adminPhotoInput = document.createElement('input');
+adminPhotoInput.type = 'file';
+adminPhotoInput.accept = 'image/*';
+adminPhotoInput.style.display = 'none';
+adminPhotoInput.id = 'adminPhotoInput';
+document.body.appendChild(adminPhotoInput);
+document.getElementById('adminUploadBtn').addEventListener('click', ()=>adminPhotoInput.click());
+adminPhotoInput.addEventListener('change', async ()=>{
+  const f = adminPhotoInput.files && adminPhotoInput.files[0];
+  adminPhotoInput.value = '';
+  if(!f) return;
+  try{
+    const compressed = await compressToLimit(f, 1280, 0.82, 280 * 1024);
+    const dataB64 = await blobToBase64(compressed);
+    await api('/api/photos', { method: 'POST', body: JSON.stringify({ dataB64 }) });
+    toast('上传成功，已上架');
+    loadAdminPhotos();
+    loadRemotePhotos();
+  }catch(e){ toast(e.message || '上传失败'); }
+});
 
 /* ---------- 点击复制（QQ 号） ---------- */
 document.querySelectorAll('[data-copy]').forEach(function(el){
