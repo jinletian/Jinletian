@@ -27,8 +27,8 @@ const store = {
 
 /* ================= 工具 ================= */
 const TOKEN_TTL = 30 * 24 * 3600 * 1000;
-const IMG_LIMIT = 80 * 1024;     // 留言图片 80KB（Val Town 免费存储共 10MB）
-const AVATAR_LIMIT = 40 * 1024;  // 头像 40KB
+const IMG_LIMIT = 200 * 1024;    // 留言图片 200KB（Val Town 免费存储共 10MB）
+const AVATAR_LIMIT = 80 * 1024;  // 头像 80KB
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const enc = new TextEncoder();
 
@@ -108,7 +108,7 @@ routes.push({ m: 'POST', re: /^\/api\/register$/, fn: async (req, ctx) => {
   let avatar = '';
   if (body?.avatarData) {
     if (b64ToBytes(String(body.avatarData)).length > AVATAR_LIMIT) {
-      return ctx.json({ error: '头像过大（上限 40KB）' }, 400);
+      return ctx.json({ error: '头像过大（上限 ' + Math.round(AVATAR_LIMIT / 1024) + 'KB）' }, 400);
     }
     avatar = await saveImage(String(body.avatarData));
   }
@@ -150,9 +150,11 @@ routes.push({ m: 'PATCH', re: /^\/api\/me$/, auth: true, fn: async (req, ctx) =>
   if (nick) { u.nickname = nick; }
   if (body?.avatarData) {
     if (b64ToBytes(String(body.avatarData)).length > AVATAR_LIMIT) {
-      return ctx.json({ error: '头像过大（上限 40KB）' }, 400);
+      return ctx.json({ error: '头像过大（上限 ' + Math.round(AVATAR_LIMIT / 1024) + 'KB）' }, 400);
     }
     u.avatar = await saveImage(String(body.avatarData));
+  } else if (body?.avatarRemoved) {
+    u.avatar = '';   // 用户主动移除头像：恢复昵称首字占位头像
   }
   await ctx.db.run('update users set nickname = ?, avatar = ? where uid = ?', [u.nickname, u.avatar, u.uid]);
   return ctx.json({ user: publicUser(u) });
@@ -180,7 +182,7 @@ routes.push({ m: 'POST', re: /^\/api\/messages$/, auth: true, fn: async (req, ct
   const u = urows[0];
   let img = '';
   if (imgData) {
-    if (b64ToBytes(imgData).length > IMG_LIMIT) return ctx.json({ error: '图片过大（上限 80KB）' }, 400);
+    if (b64ToBytes(imgData).length > IMG_LIMIT) return ctx.json({ error: '图片过大（上限 ' + Math.round(IMG_LIMIT / 1024) + 'KB）' }, 400);
     img = await saveImage(imgData);
   }
   const ts = Date.now();
