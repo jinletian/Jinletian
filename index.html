@@ -98,7 +98,7 @@
   body{
     background:var(--bg);
     color:var(--fg);
-    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC",sans-serif;
     font-weight:400;
     line-height:1.65;
     -webkit-font-smoothing:antialiased;
@@ -347,8 +347,15 @@
   }
   .ph .veil .dl:hover{background:var(--accent);color:#fff;border-color:var(--accent);transform:scale(1.1)}
   .ph .veil .dl:active{transform:scale(.92)}
-  .ph .veil .dl::after{content:"⬇";font-size:15px}
-  .ph .veil .dl.locked::after{content:"🔒";font-size:12px}
+  .ph .veil .dl::after{
+    content:"";width:15px;height:15px;background:currentColor;
+    -webkit-mask:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v11M7 11.5 12 16.5 17 11.5'/%3E%3Cpath d='M5 19.5h14'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v11M7 11.5 12 16.5 17 11.5'/%3E%3Cpath d='M5 19.5h14'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+  .ph .veil .dl.locked::after{
+    -webkit-mask:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5.5' y='10.5' width='13' height='9.5' rx='2.4'/%3E%3Cpath d='M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5.5' y='10.5' width='13' height='9.5' rx='2.4'/%3E%3Cpath d='M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
   .gallery-foot{display:flex;justify-content:center;margin-top:44px}
 
   /* 占位区 */
@@ -440,6 +447,49 @@
     border:1px dashed var(--line);border-radius:var(--r-lg);
   }
   @media(max-width:640px){ #board .msg{padding:16px} #board .msg .img{max-width:100%} }
+
+  /* ================= iOS 设置风格分组列表 ================= */
+  .ios-group{
+    border-radius:var(--r-lg);overflow:hidden;
+    border:1px solid var(--glass-brd);background:var(--glass-bg);
+    backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);
+    box-shadow:var(--glass-hl),var(--glass-shadow);
+  }
+  .ios-row{
+    display:flex;align-items:center;gap:13px;padding:12px 16px;width:100%;
+    position:relative;color:var(--fg);font-size:14.5px;text-align:left;
+    font-family:inherit;background:transparent;border:none;cursor:default;
+    transition:background .25s var(--ease);
+  }
+  a.ios-row,button.ios-row{cursor:pointer}
+  a.ios-row:hover,button.ios-row:hover{background:var(--fill-2)}
+  a.ios-row:active,button.ios-row:active{background:var(--fill)}
+  /* iOS 缩进分隔线：从图标右缘开始 */
+  .ios-row + .ios-row::before{
+    content:"";position:absolute;left:60px;right:0;top:0;height:1px;background:var(--line);
+  }
+  .ios-ico{
+    width:34px;height:34px;border-radius:9px;flex:none;display:grid;place-items:center;color:#fff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
+  }
+  .ios-ico svg{width:19px;height:19px}
+  .ios-label{color:var(--dim);flex:none}
+  .ios-value{
+    margin-left:auto;color:var(--fg);font-weight:500;text-align:right;
+    min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .ios-chev{width:15px;height:15px;flex:none;color:var(--faint);margin-left:4px}
+  .ios-copy-hint{font-size:12px;color:var(--faint);margin-left:10px;flex:none}
+  @media(max-width:520px){
+    .ios-row{font-size:13.5px;gap:11px;padding:11px 13px}
+    .ios-row + .ios-row::before{left:54px}
+  }
+
+  /* 按钮 / 行内 SVG 图标统一尺寸 */
+  .btn svg,.tool-btn svg{width:14px;height:14px;flex:none}
+  .unlock .ic-slot{display:inline-flex;align-items:center;flex:none}
+  .unlock .ic-slot svg{width:14px;height:14px;display:block}
+  .pwd-wrap .eye svg{width:17px;height:17px;display:block}
 
   /* ================= 登录弹窗（云端） ================= */
   .auth-hint{color:var(--dim);font-size:13px;font-weight:400;line-height:1.65;margin-bottom:4px}
@@ -620,7 +670,7 @@
       <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 14.2A8.6 8.6 0 0 1 9.8 3.4a8.6 8.6 0 1 0 10.8 10.8z"/></svg>
       <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5 5l1.6 1.6M17.4 17.4L19 19M19 5l-1.6 1.6M6.6 17.4L5 19"/></svg>
     </button>
-    <button class="unlock" id="unlockBtn"><span class="ic">👤</span><span class="tx">登录</span></button>
+    <button class="unlock" id="unlockBtn"><span class="ic-slot"><svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg></span><span class="tx">登录</span></button>
   </div>
 </header>
 
@@ -649,7 +699,7 @@
     </div>
     <div class="grid" id="grid"></div>
     <div class="gallery-foot">
-      <button class="btn ghost shine" id="downloadAll">⬇ 下载全部原图</button>
+      <button class="btn ghost shine" id="downloadAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v11M7.5 11 12 15.5 16.5 11"/><path d="M5 19.5h14"/></svg>下载全部原图</button>
     </div>
   </section>
 
@@ -680,7 +730,7 @@
         <div class="img-preview" id="imgPreview"></div>
         <div class="composer-foot">
           <div class="composer-tools">
-            <button class="tool-btn" id="imgBtn" type="button">🖼 上传图片</button>
+            <button class="tool-btn" id="imgBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="9.8" r="1.7"/><path d="M4.5 17.5l4.5-4 3.5 3 3-2.5 4 3.5"/></svg>上传图片</button>
             <span class="char-count" id="charCount">0 / 500</span>
           </div>
           <button class="btn primary shine" id="publishBtn" type="button">发布留言</button>
@@ -694,22 +744,80 @@
     <div class="msg-list" id="msgList"></div>
   </section>
 
-  <!-- 关于（占位） -->
-  <section class="section placeholder" id="about">
-    <div class="reveal">
+  <!-- 关于我 -->
+  <section class="section" id="about">
+    <div class="section-head reveal">
       <p class="eyebrow">ABOUT</p>
       <h2>关于我</h2>
+      <p class="section-desc">苏州大学未来科学与工程学院人工智能专业在读本科生。</p>
     </div>
-    <div class="ph-card reveal"><span class="big">内容整理中</span>这一板块的具体内容还在构思，后续会补充个人介绍、经历与兴趣。</div>
+    <div class="ios-group reveal">
+      <div class="ios-row">
+        <span class="ios-ico" style="background:#0071e3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg></span>
+        <span class="ios-label">姓名</span>
+        <span class="ios-value">金乐添</span>
+      </div>
+      <div class="ios-row">
+        <span class="ios-ico" style="background:#ff375f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M8 3.5v4M16 3.5v4M4 10h16"/></svg></span>
+        <span class="ios-label">生日</span>
+        <span class="ios-value">2008 年 7 月 8 日</span>
+      </div>
+      <div class="ios-row">
+        <span class="ios-ico" style="background:#af52de"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19.5c.6-3.2 2.9-4.8 5.5-4.8s4.9 1.6 5.5 4.8"/><path d="M15.5 5.7a3.2 3.2 0 0 1 0 5.6M17.6 15c1.7.8 2.6 2.3 2.9 4.5"/></svg></span>
+        <span class="ios-label">性别</span>
+        <span class="ios-value">男</span>
+      </div>
+      <div class="ios-row">
+        <span class="ios-ico" style="background:#ff9500"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 2.8 8.2 12 12.4l9.2-4.2L12 4z"/><path d="M6.5 10.2v4.6c0 1.6 2.5 2.9 5.5 2.9s5.5-1.3 5.5-2.9v-4.6"/><path d="M21.2 8.4v4.8"/></svg></span>
+        <span class="ios-label">学校</span>
+        <span class="ios-value">苏州大学</span>
+      </div>
+      <div class="ios-row">
+        <span class="ios-ico" style="background:#5856d6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7.2 4.6 4.5 5v13c2.7-.4 5.5 0 7.5 1.5 2-1.5 4.8-1.9 7.5-1.5V5c-2.7-.4-5.5 0-7.5 1.5z"/><path d="M12 6.5v13"/></svg></span>
+        <span class="ios-label">院系</span>
+        <span class="ios-value">未来科学与工程学院</span>
+      </div>
+      <div class="ios-row">
+        <span class="ios-ico" style="background:#34c759"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3.5v3M14 3.5v3M10 17.5v3M14 17.5v3M3.5 10h3M3.5 14h3M17.5 10h3M17.5 14h3"/></svg></span>
+        <span class="ios-label">专业</span>
+        <span class="ios-value">人工智能 · 本科在读</span>
+      </div>
+    </div>
   </section>
 
-  <!-- 联系（占位） -->
-  <section class="section placeholder" id="contact">
-    <div class="reveal">
+  <!-- 联系我 -->
+  <section class="section" id="contact">
+    <div class="section-head reveal">
       <p class="eyebrow">CONTACT</p>
       <h2>联系我</h2>
+      <p class="section-desc">邮箱、电话、QQ 都可以找到我，欢迎随时联系。</p>
     </div>
-    <div class="ph-card reveal"><span class="big">敬请期待</span>联系方式与更多内容即将上线。</div>
+    <div class="ios-group reveal">
+      <a class="ios-row" href="mailto:jinletian2008@outlook.com">
+        <span class="ios-ico" style="background:#0071e3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M4.8 8.2 12 13.4l7.2-5.2"/></svg></span>
+        <span class="ios-label">邮箱</span>
+        <span class="ios-value">jinletian2008@outlook.com</span>
+        <svg class="ios-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+      </a>
+      <a class="ios-row" href="mailto:42591634@qq.com">
+        <span class="ios-ico" style="background:#5856d6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M4.8 8.2 12 13.4l7.2-5.2"/></svg></span>
+        <span class="ios-label">邮箱</span>
+        <span class="ios-value">42591634@qq.com</span>
+        <svg class="ios-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+      </a>
+      <a class="ios-row" href="tel:+8618550778857">
+        <span class="ios-ico" style="background:#34c759"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h3l1.5 4-2 1.5a12 12 0 0 0 5.5 5.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 5 5.7 2 2 0 0 1 7 3.5z"/></svg></span>
+        <span class="ios-label">电话</span>
+        <span class="ios-value">+86 18550778857</span>
+        <svg class="ios-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+      </a>
+      <button type="button" class="ios-row" data-copy="42591634">
+        <span class="ios-ico" style="background:#12b7f5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c4 0 7 2.8 7 6.3 0 3.4-3 6.2-7 6.2-.8 0-1.6-.1-2.3-.3l-2.7 1.5.7-2.5C6 14.2 5 12.4 5 10.3 5 6.8 8 4 12 4z"/><path d="M9.5 10.2h.01M14.5 10.2h.01"/></svg></span>
+        <span class="ios-label">QQ</span>
+        <span class="ios-value">42591634</span>
+        <span class="ios-copy-hint">点击复制</span>
+      </button>
+    </div>
   </section>
 </main>
 
@@ -726,7 +834,7 @@
   <button class="lb-next" id="lbNext" aria-label="下一张">›</button>
   <div class="lb-bar">
     <span id="lbCounter">1 / 25</span>
-    <button id="lbDownload">⬇ 下载</button>
+    <button id="lbDownload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v11M7.5 11 12 15.5 16.5 11"/><path d="M5 19.5h14"/></svg>下载</button>
   </div>
 </div>
 
@@ -743,7 +851,7 @@
       <input id="loginEmail" class="fld" type="email" placeholder="邮箱" autocomplete="email" />
       <div class="pwd-wrap">
         <input id="loginPass" class="fld" type="password" placeholder="密码" autocomplete="current-password" />
-        <button type="button" class="eye" id="eyeLogin" aria-label="显示或隐藏密码">👁</button>
+        <button type="button" class="eye" id="eyeLogin" aria-label="显示或隐藏密码"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
       <div class="forgot-row"><button type="button" class="link-btn" id="forgotBtn">忘记密码？</button></div>
     </div>
@@ -753,11 +861,11 @@
       <input id="suEmail" class="fld" type="email" placeholder="邮箱" autocomplete="email" />
       <div class="pwd-wrap">
         <input id="suPass" class="fld" type="password" placeholder="设置密码（至少6位）" autocomplete="new-password" />
-        <button type="button" class="eye" id="eyeSignup" aria-label="显示或隐藏密码">👁</button>
+        <button type="button" class="eye" id="eyeSignup" aria-label="显示或隐藏密码"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
       <input id="suNick" class="fld" placeholder="昵称（必填，留言时展示给大家）" maxlength="20" />
       <div class="avatar-pick">
-        <button type="button" class="tool-btn" id="suAvatarBtn">🖼 上传头像（选填）</button>
+        <button type="button" class="tool-btn" id="suAvatarBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="9.8" r="1.7"/><path d="M4.5 17.5l4.5-4 3.5 3 3-2.5 4 3.5"/></svg>上传头像（选填）</button>
         <span class="avatar-preview" id="suAvatarPv" hidden><img alt="头像预览" /><button type="button" id="suAvatarRm" aria-label="移除头像">×</button></span>
       </div>
     </div>
@@ -776,7 +884,7 @@
     <p class="auth-hint">昵称和头像会展示在你的每一条留言旁。</p>
     <input id="pfNick" class="fld" placeholder="昵称" maxlength="20" style="margin-top:16px" />
     <div class="avatar-pick">
-      <button type="button" class="tool-btn" id="pfAvatarBtn">🖼 更换头像</button>
+      <button type="button" class="tool-btn" id="pfAvatarBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="9.8" r="1.7"/><path d="M4.5 17.5l4.5-4 3.5 3 3-2.5 4 3.5"/></svg>更换头像</button>
       <span class="avatar-preview" id="pfAvatarPv" hidden><img alt="头像预览" /><button type="button" id="pfAvatarRm" aria-label="移除头像">×</button></span>
     </div>
     <p class="err" id="pfErr"></p>
@@ -1000,15 +1108,19 @@ lightbox.addEventListener('touchend', e=>{
 /* ---------- 下载 & 登录门（云端会话） ---------- */
 function syncDownloadUI(){
   const ok = isLoggedIn();
+  const DL_ICO  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v11M7.5 11 12 15.5 16.5 11"/><path d="M5 19.5h14"/></svg>';
+  const LOCK_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2.4"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>';
+  const CHECK_ICO = '<svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 10 18 19.5 6.5"/></svg>';
+  const PERSON_ICO = '<svg class="ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg>';
   lbDownload.classList.toggle('locked', !ok);
-  lbDownload.innerHTML = ok ? '⬇ 下载原图' : '🔒 登录后下载';
+  lbDownload.innerHTML = ok ? DL_ICO + '下载原图' : LOCK_ICO + '登录后下载';
   document.querySelectorAll('.dl').forEach(el=>{
     el.classList.toggle('locked', !ok);
     el.title = ok ? '下载原图' : '登录后可下载';
   });
   const btn = document.getElementById('unlockBtn');
   btn.classList.toggle('on', ok);
-  btn.querySelector('.ic').textContent = ok ? '✅' : '👤';
+  btn.querySelector('.ic-slot').innerHTML = ok ? CHECK_ICO : PERSON_ICO;
   btn.querySelector('.tx').textContent = ok ? '退出登录' : '登录';
 }
 function saveBlob(url, name){
@@ -1485,15 +1597,17 @@ pfSave.addEventListener('click', saveProfile);
 pfCancel.addEventListener('click', closeProfile);
 profileModal.addEventListener('click', e=>{ if(e.target === profileModal) closeProfile(); });
 editProfileBtn.addEventListener('click', openProfile);
+const EYE_ON  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16"/><path d="M9.9 5.9A9.8 9.8 0 0 1 12 5.8c6 0 9.5 6.2 9.5 6.2a17.8 17.8 0 0 1-3.3 4.2M6.5 7.6A17.3 17.3 0 0 0 2.5 12S6 18.2 12 18.2c1.5 0 2.8-.3 4-.9"/><path d="M9.9 10.1a3 3 0 0 0 4.2 4.2"/></svg>';
 eyeLogin.addEventListener('click', ()=>{
   const show = loginPass.type === 'password';
   loginPass.type = show ? 'text' : 'password';
-  eyeLogin.textContent = show ? '🙈' : '👁';
+  eyeLogin.innerHTML = show ? EYE_OFF : EYE_ON;
 });
 eyeSignup.addEventListener('click', ()=>{
   const show = suPass.type === 'password';
   suPass.type = show ? 'text' : 'password';
-  eyeSignup.textContent = show ? '🙈' : '👁';
+  eyeSignup.innerHTML = show ? EYE_OFF : EYE_ON;
 });
 loginEmail.addEventListener('keydown', e=>{ if(e.key === 'Enter') loginPass.focus(); });
 loginPass.addEventListener('keydown', e=>{ if(e.key === 'Enter') doLogin(); });
@@ -1618,6 +1732,24 @@ document.querySelectorAll('.ph').forEach((el,i)=>{
   io.observe(el);
 });
 onScroll();
+
+/* ---------- 点击复制（QQ 号） ---------- */
+document.querySelectorAll('[data-copy]').forEach(function(el){
+  el.addEventListener('click', function(){
+    var txt = el.getAttribute('data-copy');
+    function ok(){ toast('已复制：' + txt); }
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); ok(); }catch(e){ toast('复制失败，请手动复制'); }
+      document.body.removeChild(ta);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(ok).catch(fallback);
+    }else{ fallback(); }
+  });
+});
 </script>
 </body>
 </html>
