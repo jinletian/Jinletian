@@ -143,35 +143,37 @@
     position:absolute;inset:-8%;
     background:url('assets/bg/hero-1920.webp') center/cover no-repeat;
     filter:url(#lgRefract) blur(1.5px) saturate(1.22);
-    animation:kenBurns 40s var(--ease) infinite alternate;
+    transform:translate3d(calc(var(--gx,0)*1%), calc(var(--gy,0)*1%), 0) scale(var(--gk,1.08));
     will-change:transform;
   }
   @media(max-width:760px){.bg-photo .layer{background-image:url('assets/bg/hero-960.webp')}}
-  @keyframes kenBurns{from{transform:scale(1.04) translate(0,0)}to{transform:scale(1.12) translate(-1.4%,1%)}}
   /* 磨砂玻璃层：对折射后的照片再做 frosted，叠出液态玻璃的厚度感 */
   .bg-glass{
     position:absolute;inset:0;z-index:1;pointer-events:none;
     backdrop-filter:blur(26px) saturate(1.55) brightness(1.03);
     -webkit-backdrop-filter:blur(26px) saturate(1.55) brightness(1.03);
   }
-  /* 色调：极淡冷暖渐变（soft-light），替代俗套的圆形光斑 */
+  /* 色调：极淡冷暖渐变（soft-light），随指针缓慢偏移 */
   .bg-tint{
     position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:soft-light;opacity:.5;
     background:linear-gradient(135deg,rgba(255,176,120,.55),transparent 44%,rgba(96,140,255,.55) 100%);
     background-size:180% 180%;
-    animation:tintDrift 30s var(--ease) infinite alternate;
+    background-position:calc(40% + var(--tx,0)*46%) calc(40% + var(--ty,0)*46%);
+    transition:background-position .35s var(--ease);
   }
-  @keyframes tintDrift{from{background-position:0% 0%}to{background-position:100% 100%}}
-  /* 动态高光：光带缓慢扫过，像光线掠过玻璃表面 */
+  /* 动态高光：随指针/滚动移动，像光线掠过玻璃表面（iOS26 风格：折射随交互变化） */
   .bg-spec{
     position:absolute;inset:-25%;z-index:3;pointer-events:none;mix-blend-mode:screen;opacity:.55;
     background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.6) 50%,transparent 60%);
     background-size:260% 260%;
-    animation:specSweep 16s var(--ease) infinite;
+    background-position:calc(50% + var(--sx,0)*36%) calc(50% + var(--sy,0)*36%);
+    transition:background-position .25s var(--ease);
     will-change:background-position;
   }
   :root[data-theme="dark"] .bg-spec{opacity:.34}
-  @keyframes specSweep{0%{background-position:170% 0}50%{background-position:-70% 100%}100%{background-position:170% 0}}
+  /* 引导页：保持照片清晰，不做磨砂/折射/高光 */
+  #intro .bg-photo .layer{filter:none}
+  #intro .bg-glass, #intro .bg-tint, #intro .bg-spec{display:none}
 
   #intro{
     position:fixed;inset:0;z-index:200;
@@ -725,6 +727,107 @@
   @media(prefers-reduced-motion:reduce){
     *{animation-duration:.01ms!important;transition-duration:.01ms!important}
   }
+
+  /* ================= 我的日志（公开板块） ================= */
+  .journal-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin-top:8px}
+  .journal-card{
+    position:relative;display:flex;flex-direction:column;overflow:hidden;cursor:pointer;
+    background:var(--glass-bg);border:1px solid var(--glass-brd);border-radius:var(--r-lg);
+    box-shadow:0 10px 30px -16px rgba(0,0,0,.28);
+    transition:transform .5s var(--spring),box-shadow .4s var(--ease),border-color .3s var(--ease);
+  }
+  .journal-card:hover{transform:translateY(-6px);box-shadow:0 22px 48px -20px rgba(0,0,0,.34);border-color:var(--accent-soft)}
+  .journal-card .cover{position:relative;aspect-ratio:16/10;background:var(--fill-2);overflow:hidden}
+  .journal-card .cover img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s var(--ease)}
+  .journal-card:hover .cover img{transform:scale(1.05)}
+  .journal-card .cover.none{display:grid;place-items:center;color:var(--faint);font-size:13px}
+  .journal-card .body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:10px;flex:1;min-width:0}
+  .journal-card .title{font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.3;color:var(--fg);
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .journal-card .excerpt{font-size:13.5px;line-height:1.62;color:var(--dim);
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+  .journal-card .meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px}
+  .journal-card .when{font-size:12px;color:var(--faint)}
+  .journal-card .stats{display:flex;gap:14px;font-size:12.5px;color:var(--dim)}
+  .journal-card .stats span{display:inline-flex;align-items:center;gap:5px}
+  .journal-card .stats svg{width:15px;height:15px;opacity:.82}
+  .journal-empty{grid-column:1/-1;text-align:center;padding:44px 16px;color:var(--faint);font-size:13.5px}
+
+  /* 文章详情弹层 */
+  .article-card{width:min(720px,100%);max-height:calc(100vh - 48px);overflow:auto;padding:0}
+  .modal-x{position:absolute;top:12px;right:14px;z-index:3;width:32px;height:32px;
+    border:none;border-radius:50%;background:rgba(120,120,128,.22);color:var(--fg);font-size:20px;line-height:1;cursor:pointer;
+    display:grid;place-items:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:background .2s}
+  .modal-x:hover{background:rgba(120,120,128,.4)}
+  .article-cover{width:100%;aspect-ratio:16/9;background:var(--fill-2);overflow:hidden}
+  .article-cover img{width:100%;height:100%;object-fit:cover;display:block}
+  .article-pad{padding:26px 30px 30px}
+  .article-title{font-size:25px;font-weight:700;letter-spacing:-.02em;line-height:1.28;color:var(--fg);margin:0}
+  .article-meta{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px;color:var(--faint)}
+  .article-meta .ava{width:30px;height:30px;border-radius:50%;overflow:hidden;display:grid;place-items:center;font-size:13px;font-weight:600;color:#fff;flex:none}
+  .article-meta .ava img{width:100%;height:100%;object-fit:cover;display:block}
+  .article-body{margin-top:20px;font-size:15.5px;line-height:1.85;color:var(--fg);white-space:pre-wrap;word-break:break-word}
+  .article-likes{display:flex;align-items:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
+  .like-btn{display:inline-flex;align-items:center;gap:9px;padding:10px 20px;border-radius:var(--pill);cursor:pointer;font-family:inherit;
+    background:var(--fill-2);border:1px solid var(--line);color:var(--dim);font-size:14px;font-weight:600;transition:transform .4s var(--spring),background .25s,color .25s,border-color .25s}
+  .like-btn:hover{color:var(--fg)}
+  .like-btn:active{transform:scale(.94)}
+  .like-btn.on{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+  .like-btn svg{width:19px;height:19px;transition:transform .4s var(--spring)}
+  .like-btn.on svg{fill:var(--accent);stroke:var(--accent);transform:scale(1.12)}
+  .like-btn.pop svg{animation:likePop .45s var(--spring)}
+  @keyframes likePop{0%{transform:scale(1)}40%{transform:scale(1.4)}100%{transform:scale(1.12)}}
+
+  .comment-head{margin-top:26px;font-size:14px;font-weight:700;color:var(--fg)}
+  .comment-list{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+  .comment-item{display:flex;gap:11px;align-items:flex-start}
+  .comment-item .ava{width:32px;height:32px;border-radius:50%;overflow:hidden;display:grid;place-items:center;font-size:13px;font-weight:600;color:#fff;flex:none}
+  .comment-item .ava img{width:100%;height:100%;object-fit:cover;display:block}
+  .comment-item .c-body{flex:1;min-width:0}
+  .comment-item .c-top{display:flex;align-items:center;gap:8px}
+  .comment-item .c-name{font-size:13.5px;font-weight:600;color:var(--fg)}
+  .comment-item .c-time{font-size:11.5px;color:var(--faint)}
+  .comment-item .c-text{font-size:14px;line-height:1.6;color:var(--fg);margin-top:3px;white-space:pre-wrap;word-break:break-word}
+  .comment-item .c-del{margin-left:auto;font-size:11.5px;color:var(--faint);background:transparent;border:none;cursor:pointer;font-family:inherit;padding:2px 6px;border-radius:6px;transition:.2s}
+  .comment-item .c-del:hover{color:var(--danger);background:var(--danger-soft)}
+  .comment-form{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+  .comment-form .gate{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    background:var(--fill-2);border-radius:var(--r-md);padding:13px 16px}
+  .comment-form .gate span{font-size:13px;color:var(--dim)}
+  .comment-form textarea{width:100%;min-height:74px;margin-top:0;padding:12px 14px;border-radius:var(--r-sm);
+    background:var(--fill);border:1px solid transparent;color:var(--fg);font-size:14px;font-family:inherit;outline:none;resize:vertical;
+    transition:border-color .3s var(--ease),box-shadow .3s var(--ease)}
+  .comment-form textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+  .comment-form .composer-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+  .comment-form .char-count{font-size:12px;color:var(--faint)}
+
+  /* 日志编辑器（站长） */
+  .journal-editor .tabs-hint{font-size:13px;color:var(--dim);margin:6px 0 16px}
+  .journal-editor textarea{width:100%;min-height:220px;margin-top:14px;padding:12px 16px;border-radius:var(--r-sm);
+    background:var(--fill);border:1px solid transparent;color:var(--fg);font-size:14.5px;font-family:inherit;line-height:1.7;outline:none;resize:vertical;
+    transition:border-color .3s var(--ease),box-shadow .3s var(--ease)}
+  .journal-editor textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+
+  /* 管理面板：日志列表 */
+  .admin-journal{display:flex;flex-direction:column;gap:10px;margin-top:16px;max-height:44vh;overflow:auto;padding-right:4px}
+  .admin-j-row{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:var(--r-md);background:var(--fill-2);border:1px solid transparent;transition:border-color .25s var(--ease)}
+  .admin-j-row:hover{border-color:var(--line)}
+  .admin-j-row .j-thumb{width:54px;height:38px;border-radius:7px;overflow:hidden;flex:none;background:var(--fill);display:grid;place-items:center}
+  .admin-j-row .j-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .admin-j-row .j-thumb.none{color:var(--faint);font-size:10px}
+  .admin-j-row .j-info{flex:1;min-width:0}
+  .admin-j-row .j-title{font-size:13.5px;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .admin-j-row .j-sub{font-size:11.5px;color:var(--faint);margin-top:2px}
+  .admin-j-row .ops{display:flex;gap:7px;flex:none}
+  .admin-j-row .ops button{font-size:12px;padding:6px 12px;border-radius:var(--pill);border:1px solid var(--line);background:transparent;color:var(--dim);cursor:pointer;font-family:inherit;transition:.2s;white-space:nowrap}
+  .admin-j-row .ops button:hover{color:var(--fg);background:var(--fill)}
+  .admin-j-row .ops button.danger:hover{color:var(--danger);background:var(--danger-soft);border-color:var(--danger)}
+
+  @media(max-width:560px){
+    .journal-list{grid-template-columns:1fr}
+    .article-pad{padding:22px 20px 26px}
+    .article-title{font-size:22px}
+  }
 </style>
 <script>
 /* 主题预置：在首屏绘制前确定浅色/深色，避免主题闪烁 */
@@ -764,14 +867,15 @@
 <!-- ================= 导航 ================= -->
 <header id="nav">
   <a class="logo" href="#home">Jin<b>letian</b></a>
-  <nav>
-    <a href="#home" class="active">首页</a>
-    <a href="#gallery">图片集</a>
-    <a href="#board">想对我说的</a>
-    <a href="#" id="adminNavLink" hidden>管理</a>
-    <a href="#about">关于</a>
-    <a href="#contact">联系</a>
-  </nav>
+    <nav>
+      <a href="#home" class="active">首页</a>
+      <a href="#gallery">图片集</a>
+      <a href="#journal">我的日志</a>
+      <a href="#board">想对我说的</a>
+      <a href="#" id="adminNavLink" hidden>管理</a>
+      <a href="#about">关于</a>
+      <a href="#contact">联系</a>
+    </nav>
   <div class="nav-right">
     <button class="theme-toggle" id="themeBtn" type="button" aria-label="切换到深色">
       <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 14.2A8.6 8.6 0 0 1 9.8 3.4a8.6 8.6 0 1 0 10.8 10.8z"/></svg>
@@ -815,6 +919,16 @@
     <div class="gallery-foot">
       <button class="btn ghost shine" id="downloadAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v11M7.5 11 12 15.5 16.5 11"/><path d="M5 19.5h14"/></svg>下载全部原图</button>
     </div>
+  </section>
+
+  <!-- 我的日志 -->
+  <section class="section" id="journal">
+    <div class="section-head reveal">
+      <p class="eyebrow">MY JOURNAL</p>
+      <h2>我的日志</h2>
+      <p class="section-desc">站长在这里记录一些文章，欢迎点赞和评论。</p>
+    </div>
+    <div class="journal-list" id="journalList"></div>
   </section>
 
   <!-- 想对我说的（留言板 · 云端） -->
@@ -955,6 +1069,7 @@
 <!-- ================= 登录弹窗 ================= -->
 <div class="modal" id="loginModal" aria-hidden="true">
   <div class="modal-card" id="modalCard">
+    <button class="modal-x" id="loginClose" type="button" aria-label="关闭">×</button>
     <div class="auth-tabs">
       <button type="button" class="auth-tab active" id="tabLogin">登录</button>
       <button type="button" class="auth-tab" id="tabSignup">注册</button>
@@ -1016,6 +1131,7 @@
       <button type="button" class="auth-tab active" id="adminTabMsgs">留言管理</button>
       <button type="button" class="auth-tab" id="adminTabPhotos">图片管理</button>
       <button type="button" class="auth-tab" id="adminTabUsers">账号管理</button>
+      <button type="button" class="auth-tab" id="adminTabJournal">日志管理</button>
     </div>
     <!-- 留言管理 -->
     <div id="adminPaneMsgs">
@@ -1035,8 +1151,75 @@
       <p class="auth-hint">查看已注册账号；可停用异常账号（停用后该账号将无法登录，且立即下线）。</p>
       <div class="admin-list" id="adminUserList"></div>
     </div>
+    <!-- 日志管理 -->
+    <div id="adminPaneJournal" hidden>
+      <div class="admin-upload">
+        <button type="button" class="btn primary" id="adminNewJournalBtn">写新日志</button>
+        <span class="admin-hint">仅站长可发布；支持封面图（自动压缩至 1.5MB 内）。</span>
+      </div>
+      <div class="admin-journal" id="adminJournalList"></div>
+    </div>
     <div class="modal-actions">
       <button class="btn ghost" id="adminClose">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 我的日志 · 文章详情 -->
+<div class="modal" id="articleModal" aria-hidden="true">
+  <div class="modal-card modal-wide article-card">
+    <button class="modal-x" id="articleClose" type="button" aria-label="关闭">×</button>
+    <div class="article-cover" id="articleCover"></div>
+    <div class="article-pad">
+      <h3 class="article-title" id="articleTitle"></h3>
+      <div class="article-meta">
+        <span class="ava" id="articleAva"></span>
+        <span id="articleAuthor"></span>
+        <span>·</span>
+        <span id="articleTime"></span>
+      </div>
+      <div class="article-body" id="articleBody"></div>
+      <div class="article-likes">
+        <button class="like-btn" id="articleLikeBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5 4.2 12.7a4.6 4.6 0 0 1 6.5-6.5l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.5 6.5z"/></svg>
+          <span id="articleLikeCount">0</span> 赞
+        </button>
+      </div>
+      <div class="comment-head">评论 <span id="articleCommentCount">0</span></div>
+      <div class="comment-list" id="articleComments"></div>
+      <div class="comment-form" id="articleCommentForm">
+        <div class="gate" id="commentGate">
+          <span>登录后即可参与评论</span>
+          <button class="btn primary" id="commentLoginBtn" type="button">登录 / 注册</button>
+        </div>
+        <div id="commentEditor" hidden>
+          <textarea id="commentInput" maxlength="500" placeholder="写下你的评论…"></textarea>
+          <div class="composer-foot">
+            <span class="char-count" id="commentCount">0 / 500</span>
+            <button class="btn primary" id="commentSubmitBtn" type="button">发表评论</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 我的日志 · 编辑器（仅站长） -->
+<div class="modal journal-editor" id="journalEditorModal" aria-hidden="true">
+  <div class="modal-card modal-wide">
+    <button class="modal-x" id="journalEditorClose" type="button" aria-label="关闭">×</button>
+    <h3 id="journalEditorHeading">写新日志</h3>
+    <p class="tabs-hint">所有人可见；标题与正文必填，封面可选。</p>
+    <input class="fld" id="journalTitleInput" type="text" maxlength="80" placeholder="标题（最多 80 字）">
+    <textarea id="journalBodyInput" placeholder="正文…（最多 8000 字）"></textarea>
+    <div class="admin-upload">
+      <button class="btn primary" id="journalCoverBtn" type="button">添加封面图</button>
+      <span class="admin-hint">可选，自动压缩至 1.5MB 内</span>
+    </div>
+    <div class="img-preview" id="journalCoverPreview"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="journalEditorCancel" type="button">取消</button>
+      <button class="btn primary" id="journalEditorSave" type="button">发布</button>
     </div>
   </div>
 </div>
@@ -1403,6 +1586,7 @@ async function doLogin(){
     const data = await api('/api/login', { method: 'POST', body: JSON.stringify({ email, password }) }, false);
     saveSession(data.token, data.user);
     applyUser(data.user);
+    loadJournal();
     closeLogin();
     toast('✅ 已登录，可下载原图并留言');
   }catch(e){ showErr(friendlyErr(e, '登录失败，请重试')); }
@@ -1427,6 +1611,7 @@ async function doSignup(){
     }, false);
     saveSession(data.token, data.user);
     applyUser(data.user);
+    loadJournal();
     closeLogin();
     toast('✅ 注册并登录成功');
   }catch(e){ showErr(friendlyErr(e, '注册失败，请重试')); }
@@ -1449,7 +1634,7 @@ async function doLogout(){
   clearSession();
   currentUser = null; profile = null;
   syncAllUI();
-  if(apiReady()) loadMsgs();   // 重渲染列表：游客视角不应再显示「删除」按钮
+  if(apiReady()){ loadMsgs(); loadJournal(); }   // 游客视角重渲染：移除「删除」「已赞」状态
   toast('已退出登录');
 }
 /* ============ 想对我说的 · 留言板（Val Town 云端后端，人人可见） ============ */
@@ -1768,6 +1953,7 @@ tabSignup.addEventListener('click', ()=>setAuthMode('signup'));
 loginOk.addEventListener('click', ()=>{ authMode === 'login' ? doLogin() : doSignup(); });
 forgotBtn.addEventListener('click', doForgot);
 document.getElementById('loginCancel').addEventListener('click', closeLogin);
+document.getElementById('loginClose').addEventListener('click', closeLogin);
 loginModal.addEventListener('click', e=>{ if(e.target === loginModal) closeLogin(); });
 suAvatarBtn.addEventListener('click', ()=>chooseAvatar('su'));
 suAvatarRm.addEventListener('click', ()=>{
@@ -1904,6 +2090,41 @@ hero.addEventListener('mousemove', e=>{
   heroGlow.style.top = y + 'px';
 });
 
+/* ---------- Hero 液态玻璃：随滚动视差 + 指针折射（iOS26 风格） ---------- */
+const bgPhoto = document.querySelector('#home .bg-photo');
+const dispMap = document.querySelector('#lgRefract feDisplacementMap');
+let gTpx = 0, gTpy = 0, gCx = 0, gCy = 0, gVel = 0, gLastY = window.scrollY, gScale = 24, gLastScaleT = 0;
+function glassTick(){
+  gCx += (gTpx - gCx) * 0.08; gCy += (gTpy - gCy) * 0.08;
+  const sp = window.scrollY * 0.22;                       // 滚动视差：照片在玻璃后缓缓移动
+  if(bgPhoto){
+    bgPhoto.style.setProperty('--sx', gCx.toFixed(3));
+    bgPhoto.style.setProperty('--sy', gCy.toFixed(3));
+    bgPhoto.style.setProperty('--tx', gCx.toFixed(3));
+    bgPhoto.style.setProperty('--ty', gCy.toFixed(3));
+    bgPhoto.style.setProperty('--gx', (gCx * 1.4).toFixed(3));
+    bgPhoto.style.setProperty('--gy', (gCy * 1.4 + sp).toFixed(2));
+  }
+  gVel *= 0.9;                                            // 滚动越快，折射扰动越强（liquid 感）
+  const target = 20 + Math.min(1, gVel) * 24;
+  gScale += (target - gScale) * 0.12;
+  const now = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  if(dispMap && now - gLastScaleT > 110){ dispMap.setAttribute('scale', gScale.toFixed(1)); gLastScaleT = now; }
+  requestAnimationFrame(glassTick);
+}
+if(bgPhoto){ requestAnimationFrame(glassTick); }
+window.addEventListener('scroll', () => {
+  const y = window.scrollY; gVel = Math.min(1, gVel + Math.abs(y - gLastY) / 36); gLastY = y;
+}, { passive: true });
+if(hero){
+  hero.addEventListener('pointermove', e => {
+    const r = hero.getBoundingClientRect();
+    gTpx = ((e.clientX - r.left) / r.width) * 2 - 1;
+    gTpy = ((e.clientY - r.top) / r.height) * 2 - 1;
+  });
+  hero.addEventListener('pointerleave', () => { gTpx = 0; gTpy = 0; });
+}
+
 /* ---------- 滚动进入动画 ---------- */
 const io = new IntersectionObserver((entries)=>{
   entries.forEach(en=>{
@@ -1932,6 +2153,7 @@ function openAdmin(){
   loadAdminMsgs();
   loadAdminPhotos();
   loadAdminUsers();
+  loadAdminJournal();
 }
 function closeAdmin(){
   adminModal.classList.remove('open');
@@ -1941,9 +2163,11 @@ function adminTab(which){
   document.getElementById('adminTabMsgs').classList.toggle('active', which === 'msgs');
   document.getElementById('adminTabPhotos').classList.toggle('active', which === 'photos');
   document.getElementById('adminTabUsers').classList.toggle('active', which === 'users');
+  document.getElementById('adminTabJournal').classList.toggle('active', which === 'journal');
   document.getElementById('adminPaneMsgs').hidden = which !== 'msgs';
   document.getElementById('adminPanePhotos').hidden = which !== 'photos';
   document.getElementById('adminPaneUsers').hidden = which !== 'users';
+  document.getElementById('adminPaneJournal').hidden = which !== 'journal';
 }
 adminNavLink.addEventListener('click', e=>{ e.preventDefault(); openAdmin(); });
 document.getElementById('adminClose').addEventListener('click', closeAdmin);
@@ -1951,6 +2175,7 @@ adminModal.addEventListener('click', e=>{ if(e.target === adminModal) closeAdmin
 document.getElementById('adminTabMsgs').addEventListener('click', ()=>adminTab('msgs'));
 document.getElementById('adminTabPhotos').addEventListener('click', ()=>adminTab('photos'));
 document.getElementById('adminTabUsers').addEventListener('click', ()=>adminTab('users'));
+document.getElementById('adminTabJournal').addEventListener('click', ()=>adminTab('journal'));
 
 function fmtTime(ts){
   const d = new Date(ts);
@@ -2086,7 +2311,7 @@ adminPhotoInput.addEventListener('change', async ()=>{
   adminPhotoInput.value = '';
   if(!f) return;
   try{
-    const compressed = await compressToLimit(f, 1280, 0.82, 280 * 1024);
+    const compressed = await compressToLimit(f, 1600, 0.82, 1.4 * 1024 * 1024);
     const dataB64 = await blobToBase64(compressed);
     await api('/api/photos', { method: 'POST', body: JSON.stringify({ dataB64 }) });
     toast('上传成功，已上架');
@@ -2112,6 +2337,335 @@ document.querySelectorAll('[data-copy]').forEach(function(el){
     }else{ fallback(); }
   });
 });
+
+/* ================= 我的日志（公开板块 · 文章 / 点赞 / 评论） ================= */
+const journalList   = document.getElementById('journalList');
+const articleModal  = document.getElementById('articleModal');
+const articleClose  = document.getElementById('articleClose');
+const articleCover  = document.getElementById('articleCover');
+const articleTitle  = document.getElementById('articleTitle');
+const articleAva    = document.getElementById('articleAva');
+const articleAuthor = document.getElementById('articleAuthor');
+const articleTime   = document.getElementById('articleTime');
+const articleBody   = document.getElementById('articleBody');
+const articleLikeBtn= document.getElementById('articleLikeBtn');
+const articleLikeCount = document.getElementById('articleLikeCount');
+const articleComments = document.getElementById('articleComments');
+const articleCommentCount = document.getElementById('articleCommentCount');
+const commentGate    = document.getElementById('commentGate');
+const commentEditor  = document.getElementById('commentEditor');
+const commentInput   = document.getElementById('commentInput');
+const commentCount   = document.getElementById('commentCount');
+const commentLoginBtn= document.getElementById('commentLoginBtn');
+const commentSubmitBtn = document.getElementById('commentSubmitBtn');
+
+const HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5 4.2 12.7a4.6 4.6 0 0 1 6.5-6.5l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.5 6.5z"/></svg>';
+const CHAT  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v11H9l-4 3.5V16.5H4z"/></svg>';
+
+let curArticle = null;
+
+function excerptOf(text){
+  const t = String(text || '').replace(/\s+/g, ' ').trim();
+  return t.length > 90 ? t.slice(0, 90) + '…' : t;
+}
+
+async function loadJournal(){
+  if(!apiReady()){ journalList.innerHTML = '<div class="journal-empty">日志功能正在接入中，敬请期待。</div>'; return; }
+  try{
+    const data = await api('/api/articles', {}, !!localStorage.getItem(TOKEN_KEY));
+    const arts = data.articles || [];
+    if(!arts.length){ journalList.innerHTML = '<div class="journal-empty">站长还没有发布日志，敬请期待～</div>'; return; }
+    journalList.innerHTML = '';
+    arts.forEach(a=>{
+      const card = document.createElement('article');
+      card.className = 'journal-card';
+      const cover = a.cover
+        ? `<div class="cover"><img src="${imgUrl(a.cover)}" alt="封面" loading="lazy" decoding="async"></div>`
+        : `<div class="cover none">Jinletian</div>`;
+      card.innerHTML = `
+        ${cover}
+        <div class="body">
+          <h3 class="title">${escHtml(a.title)}</h3>
+          <p class="excerpt">${escHtml(excerptOf(a.body))}</p>
+          <div class="meta">
+            <span class="when">${timeAgo(a.createdAt)}</span>
+            <span class="stats">
+              <span>${HEART}${a.likeCount || 0}</span>
+              <span>${CHAT}${a.commentCount || 0}</span>
+            </span>
+          </div>
+        </div>`;
+      card.addEventListener('click', ()=>openArticle(a.id));
+      journalList.appendChild(card);
+    });
+  }catch(e){
+    console.warn('loadJournal', e);
+    journalList.innerHTML = '<div class="journal-empty">日志加载失败，请稍后刷新重试。</div>';
+  }
+}
+
+function openArticle(id){
+  curArticle = id;
+  articleModal.classList.add('open');
+  articleModal.setAttribute('aria-hidden', 'false');
+  articleTitle.textContent = '加载中…';
+  articleBody.textContent = '';
+  articleCover.innerHTML = '';
+  articleAva.textContent = ''; articleAva.style.background = '';
+  articleAuthor.textContent = ''; articleTime.textContent = '';
+  articleComments.innerHTML = '';
+  articleCommentCount.textContent = '0';
+  setLike(0, false);
+  syncCommentGate();
+  loadArticleDetail(id);
+}
+function closeArticle(){
+  articleModal.classList.remove('open');
+  articleModal.setAttribute('aria-hidden', 'true');
+  curArticle = null;
+}
+articleClose.addEventListener('click', closeArticle);
+articleModal.addEventListener('click', e=>{ if(e.target === articleModal) closeArticle(); });
+
+async function loadArticleDetail(id){
+  try{
+    const data = await api('/api/articles/' + id, {}, !!localStorage.getItem(TOKEN_KEY));
+    const a = data.article;
+    articleTitle.textContent = a.title || '';
+    articleBody.textContent = a.body || '';
+    articleCover.innerHTML = a.cover ? `<img src="${imgUrl(a.cover)}" alt="封面">` : '';
+    renderAvatar(articleAva, '', a.nickname);
+    articleAuthor.textContent = a.nickname || '站长';
+    articleTime.textContent = timeAgo(a.createdAt);
+    setLike(a.likeCount || 0, !!a.liked);
+    renderComments(data.comments || []);
+  }catch(e){
+    console.warn('loadArticleDetail', e);
+    articleBody.textContent = '文章加载失败：' + (e.message || '请稍后重试');
+  }
+}
+
+function setLike(count, liked){
+  articleLikeCount.textContent = count;
+  articleLikeBtn.classList.toggle('on', !!liked);
+  articleLikeBtn.dataset.liked = liked ? '1' : '0';
+}
+
+function syncCommentGate(){
+  const ok = isLoggedIn();
+  commentGate.hidden = ok;
+  commentEditor.hidden = !ok;
+  if(ok){ commentInput.value = ''; commentCount.textContent = '0 / 500'; }
+}
+
+function renderComments(list){
+  articleCommentCount.textContent = list.length;
+  if(!list.length){ articleComments.innerHTML = '<div class="comment-item" style="color:var(--faint);font-size:13px">还没有评论，来抢沙发～</div>'; return; }
+  articleComments.innerHTML = '';
+  list.forEach(c=>{
+    const isSelf = currentUser && c.uid === currentUser.uid;
+    const isAdminC = currentUser && currentUser.role === 'admin';
+    const canDel = isSelf || isAdminC;
+    const el = document.createElement('div');
+    el.className = 'comment-item';
+    el.innerHTML = `
+      <span class="ava">${c.avatar ? `<img src="${imgUrl(c.avatar)}" alt="">` : escHtml((c.nickname || '?')[0] || '?')}</span>
+      <div class="c-body">
+        <div class="c-top">
+          <span class="c-name">${escHtml(c.nickname)}</span>
+          <span class="c-time">${timeAgo(c.createdAt)}</span>
+          ${canDel ? '<button type="button" class="c-del">删除</button>' : ''}
+        </div>
+        <div class="c-text">${escHtml(c.content)}</div>
+      </div>`;
+    if(canDel){ el.querySelector('.c-del').addEventListener('click', ()=>deleteComment(c.id)); }
+    articleComments.appendChild(el);
+  });
+}
+
+articleLikeBtn.addEventListener('click', async ()=>{
+  if(!isLoggedIn()){ closeArticle(); openLogin(); return; }
+  if(!curArticle) return;
+  const was = articleLikeBtn.dataset.liked === '1';
+  setLike(Number(articleLikeCount.textContent) + (was ? -1 : 1), !was);
+  articleLikeBtn.classList.add('pop');
+  setTimeout(()=>articleLikeBtn.classList.remove('pop'), 460);
+  try{
+    const data = await api('/api/articles/' + curArticle + '/like', { method: 'POST' });
+    setLike(data.likeCount || 0, !!data.liked);
+  }catch(e){
+    setLike(Number(articleLikeCount.textContent) + (was ? 1 : -1), was);  // 回滚
+    toast(e.message || '操作失败');
+  }
+});
+
+commentLoginBtn.addEventListener('click', ()=>{ closeArticle(); openLogin(); });
+commentInput.addEventListener('input', ()=>{ commentCount.textContent = `${commentInput.value.length} / 500`; });
+commentSubmitBtn.addEventListener('click', async ()=>{
+  if(!curArticle) return;
+  const content = commentInput.value.trim();
+  if(!content){ toast('评论内容不能为空'); return; }
+  commentSubmitBtn.disabled = true;
+  try{
+    await api('/api/articles/' + curArticle + '/comments', { method: 'POST', body: JSON.stringify({ content }) });
+    commentInput.value = ''; commentCount.textContent = '0 / 500';
+    await loadArticleDetail(curArticle);
+    toast('评论成功');
+  }catch(e){ toast(e.message || '评论失败'); }
+  finally{ commentSubmitBtn.disabled = false; }
+});
+
+async function deleteComment(cid){
+  if(typeof confirm === 'function' && !confirm('确定删除这条评论？')) return;
+  try{
+    await api('/api/comments/' + cid, { method: 'DELETE' });
+    if(curArticle) await loadArticleDetail(curArticle);
+    toast('已删除');
+  }catch(e){ toast(e.message || '删除失败'); }
+}
+
+/* ---------- 管理面板：日志管理（仅站长） ---------- */
+const adminJournalList = document.getElementById('adminJournalList');
+const adminNewJournalBtn = document.getElementById('adminNewJournalBtn');
+const journalEditorModal = document.getElementById('journalEditorModal');
+const journalEditorClose = document.getElementById('journalEditorClose');
+const journalEditorHeading = document.getElementById('journalEditorHeading');
+const journalEditorCancel = document.getElementById('journalEditorCancel');
+const journalEditorSave = document.getElementById('journalEditorSave');
+const journalTitleInput = document.getElementById('journalTitleInput');
+const journalBodyInput = document.getElementById('journalBodyInput');
+const journalCoverBtn = document.getElementById('journalCoverBtn');
+const journalCoverPreview = document.getElementById('journalCoverPreview');
+
+let editingArticleId = null;
+let pendingCoverBlob = null;
+let pendingCoverURL = '';
+
+async function loadAdminJournal(){
+  if(!isAdminUser()) return;
+  try{
+    const data = await api('/api/articles', {}, true);
+    const arts = data.articles || [];
+    if(!arts.length){ adminJournalList.innerHTML = '<div class="admin-empty">还没有日志，点击「写新日志」发布第一篇。</div>'; return; }
+    adminJournalList.innerHTML = '';
+    arts.forEach(a=>{
+      const row = document.createElement('div');
+      row.className = 'admin-j-row';
+      row.innerHTML = `
+        <span class="j-thumb ${a.cover ? '' : 'none'}">${a.cover ? `<img src="${imgUrl(a.cover)}" alt="">` : '无图'}</span>
+        <span class="j-info">
+          <span class="j-title">${escHtml(a.title)}</span>
+          <span class="j-sub">${timeAgo(a.createdAt)} · ${a.likeCount || 0} 赞 · ${a.commentCount || 0} 评论</span>
+        </span>
+        <span class="ops">
+          <button type="button" data-act="edit">编辑</button>
+          <button type="button" class="danger" data-act="del">删除</button>
+        </span>`;
+      row.querySelector('[data-act="edit"]').addEventListener('click', ()=>openJournalEditor(a.id));
+      row.querySelector('[data-act="del"]').addEventListener('click', ()=>deleteJournal(a.id));
+      adminJournalList.appendChild(row);
+    });
+  }catch(e){
+    adminJournalList.innerHTML = '<div class="admin-empty">加载失败，请稍后重试</div>';
+  }
+}
+
+function openJournalEditor(id){
+  editingArticleId = id || null;
+  journalEditorHeading.textContent = id ? '编辑日志' : '写新日志';
+  journalEditorSave.textContent = id ? '保存' : '发布';
+  clearJournalCover();
+  journalTitleInput.value = '';
+  journalBodyInput.value = '';
+  if(id){
+    api('/api/articles/' + id, {}, true).then(a=>{
+      journalTitleInput.value = a.article.title || '';
+      journalBodyInput.value = a.article.body || '';
+    }).catch(()=>{});
+  }
+  journalEditorModal.classList.add('open');
+  journalEditorModal.setAttribute('aria-hidden', 'false');
+  setTimeout(()=>journalTitleInput.focus(), 120);
+}
+function closeJournalEditor(){
+  journalEditorModal.classList.remove('open');
+  journalEditorModal.setAttribute('aria-hidden', 'true');
+}
+function clearJournalCover(){
+  if(pendingCoverURL){ URL.revokeObjectURL(pendingCoverURL); pendingCoverURL = ''; }
+  pendingCoverBlob = null;
+  journalCoverPreview.innerHTML = '';
+}
+journalEditorClose.addEventListener('click', closeJournalEditor);
+journalEditorCancel.addEventListener('click', closeJournalEditor);
+journalEditorModal.addEventListener('click', e=>{ if(e.target === journalEditorModal) closeJournalEditor(); });
+adminNewJournalBtn.addEventListener('click', ()=>openJournalEditor(null));
+
+const journalCoverInput = document.createElement('input');
+journalCoverInput.type = 'file'; journalCoverInput.accept = 'image/*'; journalCoverInput.style.display = 'none';
+journalCoverInput.id = 'journalCoverInput';
+document.body.appendChild(journalCoverInput);
+journalCoverBtn.addEventListener('click', ()=>journalCoverInput.click());
+journalCoverInput.addEventListener('change', async ()=>{
+  const f = journalCoverInput.files && journalCoverInput.files[0];
+  journalCoverInput.value = '';
+  if(!f) return;
+  try{
+    const blob = await compressToLimit(f, 1600, 0.82, 1.4 * 1024 * 1024);
+    clearJournalCover();
+    pendingCoverBlob = blob;
+    pendingCoverURL = URL.createObjectURL(blob);
+    const pv = document.createElement('div');
+    pv.className = 'pv';
+    const im = document.createElement('img'); im.src = pendingCoverURL; im.alt = '封面预览';
+    const rm = document.createElement('button'); rm.type = 'button'; rm.textContent = '×'; rm.title = '移除封面';
+    rm.addEventListener('click', clearJournalCover);
+    pv.appendChild(im); pv.appendChild(rm);
+    journalCoverPreview.appendChild(pv);
+  }catch(e){ toast(e.message || '封面处理失败'); }
+});
+
+journalEditorSave.addEventListener('click', async ()=>{
+  const title = journalTitleInput.value.trim();
+  const body = journalBodyInput.value.trim();
+  if(!title || !body){ toast('标题和正文都要填写'); return; }
+  journalEditorSave.disabled = true;
+  try{
+    const cover = pendingCoverBlob ? await blobToBase64(pendingCoverBlob) : '';
+    const payload = { title, body, cover };
+    if(editingArticleId){
+      await api('/api/articles/' + editingArticleId, { method: 'PATCH', body: JSON.stringify(payload) });
+      toast('已保存');
+    }else{
+      await api('/api/articles', { method: 'POST', body: JSON.stringify(payload) });
+      toast('已发布');
+    }
+    closeJournalEditor();
+    loadAdminJournal();
+    loadJournal();
+  }catch(e){ toast(e.message || '发布失败'); }
+  finally{ journalEditorSave.disabled = false; }
+});
+
+async function deleteJournal(id){
+  if(typeof confirm === 'function' && !confirm('确定删除这篇日志？评论与点赞也会一并删除。')) return;
+  try{
+    await api('/api/articles/' + id, { method: 'DELETE' });
+    toast('已删除');
+    loadAdminJournal();
+    loadJournal();
+  }catch(e){ toast(e.message || '删除失败'); }
+}
+
+/* 弹层全局 Esc 关闭 */
+document.addEventListener('keydown', e=>{
+  if(e.key !== 'Escape') return;
+  if(articleModal.classList.contains('open')) closeArticle();
+  if(journalEditorModal.classList.contains('open')) closeJournalEditor();
+});
+
+/* 启动：拉取日志列表（游客/登录用户均可浏览，登录态下携带 token 以反映点赞） */
+if(apiReady()) loadJournal();
 </script>
 </body>
 </html>
