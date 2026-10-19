@@ -189,7 +189,7 @@
   :root[data-theme="dark"] #intro .bg-shade{
     background:linear-gradient(to bottom,rgba(0,0,0,.44) 0%,rgba(0,0,0,.2) 44%,rgba(0,0,0,.62) 100%);
   }
-  #intro .intro-name,#intro .intro-line,#intro .intro-sub,#intro #enterBtn,#intro .intro-hint{position:relative;z-index:2}
+  #intro .intro-name,#intro .intro-line,#intro .intro-sub,#intro #enterBtn{position:relative;z-index:2}
   #intro.hidden{opacity:0;visibility:hidden;pointer-events:none}
   .intro-name{
     font-family:inherit;
@@ -200,8 +200,7 @@
     line-height:1;
     padding-left:.02em;
     color:#fff;
-    filter:url(#textGlass);
-    text-shadow:0 2px 30px rgba(0,0,0,.28);
+    text-shadow:0 2px 22px rgba(0,0,0,.3);
   }
   .intro-name span{
     display:inline-block;opacity:0;transform:translateY(38px) rotateX(-35deg);
@@ -233,11 +232,6 @@
   #enterBtn:hover{background:var(--accent-hover);box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 14px 36px -10px var(--accent-shadow)}
   #enterBtn:active{transform:scale(.94)}
   @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-  .intro-hint{
-    position:absolute;bottom:34px;font-size:11px;letter-spacing:.3em;color:rgba(255,255,255,.82);
-    animation:fadeUp 1s 2.1s var(--ease) forwards;opacity:0;
-    text-shadow:0 1px 14px rgba(0,0,0,.32);
-  }
 
   /* ================= 滚动进度 ================= */
   #progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:120;
@@ -329,8 +323,7 @@
     font-family:inherit;font-weight:700;
     font-size:clamp(42px,7.2vw,84px);line-height:1.06;letter-spacing:-.03em;
     color:#fff;
-    filter:url(#textGlass);
-    text-shadow:0 2px 34px rgba(0,0,0,.3);
+    text-shadow:0 2px 24px rgba(0,0,0,.32);
   }
   .hero .lead{
     margin-top:24px;font-size:clamp(15px,1.8vw,18px);color:rgba(255,255,255,.9);max-width:560px;font-weight:400;line-height:1.7;
@@ -862,12 +855,6 @@
     </feTurbulence>
     <feDisplacementMap in="SourceGraphic" in2="noise" scale="30" xChannelSelector="R" yChannelSelector="G"/>
   </filter>
-  <!-- 文字液态玻璃：极淡模糊 + 轻微位移扰动，让大字边缘呈磨砂玻璃质感（参考 iOS 锁屏时间数字） -->
-  <filter id="textGlass" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
-    <feGaussianBlur in="SourceGraphic" stdDeviation="0.4" result="b"/>
-    <feTurbulence type="fractalNoise" baseFrequency="0.02 0.024" numOctaves="2" seed="11" result="n"/>
-    <feDisplacementMap in="b" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
 </svg>
 
 <!-- ================= 开场动画 ================= -->
@@ -883,7 +870,6 @@
   <div class="intro-line"></div>
   <div class="intro-sub">Personal Space · 个人主页</div>
   <button id="enterBtn">进 入</button>
-  <div class="intro-hint">点击任意处进入</div>
 </div>
 
 <div id="progress"></div>
