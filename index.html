@@ -511,6 +511,18 @@
   #board .msg .img{margin-top:12px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--glass-brd);max-width:340px;cursor:zoom-in}
   #board .msg .img img{width:100%;height:auto;display:block;transition:transform .4s cubic-bezier(.2,.7,.2,1)}
   #board .msg .img:hover img{transform:scale(1.02)}
+  /* 留言操作行：点赞 + 评论（朋友圈式） */
+  #board .msg .msg-actions{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+  #board .msg .msg-comment-btn{
+    display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:var(--pill);cursor:pointer;font-family:inherit;
+    background:var(--fill-2);border:1px solid var(--line);color:var(--dim);font-size:13.5px;font-weight:600;
+    transition:transform .4s var(--spring),background .25s,color .25s,border-color .25s}
+  #board .msg .msg-comment-btn:hover{color:var(--fg)}
+  #board .msg .msg-comment-btn:active{transform:scale(.94)}
+  #board .msg .msg-comment-btn svg{width:17px;height:17px;opacity:.85}
+  #board .msg .msg-comments{margin-top:16px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:14px}
+  #board .msg .msg-comments .empty{font-size:13px;color:var(--faint);padding:4px 0}
+  #board .msg .msg-comments .comment-form{margin-top:0;padding-top:0;border-top:none}
   #board .empty{
     text-align:center;padding:46px 20px;color:var(--dim);font-size:14px;
     border:1px dashed var(--line);border-radius:var(--r-lg);
@@ -946,7 +958,7 @@
     <div class="section-head reveal">
       <p class="eyebrow">MESSAGES</p>
       <h2>想对我说的 <span class="count" id="msgCount">0</span></h2>
-      <p class="section-desc">登录后即可发言，支持文字和图片。所有留言人人可见——我在任意设备登录都能看到，也可以删除自己的留言。</p>
+      <p class="section-desc">登录后即可发言，支持文字和图片。所有留言人人可见——我在任意设备登录都能看到。登录后还能为留言点赞、评论（就像朋友圈一样），也可以删除自己的留言；站长可管理所有评论。</p>
     </div>
 
     <div class="composer reveal" id="composer">
@@ -1678,6 +1690,9 @@ let pfAvatarRemoved = false;  // 编辑资料时是否移除了头像
 const avatarPreviewURLs = { su: '', pf: '' };   // 头像预览 objectURL，更换时回收
 const liveURLs = new Set();   // 列表中已创建的 objectURL，重渲染时统一回收
 
+const HEART_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5l-1.4-1.3C5.4 14.6 2.8 12.2 2.8 9.2 2.8 6.9 4.6 5.1 6.9 5.1c1.5 0 2.9.7 3.8 1.9.9-1.2 2.3-1.9 3.8-1.9 2.3 0 4.1 1.8 4.1 4.1 0 3-2.6 5.4-7.8 9.9L12 20.5z"/></svg>';
+const CHAT_SVG  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.4 8.9 8.9 0 0 1-3.8-.8L3 21l1.4-4.2A8.1 8.1 0 0 1 3.5 13 8.4 8.4 0 0 1 12 4.6a8.4 8.4 0 0 1 9 6.9z"/></svg>';
+
 function avatarColor(seed){
   let h = 0;
   for(let i=0;i<seed.length;i++) h = (h*31 + seed.charCodeAt(i)) % 360;
@@ -1805,51 +1820,182 @@ function renderMsgs(list){
     msgList.appendChild(d);
     return;
   }
-  list.forEach(m => {
-    const item = document.createElement('div');
-    item.className = 'msg';
-    const ava = document.createElement('span');
-    ava.className = 'ava';
-    const nick = m.nickname || '匿名';
-    renderAvatar(ava, imgUrl(m.avatar), nick);
-    const body = document.createElement('div');
-    body.className = 'body';
-    const meta = document.createElement('div');
-    meta.className = 'meta';
-    const nickEl = document.createElement('span');
-    nickEl.className = 'nick';
-    nickEl.textContent = nick;
-    const time = document.createElement('span');
-    time.className = 'time';
-    time.textContent = timeAgo(m.createdAt);
-    meta.appendChild(nickEl); meta.appendChild(time);
-    if(m.own){
-      const del = document.createElement('button');
-      del.type = 'button'; del.className = 'msg-del';
-      del.title = '删除这条留言'; del.textContent = '×';
-      del.addEventListener('click', ()=>deleteMsg(m.id));
-      meta.appendChild(del);
-    }
-    body.appendChild(meta);
-    if(m.content){
-      const text = document.createElement('div');
-      text.className = 'text';
-      text.textContent = m.content;
-      body.appendChild(text);
-    }
-    const imgSrc = imgUrl(m.img);
-    if(imgSrc){
-      const box = document.createElement('div');
-      box.className = 'img';
-      const im = document.createElement('img');
-      im.src = imgSrc; im.alt = '留言图片'; im.loading = 'lazy';
-      im.addEventListener('click', ()=>window.open(imgSrc, '_blank'));
-      box.appendChild(im);
-      body.appendChild(box);
-    }
-    item.appendChild(ava); item.appendChild(body);
-    msgList.appendChild(item);
+  list.forEach(m => msgList.appendChild(renderMsgCard(m)));
+}
+
+function renderMsgCard(m){
+  const item = document.createElement('div');
+  item.className = 'msg';
+  const ava = document.createElement('span');
+  ava.className = 'ava';
+  const nick = m.nickname || '匿名';
+  renderAvatar(ava, imgUrl(m.avatar), nick);
+  const body = document.createElement('div');
+  body.className = 'body';
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  const nickEl = document.createElement('span');
+  nickEl.className = 'nick'; nickEl.textContent = nick;
+  const time = document.createElement('span');
+  time.className = 'time'; time.textContent = timeAgo(m.createdAt);
+  meta.appendChild(nickEl); meta.appendChild(time);
+  if(m.own){
+    const del = document.createElement('button');
+    del.type = 'button'; del.className = 'msg-del';
+    del.title = '删除这条留言'; del.textContent = '×';
+    del.addEventListener('click', ()=>deleteMsg(m.id));
+    meta.appendChild(del);
+  }
+  body.appendChild(meta);
+  if(m.content){
+    const text = document.createElement('div');
+    text.className = 'text'; text.textContent = m.content;
+    body.appendChild(text);
+  }
+  const imgSrc = imgUrl(m.img);
+  if(imgSrc){
+    const box = document.createElement('div');
+    box.className = 'img';
+    const im = document.createElement('img');
+    im.src = imgSrc; im.alt = '留言图片'; im.loading = 'lazy';
+    im.addEventListener('click', ()=>window.open(imgSrc, '_blank'));
+    box.appendChild(im);
+    body.appendChild(box);
+  }
+  // 操作行：点赞 + 评论（朋友圈式）
+  const actions = document.createElement('div');
+  actions.className = 'msg-actions';
+  const likeBtn = document.createElement('button');
+  likeBtn.type = 'button';
+  likeBtn.className = 'like-btn' + (m.liked ? ' on' : '');
+  likeBtn.title = '点赞';
+  likeBtn.innerHTML = HEART_SVG + '<span class="lc">' + (m.likeCount || 0) + '</span>';
+  likeBtn.addEventListener('click', ()=>toggleMsgLike(m, likeBtn));
+  const commentBtn = document.createElement('button');
+  commentBtn.type = 'button';
+  commentBtn.className = 'msg-comment-btn';
+  commentBtn.title = '评论';
+  commentBtn.innerHTML = CHAT_SVG + '<span>' + (m.commentCount || 0) + ' 评论</span>';
+  const commentsBox = document.createElement('div');
+  commentsBox.className = 'msg-comments';
+  commentsBox.hidden = true;
+  let loaded = false;
+  commentBtn.addEventListener('click', ()=>{
+    commentsBox.hidden = !commentsBox.hidden;
+    if(!commentsBox.hidden && !loaded){ loadMsgComments(m, commentsBox, commentBtn); loaded = true; }
   });
+  actions.appendChild(likeBtn);
+  actions.appendChild(commentBtn);
+  body.appendChild(actions);
+  body.appendChild(commentsBox);
+  item.appendChild(ava); item.appendChild(body);
+  return item;
+}
+
+async function toggleMsgLike(m, btn){
+  if(!isLoggedIn()){ openLogin(); toast('请先登录后再点赞'); return; }
+  const wasLiked = !!m.liked;
+  m.liked = !wasLiked;
+  m.likeCount = (m.likeCount || 0) + (m.liked ? 1 : -1);
+  btn.classList.toggle('on', m.liked);
+  const lc = btn.querySelector('.lc'); if(lc) lc.textContent = m.likeCount;
+  if(m.liked){ btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop'); }
+  try{
+    const r = await api('/api/messages/' + m.id + '/like', { method: 'POST' });
+    m.liked = r.liked; m.likeCount = r.likeCount;
+    btn.classList.toggle('on', m.liked);
+    if(lc) lc.textContent = m.likeCount;
+  }catch(e){
+    m.liked = wasLiked;
+    m.likeCount = (m.likeCount || 0) + (wasLiked ? 1 : -1);
+    btn.classList.toggle('on', m.liked);
+    if(lc) lc.textContent = m.likeCount;
+    toast('操作失败：' + (e.message || '请重试'));
+  }
+}
+
+async function loadMsgComments(m, box, commentBtn){
+  box.innerHTML = '';
+  try{
+    const data = await api('/api/messages/' + m.id + '/comments', {}, isLoggedIn());
+    renderMsgComments(m, data.comments || [], box, commentBtn);
+  }catch(e){
+    box.innerHTML = '<div class="empty">评论加载失败，请重试</div>';
+  }
+}
+function renderMsgComments(m, comments, box, commentBtn){
+  box.innerHTML = '';
+  if(!comments.length){
+    const e = document.createElement('div');
+    e.className = 'empty'; e.textContent = '还没有评论，来说两句～';
+    box.appendChild(e);
+  }else{
+    const list = document.createElement('div');
+    list.className = 'comment-list';
+    comments.forEach(c => list.appendChild(renderMsgCommentItem(m, c, box, commentBtn)));
+    box.appendChild(list);
+  }
+  const form = document.createElement('div');
+  form.className = 'comment-form';
+  if(isLoggedIn()){
+    form.innerHTML = '<textarea maxlength="500" placeholder="回复 TA…"></textarea>' +
+      '<div class="composer-foot"><span class="char-count">0 / 500</span>' +
+      '<button type="button" class="btn primary shine cmt-send">发送</button></div>';
+    const ta = form.querySelector('textarea');
+    const cc = form.querySelector('.char-count');
+    ta.addEventListener('input', ()=>cc.textContent = ta.value.length + ' / 500');
+    form.querySelector('.cmt-send').addEventListener('click', ()=>postMsgComment(m, ta, box, commentBtn));
+  }else{
+    form.innerHTML = '<div class="gate"><span>登录后即可参与评论</span><button type="button" class="btn primary shine cmt-login">登录 / 注册</button></div>';
+    form.querySelector('.cmt-login').addEventListener('click', ()=>openLogin());
+  }
+  box.appendChild(form);
+}
+function renderMsgCommentItem(m, c, box, commentBtn){
+  const item = document.createElement('div');
+  item.className = 'comment-item';
+  const ava = document.createElement('span'); ava.className = 'ava';
+  renderAvatar(ava, imgUrl(c.avatar), c.nickname);
+  const cb = document.createElement('div'); cb.className = 'c-body';
+  const top = document.createElement('div'); top.className = 'c-top';
+  const name = document.createElement('span'); name.className = 'c-name'; name.textContent = c.nickname || '匿名';
+  const tm = document.createElement('span'); tm.className = 'c-time'; tm.textContent = timeAgo(c.createdAt);
+  top.appendChild(name); top.appendChild(tm);
+  const canDel = currentUser && (currentUser.uid === c.uid || currentUser.role === 'admin');
+  if(canDel){
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'c-del'; del.textContent = '删除';
+    del.addEventListener('click', ()=>deleteMsgComment(m, c, box, commentBtn));
+    top.appendChild(del);
+  }
+  const txt = document.createElement('div'); txt.className = 'c-text'; txt.textContent = c.content;
+  cb.appendChild(top); cb.appendChild(txt);
+  item.appendChild(ava); item.appendChild(cb);
+  return item;
+}
+async function postMsgComment(m, ta, box, commentBtn){
+  const content = ta.value.trim();
+  if(!content){ toast('评论不能为空'); return; }
+  try{
+    await api('/api/messages/' + m.id + '/comments', { method: 'POST', body: JSON.stringify({ content }) });
+    ta.value = '';
+    await loadMsgComments(m, box, commentBtn);
+    m.commentCount = (m.commentCount || 0) + 1;
+    if(commentBtn){ const s = commentBtn.querySelector('span'); if(s) s.textContent = m.commentCount + ' 评论'; }
+    toast('✅ 评论已发布');
+  }catch(e){
+    toast('评论失败：' + (e.message || '请重试'));
+  }
+}
+async function deleteMsgComment(m, c, box, commentBtn){
+  try{
+    await api('/api/message-comments/' + c.id, { method: 'DELETE' });
+    await loadMsgComments(m, box, commentBtn);
+    m.commentCount = Math.max(0, (m.commentCount || 0) - 1);
+    if(commentBtn){ const s = commentBtn.querySelector('span'); if(s) s.textContent = m.commentCount + ' 评论'; }
+    toast('已删除评论');
+  }catch(e){
+    toast('删除失败：' + (e.message || '可能无权删除'));
+  }
 }
 async function publishMsg(){
   if(!isLoggedIn()){ openLogin(); toast('请先登录后再发言'); return; }
