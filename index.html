@@ -1723,9 +1723,13 @@ function renderAvatar(el, dataUrl, name){
 }
 
 /* 图片压缩：最长边 max，输出 webp Blob */
+function isHeicName(name){ return /\.(heic|heif)$/i.test(name || ''); }
 function compressImage(file, max, q){
   return new Promise((resolve, reject)=>{
-    if(!file.type || !file.type.startsWith('image/')) return reject(new Error('请选择图片文件'));
+    // 放宽校验：HEIC/HEIF 等手机照片常报告空 MIME，按扩展名放行（浏览器能解码即可压缩）
+    const isImageLike = (file.type && file.type.startsWith('image/')) ||
+      /\.(heic|heif|avif|webp|png|jpe?g|gif|bmp)$/i.test(file.name || '');
+    if(!isImageLike) return reject(new Error('请选择图片文件'));
     if(file.size > 10*1024*1024) return reject(new Error('图片不能超过 10MB'));
     const url = URL.createObjectURL(file);
     const img = new Image();
@@ -1740,7 +1744,7 @@ function compressImage(file, max, q){
         b ? resolve(b) : reject(new Error('图片压缩失败'));
       }, 'image/webp', q);
     };
-    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('图片读取失败')); };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error(isHeicName(file.name) ? '当前浏览器无法读取 HEIC/HEIF 格式，请在手机或电脑上转为 JPG/PNG 后再上传' : '图片读取失败')); };
     img.src = url;
   });
 }
@@ -2034,7 +2038,7 @@ async function deleteMsg(id){
 /* ---------- 头像选择（注册 / 编辑资料共用） ---------- */
 let avatarPickerFor = null;
 const avatarFileInput = document.createElement('input');
-avatarFileInput.type = 'file'; avatarFileInput.accept = 'image/*'; avatarFileInput.style.display = 'none';
+avatarFileInput.type = 'file'; avatarFileInput.accept = 'image/*,image/heic,image/heif'; avatarFileInput.style.display = 'none';
 document.body.appendChild(avatarFileInput);
 avatarFileInput.addEventListener('change', ()=>{
   if(avatarPickerFor && avatarFileInput.files && avatarFileInput.files[0]) pickAvatar(avatarPickerFor, avatarFileInput.files[0]);
@@ -2156,7 +2160,7 @@ msgInput.addEventListener('input', ()=>{
   charCount.textContent = `${msgInput.value.length} / 500`;
 });
 const fileInput = document.createElement('input');
-fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.style.display = 'none';
+fileInput.type = 'file'; fileInput.accept = 'image/*,image/heic,image/heif'; fileInput.style.display = 'none';
 fileInput.id = 'msgImgInput';
 document.body.appendChild(fileInput);
 imgBtn.addEventListener('click', ()=>fileInput.click());
@@ -2457,7 +2461,7 @@ async function loadAdminUsers(){
 /* 上传新图片（自动压缩至限额内） */
 const adminPhotoInput = document.createElement('input');
 adminPhotoInput.type = 'file';
-adminPhotoInput.accept = 'image/*';
+adminPhotoInput.accept = 'image/*,image/heic,image/heif';
 adminPhotoInput.style.display = 'none';
 adminPhotoInput.id = 'adminPhotoInput';
 document.body.appendChild(adminPhotoInput);
@@ -2758,7 +2762,7 @@ journalEditorModal.addEventListener('click', e=>{ if(e.target === journalEditorM
 adminNewJournalBtn.addEventListener('click', ()=>openJournalEditor(null));
 
 const journalCoverInput = document.createElement('input');
-journalCoverInput.type = 'file'; journalCoverInput.accept = 'image/*'; journalCoverInput.style.display = 'none';
+journalCoverInput.type = 'file'; journalCoverInput.accept = 'image/*,image/heic,image/heif'; journalCoverInput.style.display = 'none';
 journalCoverInput.id = 'journalCoverInput';
 document.body.appendChild(journalCoverInput);
 journalCoverBtn.addEventListener('click', ()=>journalCoverInput.click());
