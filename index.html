@@ -591,15 +591,63 @@
   .lightbox{
     position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;
     background:var(--lb-scrim);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
-    opacity:0;visibility:hidden;transition:.35s;padding:56px 72px;
+    opacity:0;visibility:hidden;transition:.35s;padding:24px;overflow-y:auto;
   }
   .lightbox.open{opacity:1;visibility:visible}
+  .lb-stage{
+    display:flex;flex-direction:column;align-items:center;gap:16px;
+    width:min(880px,100%);max-height:calc(100vh - 48px);margin:auto;
+  }
   #lbImg{
-    max-width:100%;max-height:calc(100vh - 150px);border-radius:var(--r-md);
+    flex:none;max-width:100%;max-height:calc(100vh - 250px);object-fit:contain;border-radius:var(--r-md);
     box-shadow:0 40px 120px -20px rgba(0,0,0,.9);
     transform:scale(.92);transition:transform .5s var(--spring);
   }
   .lightbox.open #lbImg{transform:scale(1)}
+  /* 图片集互动面板（简介 / 点赞 / 评论，朋友圈式） */
+  .lb-panel{
+    flex:1 1 auto;min-height:0;width:100%;max-width:680px;overflow-y:auto;
+    background:var(--glass-bg);
+    backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);
+    border:1px solid var(--glass-brd);border-radius:var(--r-lg);
+    padding:18px 20px;box-shadow:var(--glass-hl),var(--modal-shadow);
+  }
+  .lb-panel-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .lb-caption{font-size:14.5px;line-height:1.7;color:rgba(255,255,255,.92);white-space:pre-wrap;word-break:break-word}
+  .lb-caption.empty{color:rgba(255,255,255,.5);font-style:italic}
+  .lb-caption-edit{width:100%;min-height:60px;margin:0;padding:11px 13px;border-radius:var(--r-sm);background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:14px;font-family:inherit;line-height:1.6;outline:none;resize:vertical}
+  .lb-caption-edit:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+  .lb-caption-edit + .btn{margin-top:10px}
+  .lb-actions{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12)}
+  .lb-actions .like-btn,.lb-actions .photo-comment-btn{
+    display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:var(--pill);cursor:pointer;font-family:inherit;
+    background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.85);font-size:13.5px;font-weight:600;
+    transition:transform .4s var(--spring),background .25s,color .25s,border-color .25s}
+  .lb-actions .like-btn:hover,.lb-actions .photo-comment-btn:hover{color:#fff;background:rgba(255,255,255,.16)}
+  .lb-actions .like-btn:active,.lb-actions .photo-comment-btn:active{transform:scale(.94)}
+  .lb-actions .like-btn svg,.lb-actions .photo-comment-btn svg{width:17px;height:17px;opacity:.9}
+  .lb-actions .like-btn.on{color:#fff;background:rgba(255,59,92,.22);border-color:rgba(255,99,122,.5)}
+  .lb-actions .like-btn.on svg{fill:#ff3b5c;stroke:#ff3b5c}
+  .lb-actions .like-btn.pop svg{animation:heartPop .45s var(--spring)}
+  @keyframes heartPop{0%{transform:scale(1)}40%{transform:scale(1.22)}100%{transform:scale(1)}}
+  .lb-photo-comments{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column;gap:12px}
+  .lb-photo-comments[hidden]{display:none}
+  .lb-photo-comments .empty{color:rgba(255,255,255,.5);font-size:13px;padding:4px 0}
+  .lb-panel .comment-list{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+  .lb-panel .comment-item{display:flex;gap:11px;align-items:flex-start}
+  .lb-panel .comment-item .ava{width:32px;height:32px;border-radius:50%;overflow:hidden;display:grid;place-items:center;font-size:13px;font-weight:600;color:#fff;flex:none;background:var(--accent)}
+  .lb-panel .comment-item .ava img{width:100%;height:100%;object-fit:cover;display:block}
+  .lb-panel .comment-item .c-body{flex:1;min-width:0}
+  .lb-panel .comment-item .c-top{display:flex;align-items:center;gap:8px}
+  .lb-panel .comment-item .c-name{font-size:13.5px;font-weight:600;color:#fff}
+  .lb-panel .comment-item .c-time{font-size:11.5px;color:rgba(255,255,255,.5)}
+  .lb-panel .comment-item .c-text{font-size:14px;line-height:1.6;color:rgba(255,255,255,.9);margin-top:3px;white-space:pre-wrap;word-break:break-word}
+  .lb-panel .comment-item .c-del{margin-left:auto;font-size:11.5px;color:rgba(255,255,255,.5);background:transparent;border:none;cursor:pointer;font-family:inherit;padding:2px 6px;border-radius:6px;transition:.2s}
+  .lb-panel .comment-item .c-del:hover{color:#ff8c8c}
+  .lb-panel .comment-form textarea{background:rgba(0,0,0,.28);border-color:rgba(255,255,255,.16);color:#fff}
+  .lb-panel .comment-form textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+  .lb-panel .comment-form .char-count{color:rgba(255,255,255,.5)}
+  .lb-panel .comment-form .gate{color:rgba(255,255,255,.75)}
   .lb-close,.lb-prev,.lb-next{
     position:absolute;background:var(--lb-bar);border:1px solid var(--lb-bar-brd);
     backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);
@@ -633,11 +681,11 @@
   .modal{
     position:fixed;inset:0;z-index:180;display:flex;align-items:center;justify-content:center;
     background:var(--scrim);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
-    opacity:0;visibility:hidden;transition:.3s;padding:24px;
+    opacity:0;visibility:hidden;transition:.3s;padding:24px;overflow-y:auto;
   }
   .modal.open{opacity:1;visibility:visible}
   .modal-card{
-    position:relative;width:min(420px,100%);
+    position:relative;width:min(420px,100%);margin:auto;
     background:var(--glass-bg);
     backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);
     border:1px solid var(--glass-brd);border-radius:var(--r-lg);padding:34px 30px;
@@ -830,6 +878,7 @@
     background:var(--fill);border:1px solid transparent;color:var(--fg);font-size:14.5px;font-family:inherit;line-height:1.7;outline:none;resize:vertical;
     transition:border-color .3s var(--ease),box-shadow .3s var(--ease)}
   .journal-editor textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+  .journal-editor .modal-card{max-height:calc(100vh - 48px);overflow:auto}
 
   /* 管理面板：日志列表 */
   .admin-journal{display:flex;flex-direction:column;gap:10px;margin-top:16px;max-height:44vh;overflow:auto;padding-right:4px}
@@ -935,7 +984,7 @@
     <div class="section-head reveal">
       <p class="eyebrow">PHOTO GALLERY</p>
       <h2>图片集 <span class="count" id="photoCount">25</span></h2>
-      <p class="section-desc">游客可自由浏览全部照片；<a id="unlockInline">登录</a>后即可下载原图。</p>
+      <p class="section-desc">游客可自由浏览全部照片；点开任意一张即可查看站长写的简介，<a id="unlockInline">登录</a>后还能为照片点赞、评论（就像朋友圈一样），站长可管理所有评论。</p>
     </div>
     <div class="grid" id="grid"></div>
     <div class="gallery-foot">
@@ -1080,11 +1129,18 @@
 <div class="lightbox" id="lightbox" aria-hidden="true">
   <button class="lb-close" id="lbClose" aria-label="关闭">×</button>
   <button class="lb-prev" id="lbPrev" aria-label="上一张">‹</button>
-  <img id="lbImg" src="" alt="" />
   <button class="lb-next" id="lbNext" aria-label="下一张">›</button>
-  <div class="lb-bar">
-    <span id="lbCounter">1 / 25</span>
-    <button id="lbDownload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v11M7.5 11 12 15.5 16.5 11"/><path d="M5 19.5h14"/></svg>下载</button>
+  <div class="lb-stage">
+    <img id="lbImg" src="" alt="" />
+    <div class="lb-panel" id="lbPanel">
+      <div class="lb-panel-bar">
+        <span id="lbCounter">1 / 25</span>
+        <button id="lbDownload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v11M7.5 11 12 15.5 16.5 11"/><path d="M5 19.5h14"/></svg>下载原图</button>
+      </div>
+      <div class="lb-caption-wrap" id="lbCaptionWrap"></div>
+      <div class="lb-actions" id="lbActions"></div>
+      <div class="lb-photo-comments" id="lbComments" hidden></div>
+    </div>
   </div>
 </div>
 
@@ -1459,6 +1515,7 @@ function updateLightbox(){
   lbImg.alt = `照片 ${cur + 1}`;
   lbCounter.textContent = `${cur+1} / ${all.length}`;
   syncDownloadUI();
+  loadPhotoInteractions(p.id);          // 加载该图的简介 / 点赞 / 评论
 }
 function closeLightbox(){
   lightbox.classList.remove('open');
@@ -1490,6 +1547,159 @@ lightbox.addEventListener('touchend', e=>{
   if(Math.abs(dx) > 50) navTo(dx < 0 ? 1 : -1);
   touchX = null;
 });
+
+/* ---------- 图片集互动：简介（站长）/ 点赞（人人）/ 评论（人人，朋友圈式） ---------- */
+async function loadPhotoInteractions(pid){
+  if(!apiReady()){
+    renderPhotoPanel(pid, { caption:'', likeCount:0, commentCount:0, liked:false });
+    return;
+  }
+  try{
+    const data = await api('/api/photos/' + pid + '/interactions', {}, true);
+    renderPhotoPanel(pid, data);
+  }catch(e){
+    renderPhotoPanel(pid, { caption:'', likeCount:0, commentCount:0, liked:false });
+  }
+}
+function renderPhotoPanel(pid, data){
+  const wrap = document.getElementById('lbCaptionWrap');
+  const actions = document.getElementById('lbActions');
+  const commentsBox = document.getElementById('lbComments');
+  wrap.innerHTML = ''; actions.innerHTML = ''; commentsBox.innerHTML = ''; commentsBox.hidden = true;
+
+  // 简介：站长可编辑，其他人（含游客）只看
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  if(isAdmin){
+    const ta = document.createElement('textarea');
+    ta.className = 'lb-caption-edit'; ta.maxLength = 280; ta.placeholder = '为这张照片写一句简介…（只有你能编辑）';
+    ta.value = data.caption || '';
+    const save = document.createElement('button');
+    save.type = 'button'; save.className = 'btn primary shine'; save.textContent = '保存简介';
+    save.addEventListener('click', ()=>savePhotoCaption(pid, ta.value));
+    wrap.appendChild(ta); wrap.appendChild(save);
+  }else if(data.caption){
+    const cap = document.createElement('div');
+    cap.className = 'lb-caption'; cap.textContent = data.caption;
+    wrap.appendChild(cap);
+  }
+
+  // 操作行：点赞 + 评论
+  const likeBtn = document.createElement('button');
+  likeBtn.type = 'button';
+  likeBtn.className = 'like-btn' + (data.liked ? ' on' : '');
+  likeBtn.title = '点赞';
+  likeBtn.innerHTML = HEART_SVG + '<span class="lc">' + (data.likeCount || 0) + '</span>';
+  likeBtn.addEventListener('click', ()=>togglePhotoLike(pid, likeBtn));
+  const commentBtn = document.createElement('button');
+  commentBtn.type = 'button';
+  commentBtn.className = 'photo-comment-btn';
+  commentBtn.title = '评论';
+  commentBtn.innerHTML = CHAT_SVG + '<span>' + (data.commentCount || 0) + ' 评论</span>';
+  let loaded = false;
+  commentBtn.addEventListener('click', ()=>{
+    commentsBox.hidden = !commentsBox.hidden;
+    if(!commentsBox.hidden && !loaded){ loadPhotoComments(pid, commentsBox, commentBtn); loaded = true; }
+  });
+  actions.appendChild(likeBtn);
+  actions.appendChild(commentBtn);
+  document.getElementById('lbPanel').dataset.pid = pid;
+}
+async function togglePhotoLike(pid, btn){
+  if(!isLoggedIn()){ openLogin(); toast('请先登录后再点赞'); return; }
+  const lc = btn.querySelector('.lc');
+  const was = btn.classList.contains('on');
+  btn.classList.toggle('on', !was);
+  if(lc) lc.textContent = (parseInt(lc.textContent || '0', 10) || 0) + (btn.classList.contains('on') ? 1 : -1);
+  btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
+  try{
+    const r = await api('/api/photos/' + pid + '/like', { method: 'POST' });
+    btn.classList.toggle('on', r.liked);
+    if(lc) lc.textContent = r.likeCount;
+  }catch(e){
+    btn.classList.toggle('on', was);
+    if(lc) lc.textContent = (parseInt(lc.textContent || '0', 10) || 0) + (was ? 1 : -1);
+    toast('操作失败：' + (e.message || '请重试'));
+  }
+}
+async function savePhotoCaption(pid, value){
+  try{
+    await api('/api/photos/' + pid + '/caption', { method: 'POST', body: JSON.stringify({ caption: value }) });
+    toast('✅ 简介已保存');
+  }catch(e){
+    toast('保存失败：' + (e.message || '请重试'));
+  }
+}
+async function loadPhotoComments(pid, box, commentBtn){
+  box.innerHTML = '';
+  try{
+    const data = await api('/api/photos/' + pid + '/comments', {}, isLoggedIn());
+    renderPhotoComments(pid, data.comments || [], box, commentBtn);
+  }catch(e){
+    box.innerHTML = '<div class="empty">评论加载失败，请重试</div>';
+  }
+}
+function renderPhotoComments(pid, comments, box, commentBtn){
+  box.innerHTML = '';
+  if(!comments.length){
+    const e = document.createElement('div'); e.className = 'empty'; e.textContent = '还没有评论，来说两句～'; box.appendChild(e);
+  }else{
+    const list = document.createElement('div'); list.className = 'comment-list';
+    comments.forEach(c => list.appendChild(renderPhotoCommentItem(pid, c, box, commentBtn)));
+    box.appendChild(list);
+  }
+  const form = document.createElement('div'); form.className = 'comment-form';
+  if(isLoggedIn()){
+    form.innerHTML = '<textarea maxlength="500" placeholder="回复 TA…"></textarea>' +
+      '<div class="composer-foot"><span class="char-count">0 / 500</span>' +
+      '<button type="button" class="btn primary shine cmt-send">发送</button></div>';
+    const ta = form.querySelector('textarea'); const cc = form.querySelector('.char-count');
+    ta.addEventListener('input', ()=>cc.textContent = ta.value.length + ' / 500');
+    form.querySelector('.cmt-send').addEventListener('click', ()=>postPhotoComment(pid, ta, box, commentBtn));
+  }else{
+    form.innerHTML = '<div class="gate"><span>登录后即可参与评论</span><button type="button" class="btn primary shine cmt-login">登录 / 注册</button></div>';
+    form.querySelector('.cmt-login').addEventListener('click', ()=>openLogin());
+  }
+  box.appendChild(form);
+}
+function renderPhotoCommentItem(pid, c, box, commentBtn){
+  const item = document.createElement('div'); item.className = 'comment-item';
+  const ava = document.createElement('span'); ava.className = 'ava'; renderAvatar(ava, imgUrl(c.avatar), c.nickname);
+  const cb = document.createElement('div'); cb.className = 'c-body';
+  const top = document.createElement('div'); top.className = 'c-top';
+  const name = document.createElement('span'); name.className = 'c-name'; name.textContent = c.nickname || '匿名';
+  const tm = document.createElement('span'); tm.className = 'c-time'; tm.textContent = timeAgo(c.createdAt);
+  top.appendChild(name); top.appendChild(tm);
+  const canDel = currentUser && (currentUser.uid === c.uid || currentUser.role === 'admin');
+  if(canDel){
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'c-del'; del.textContent = '删除';
+    del.addEventListener('click', ()=>deletePhotoComment(pid, c, box, commentBtn));
+    top.appendChild(del);
+  }
+  const txt = document.createElement('div'); txt.className = 'c-text'; txt.textContent = c.content;
+  cb.appendChild(top); cb.appendChild(txt);
+  item.appendChild(ava); item.appendChild(cb);
+  return item;
+}
+async function postPhotoComment(pid, ta, box, commentBtn){
+  const content = ta.value.trim();
+  if(!content){ toast('评论不能为空'); return; }
+  try{
+    await api('/api/photos/' + pid + '/comments', { method: 'POST', body: JSON.stringify({ content }) });
+    ta.value = '';
+    await loadPhotoComments(pid, box, commentBtn);
+    const s = commentBtn.querySelector('span');
+    if(s) s.textContent = ((parseInt(s.textContent || '0', 10) || 0) + 1) + ' 评论';
+  }catch(e){ toast('评论失败：' + (e.message || '请重试')); }
+}
+async function deletePhotoComment(pid, c, box, commentBtn){
+  try{
+    await api('/api/photo-comments/' + c.id, { method: 'DELETE' });
+    await loadPhotoComments(pid, box, commentBtn);
+    const s = commentBtn.querySelector('span');
+    if(s) s.textContent = ((parseInt(s.textContent || '0', 10) || 0) - 1) + ' 评论';
+    toast('已删除评论');
+  }catch(e){ toast('删除失败：' + (e.message || '可能无权删除')); }
+}
 
 /* ---------- 下载 & 登录门（云端会话） ---------- */
 function syncDownloadUI(){
@@ -1588,6 +1798,10 @@ function openLogin(){
 function closeLogin(){
   loginModal.classList.remove('open');
   loginModal.setAttribute('aria-hidden','true');
+  if(lightbox.classList.contains('open')){
+    const p = allPhotos()[cur];
+    if(p) loadPhotoInteractions(p.id);
+  }
 }
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function friendlyErr(e, fallback){
