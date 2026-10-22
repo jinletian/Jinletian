@@ -613,7 +613,7 @@
   /* ================= 灯箱 ================= */
   .lightbox{
     position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;
-    background:var(--lb-scrim);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
+    background:var(--lb-scrim);backdrop-filter:blur(11px) saturate(160%);-webkit-backdrop-filter:blur(11px) saturate(160%);
     opacity:0;visibility:hidden;transition:.35s;padding:24px;overflow-y:auto;
   }
   .lightbox.open{opacity:1;visibility:visible}
@@ -703,7 +703,7 @@
   /* ================= 登录弹窗（厚液态玻璃） ================= */
   .modal{
     position:fixed;inset:0;z-index:180;display:flex;align-items:center;justify-content:center;
-    background:var(--scrim);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
+    background:var(--scrim);backdrop-filter:blur(9px) saturate(150%);-webkit-backdrop-filter:blur(9px) saturate(150%);
     opacity:0;visibility:hidden;transition:.3s;padding:24px;overflow-y:auto;
   }
   .modal.open{opacity:1;visibility:visible}
@@ -986,6 +986,62 @@
     .lib-reader-head,.lib-reader-title,.lib-reader-body,.lib-reader-foot{padding-left:20px;padding-right:20px}
     .lib-reader-title{font-size:22px}
   }
+
+  /* ================= 液态玻璃 · 三层折射（iOS 26 风格） =================
+     原理：玻璃元素自身的 backdrop-filter 会形成"背景根"，使其子层采不到页面；
+     因此把磨砂下沉到子层 .lgx-b1，兄弟子层各自独立采样页面背景，再用 radial mask
+     分出透镜剖面：中心磨砂 → 中段轻模糊+提亮增艳（光线被压缩）→ 边缘几乎不模糊+
+     明显提亮增艳（透镜边缘，背后内容反而更清晰）。再叠镜面高光、指针跟随高光、
+     边缘描边与按压反馈，得到液态玻璃的折射质感。 */
+  .lgfx{position:relative;isolation:isolate}
+  .lgfx>.lgx{position:absolute;inset:0;border-radius:inherit;pointer-events:none;display:block;z-index:-1}
+  .lgfx>.lgx-b1{background:transparent;
+    backdrop-filter:blur(var(--lgx-blur,18px)) saturate(var(--lgx-sat,1.8));
+    -webkit-backdrop-filter:blur(var(--lgx-blur,18px)) saturate(var(--lgx-sat,1.8))}
+  .lgfx>.lgx-b2{backdrop-filter:blur(2.5px) brightness(1.12) saturate(1.5);
+    -webkit-backdrop-filter:blur(2.5px) brightness(1.12) saturate(1.5);
+    -webkit-mask-image:radial-gradient(122% 122% at 50% 50%,transparent 50%,#000 84%,#000 100%);
+    mask-image:radial-gradient(122% 122% at 50% 50%,transparent 50%,#000 84%,#000 100%)}
+  .lgfx>.lgx-b3{backdrop-filter:blur(0px) brightness(1.24) saturate(2) contrast(1.08);
+    -webkit-backdrop-filter:blur(0px) brightness(1.24) saturate(2) contrast(1.08);
+    -webkit-mask-image:radial-gradient(108% 108% at 50% 50%,transparent 74%,#000 95%,#000 100%);
+    mask-image:radial-gradient(106% 106% at 50% 50%,transparent 80%,#000 96%,#000 100%)}
+  .lgfx>.lgx-sp{background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.05) 15%,transparent 42%,transparent 72%,rgba(255,255,255,.09))}
+  .lgfx>.lgx-hl{opacity:0;transition:opacity .55s var(--ease);
+    background:radial-gradient(220px 170px at var(--lgx-x,34%) var(--lgx-y,14%),rgba(255,255,255,.48),transparent 68%)}
+  .lgfx.lgx-hot>.lgx-hl{opacity:1}
+  .lgfx>.lgx-rim{box-shadow:inset 0 0 0 1px rgba(255,255,255,.40),inset 0 1.5px 0 rgba(255,255,255,.62),
+      inset 0 -1.5px 0 rgba(255,255,255,.20),inset 0 -22px 30px -22px rgba(0,0,0,.26),inset 0 18px 26px -18px rgba(255,255,255,.16)}
+  .lgfx.lgx-press>.lgx-rim{box-shadow:inset 0 0 0 1px rgba(255,255,255,.58),inset 0 2px 0 rgba(255,255,255,.82),
+      inset 0 -2px 0 rgba(255,255,255,.26),inset 0 -26px 34px -22px rgba(0,0,0,.32),inset 0 22px 30px -18px rgba(255,255,255,.24)}
+  /* 深色主题 */
+  :root[data-theme="dark"] .lgfx>.lgx-sp{background:linear-gradient(180deg,rgba(255,255,255,.20),transparent 26%,transparent 70%,rgba(255,255,255,.06))}
+  :root[data-theme="dark"] .lgfx>.lgx-rim{box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),inset 0 1.5px 0 rgba(255,255,255,.36),
+      inset 0 -1.5px 0 rgba(255,255,255,.10),inset 0 -22px 30px -22px rgba(0,0,0,.45),inset 0 16px 24px -16px rgba(255,255,255,.08)}
+  :root[data-theme="dark"] .lgfx.lgx-press>.lgx-rim{box-shadow:inset 0 0 0 1px rgba(255,255,255,.30),inset 0 2px 0 rgba(255,255,255,.55),
+      inset 0 -2px 0 rgba(255,255,255,.14),inset 0 -26px 34px -22px rgba(0,0,0,.50),inset 0 20px 28px -18px rgba(255,255,255,.12)}
+  /* 各玻璃面的底色交由 .lgx-b1 承担（元素自身背景清空，保证层序正确） */
+  #nav.scrolled{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+  #nav.scrolled>.lgx-b1{background:var(--nav-bg)}
+  .modal-card{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:7px;--lgx-sat:1.9}
+  .modal-card>.lgx-b1{background:var(--glass-bg)}
+  .modal.open .modal-card{filter:none}          /* filter 会形成背景根，须清零 */
+  .lb-bar{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:8px;--lgx-sat:1.7}
+  .lb-bar>.lgx-b1{background:var(--lb-bar)}
+  .unlock{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:6px;--lgx-sat:1.5}
+  .unlock>.lgx-b1{background:var(--accent)}
+  #nav:not(.scrolled) .unlock>.lgx-b1{background:rgba(255,255,255,.14)}
+  .unlock.on>.lgx-b1{background:var(--ok-soft)}
+  /* 横条形玻璃面：radial 蒙版在宽扁盒子里会失效，改用上下边缘线性蒙版 */
+  #nav>.lgx-b2,.lb-bar>.lgx-b2,.unlock>.lgx-b2{
+    -webkit-mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.62) 26%,transparent 50%,transparent 50%,rgba(0,0,0,.62) 74%,#000 100%);
+    mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.62) 26%,transparent 50%,transparent 50%,rgba(0,0,0,.62) 74%,#000 100%)}
+  #nav>.lgx-b3,.lb-bar>.lgx-b3,.unlock>.lgx-b3{
+    -webkit-mask-image:linear-gradient(180deg,#000 0,#000 14%,transparent 32%,transparent 68%,#000 86%,#000 100%);
+    mask-image:linear-gradient(180deg,#000 0,#000 14%,transparent 32%,transparent 68%,#000 86%,#000 100%)}
+  /* 导航未滚动（透明叠在照片上）时不显示折射层 */
+  #nav:not(.scrolled)>.lgx{display:none}
+  @media(prefers-reduced-motion:reduce){.lgfx>.lgx-hl{transition:none}}
 </style>
 <script>
 /* 主题预置：在首屏绘制前确定浅色/深色，避免主题闪烁 */
@@ -3291,6 +3347,44 @@ function initLibrary(){
 
   render();
 }
+/* ---------- 液态玻璃 · 三层折射 + 指针交互（iOS 26 风格） ----------
+   玻璃元素自身的 backdrop-filter 会形成"背景根"，导致其子层采不到页面背景；
+   因此注入兄弟子层并把磨砂下沉到 .lgx-b1，各层独立采样页面，形成透镜剖面。 */
+(function(){
+  var LAYERS=['lgx-b1','lgx-b2','lgx-b3','lgx-sp','lgx-hl','lgx-rim'];
+  var SEL='#nav, .modal-card, .lb-bar, .unlock';
+  function enhance(el){
+    if(el.__lgx) return; el.__lgx=1;
+    el.classList.add('lgfx');
+    var frag=document.createDocumentFragment();
+    for(var i=0;i<LAYERS.length;i++){var n=document.createElement('i');n.className='lgx '+LAYERS[i];frag.appendChild(n);}
+    el.insertBefore(frag, el.firstChild);
+    /* 元素自身的 backdrop-filter / 背景清空，交由子层承担，保证层序与采样正确 */
+    el.style.backdropFilter='none'; el.style.webkitBackdropFilter='none';
+    el.style.background='transparent';
+    /* 滚动容器内：让折射层钉在视口，不随内容滚走 */
+    if(el.scrollHeight>el.clientHeight+2){
+      var ls=el.querySelectorAll('.lgx');
+      var sync=function(){ for(var j=0;j<ls.length;j++) ls[j].style.transform='translateY('+(-el.scrollTop)+'px)'; };
+      el.addEventListener('scroll',sync,{passive:true}); sync();
+    }
+    /* 交互：镜面高光跟随指针 + 按压时玻璃"压缩" */
+    el.addEventListener('pointermove',function(e){
+      var r=el.getBoundingClientRect();
+      el.style.setProperty('--lgx-x',((e.clientX-r.left)/r.width*100).toFixed(1)+'%');
+      el.style.setProperty('--lgx-y',((e.clientY-r.top)/r.height*100).toFixed(1)+'%');
+      el.classList.add('lgx-hot');
+    });
+    el.addEventListener('pointerleave',function(){el.classList.remove('lgx-hot','lgx-press');});
+    el.addEventListener('pointerdown',function(){el.classList.add('lgx-press');});
+    el.addEventListener('pointerup',function(){el.classList.remove('lgx-press');});
+    el.addEventListener('pointercancel',function(){el.classList.remove('lgx-press');});
+  }
+  function boot(){ document.querySelectorAll(SEL).forEach(enhance); }
+  boot();
+  window.addEventListener('load', boot);
+})();
+
 if(window.LIBRARY_DATA) initLibrary();
 else window.addEventListener('DOMContentLoaded', ()=>{ if(window.LIBRARY_DATA) initLibrary(); });
 </script>
