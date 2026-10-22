@@ -959,7 +959,26 @@
   .lib-summary{font-size:13px;line-height:1.6;color:var(--dim);margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1}
   .lib-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px;font-size:12px;color:var(--faint)}
   .lib-meta .lib-words{display:inline-flex;align-items:center;gap:5px}
-  .lib-empty{grid-column:1/-1;text-align:center;padding:46px 16px;color:var(--faint);font-size:13.5px}
+  .lib-empty{text-align:center;padding:46px 16px;color:var(--faint);font-size:13.5px}
+  /* 图书馆 · 按分类分组折叠（默认折叠，点击组名展开） */
+  #library .lib-groups{display:flex;flex-direction:column;gap:16px}
+  #library .lib-group{border-radius:var(--r-lg);overflow:hidden;background:var(--glass-bg);
+    border:1px solid var(--glass-brd);box-shadow:0 10px 30px -18px rgba(0,0,0,.25);
+    backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%)}
+  #library .lib-group-head{width:100%;display:flex;align-items:center;gap:12px;padding:16px 20px;
+    background:transparent;border:0;cursor:pointer;font-family:inherit;color:var(--fg);text-align:left;-webkit-tap-highlight-color:transparent}
+  #library .lib-group-head:focus-visible{outline:2px solid var(--accent);outline-offset:-3px;border-radius:var(--r-lg)}
+  #library .lib-group-title{font-size:16px;font-weight:700;letter-spacing:-.01em}
+  #library .lib-group-count{font-size:12.5px;color:var(--faint);font-weight:500}
+  #library .lib-group-chev{margin-left:auto;width:20px;height:20px;color:var(--dim);transition:transform .4s var(--spring)}
+  #library .lib-group.open .lib-group-chev{transform:rotate(180deg)}
+  #library .lib-group-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .42s var(--ease)}
+  #library .lib-group.open>.lib-group-body{grid-template-rows:1fr}
+  #library .lib-group-body>.lib-group-inner{overflow:hidden;min-height:0}
+  #library .lib-group-inner .lib-grid{padding:6px 20px 22px}
+  #library .lib-group-head:hover .lib-group-chev{color:var(--fg)}
+  #library .lib-group-empty{padding:10px 2px 4px;font-size:13px;color:var(--faint)}
+  @media(prefers-reduced-motion:reduce){#library .lib-group-body{transition:none}#library .lib-group-chev{transition:none}}
   /* 阅读弹层 */
   .lib-reader{width:min(760px,100%);max-height:calc(100vh - 48px);overflow:auto;padding:0}
   .lib-reader-head{display:flex;align-items:center;gap:12px;padding:24px 30px 0}
@@ -1224,7 +1243,7 @@
         <button class="lib-chip" data-cat="读书笔记" type="button">读书笔记</button>
       </div>
     </div>
-    <div class="lib-grid" id="libGrid"></div>
+    <div id="libGrid"></div>
   </section>
 
   <!-- 阅读弹层 -->
@@ -3372,11 +3391,41 @@ function initLibrary(){
       </div>
     </article>`;
   }
+  /* 分类顺序：先按 chips（随笔 / 读书笔记），其余分类追加在后面 */
+  const chipCats = [...chips.querySelectorAll('.lib-chip')].map(b=>b.dataset.cat).filter(c=>c && c!=='all');
+  const catOrder = (function(){
+    const seen = new Set(), out = [];
+    chipCats.forEach(c=>{ if(!seen.has(c)){ seen.add(c); out.push(c); } });
+    data.forEach(it=>{ const c = it.category; if(c && !seen.has(c)){ seen.add(c); out.push(c); } });
+    return out;
+  })();
+  const openState = {};                                                    // 用户手动展开状态
+  const isForcedOpen = cat => curQ !== '' || (curCat !== 'all' && curCat === cat);  // 搜索/选中分类时强制展开
+  const isGroupVisible = cat => curCat === 'all' || curCat === cat;
+
+  function groupHTML(cat){
+    const items = sortItems(data.filter(it=> it.category === cat && matches(it)));
+    const open = isForcedOpen(cat) ? true : !!openState[cat];
+    const cards = items.length
+      ? items.map(cardHTML).join('')
+      : '<div class="lib-group-empty">该分类下还没有匹配的篇章。</div>';
+    return '<section class="lib-group' + (open ? ' open' : '') + '" data-cat="' + escAttr(cat) + '">'
+      + '<button class="lib-group-head" type="button" aria-expanded="' + (open ? 'true' : 'false') + '">'
+      + '<span class="lib-group-title">' + escAttr(cat) + '</span>'
+      + '<span class="lib-group-count">' + items.length + ' 篇</span>'
+      + '<svg class="lib-group-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
+      + '</button>'
+      + '<div class="lib-group-body"><div class="lib-group-inner">'
+      + '<div class="lib-grid">' + cards + '</div>'
+      + '</div></div>'
+      + '</section>';
+  }
   function render(){
-    const list = sortItems(data.filter(matches));
-    if(!list.length){ grid.innerHTML = '<div class="lib-empty">没有找到匹配的篇章，换个关键词试试。</div>'; return; }
-    grid.innerHTML = list.map(cardHTML).join('');
-    grid.querySelectorAll('.lib-card.reveal').forEach(c=>{ if(typeof io !== 'undefined') io.observe(c); else c.classList.add('in'); });
+    const visibleCats = catOrder.filter(isGroupVisible);
+    const total = visibleCats.reduce((n,cat)=> n + data.filter(it=> it.category === cat && matches(it)).length, 0);
+    if(!total){ grid.innerHTML = '<div class="lib-empty">没有找到匹配的篇章，换个关键词试试。</div>'; return; }
+    grid.innerHTML = '<div class="lib-groups">' + visibleCats.map(groupHTML).join('') + '</div>';
+    grid.querySelectorAll('.lib-group.open .lib-card').forEach(c=> c.classList.add('in'));  // 展开组内卡片直接可见
   }
 
   search.addEventListener('input', ()=>{ curQ = search.value.trim(); render(); });
@@ -3402,7 +3451,19 @@ function initLibrary(){
     document.body.style.overflow = 'hidden';
   }
   function closeReader(){ libReaderEl.classList.remove('open'); libReaderEl.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
-  grid.addEventListener('click', e=>{ const c = e.target.closest('.lib-card'); if(c) openReader(c.dataset.id); });
+  grid.addEventListener('click', e=>{
+    const head = e.target.closest('.lib-group-head');
+    if(head){
+      const g = head.closest('.lib-group'); if(!g) return;
+      const cat = g.dataset.cat;
+      if(isForcedOpen(cat)) return;                                   // 搜索/选中分类时强制展开，不响应折叠
+      const open = g.classList.toggle('open');
+      head.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if(open) g.querySelectorAll('.lib-card').forEach(c=> c.classList.add('in'));
+      return;
+    }
+    const c = e.target.closest('.lib-card'); if(c) openReader(c.dataset.id);
+  });
   document.getElementById('libReaderX').addEventListener('click', closeReader);
   libReaderEl.addEventListener('click', e=>{ if(e.target === libReaderEl) closeReader(); });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape' && libReaderEl.classList.contains('open')) closeReader(); });
@@ -3449,6 +3510,7 @@ function initLibrary(){
     });
     setActive(id);
     window.scrollTo(0, 0);
+    if(typeof invalidateEdge === 'function') invalidateEdge();   // 文档高度已变，边界缓存作废
     var sec = document.getElementById(id);
     if(!sec.dataset.viewed){                 // 首次进入才播放入场动画
       sec.dataset.viewed = '1';
@@ -3507,11 +3569,17 @@ function initLibrary(){
     return document.body.classList.contains('locked') ||
       !!document.querySelector('.modal.open, .lightbox.open, #nav.menu-open');
   }
+  /* 滚动边界带 200ms 缓存：scrollHeight 会强制布局，而 wheel 是非被动监听、
+     每次滚轮都读会把滚动阻塞在主线程上（表现为发卡）。切板块/改尺寸时失效。 */
+  var edgeMax = -1, edgeMaxAt = 0;
   function edgeState(){
-    var de = document.documentElement;
-    var max = de.scrollHeight - de.clientHeight;
-    return { max: max, atBottom: max <= 2 || window.scrollY >= max - 2, atTop: window.scrollY <= 2 };
+    var de = document.documentElement, y = window.scrollY;
+    var now = Date.now();
+    if(edgeMax < 0 || now - edgeMaxAt > 200){ edgeMax = de.scrollHeight - de.clientHeight; edgeMaxAt = now; }
+    var max = edgeMax;
+    return { max: max, atBottom: max <= 2 || y >= max - 2, atTop: y <= 2 };
   }
+  function invalidateEdge(){ edgeMax = -1; }
   var edgeAccum = 0, edgeDir = 0, edgeLockUntil = 0;
   function edgeFeed(dir, delta, ev){
     if(overlayBusy()){ edgeAccum = 0; edgeDir = 0; return false; }
@@ -3587,26 +3655,43 @@ function initLibrary(){
     var a = document.querySelector('#nav nav a[href="#' + id + '"], .nav-menu a[href="#' + id + '"]');
     return a ? a.textContent.trim() : '';
   }
+  /* pill 刷新按帧合并（scroll 事件比帧密），且文案只在变化时写——
+     滚动中反复写 textContent 会持续作废布局，是底部滚动发卡的元凶之一。 */
+  var pillTxtEl = null, pillLabelCache = {}, pillScheduled = false;
+  function secLabel(id){
+    var v = pillLabelCache[id];
+    if(v === undefined){
+      var a = document.querySelector('#nav nav a[href="#' + id + '"], .nav-menu a[href="#' + id + '"]');
+      v = a ? a.textContent.trim() : '';
+      pillLabelCache[id] = v;
+    }
+    return v;
+  }
   function refreshPill(){
     if(!pill) return;
-    if(overlayBusy() || !document.body.classList.contains('view')){ pill.classList.remove('show'); return; }
-    var st = edgeState();
-    var nxt = neighborId(1);
-    if(nxt && st.atBottom){
-      pill.querySelector('.txt').textContent = '继续 · ' + (secLabel(nxt) || '下一板块');
-      pill.classList.add('show');
-    } else {
-      pill.classList.remove('show');
+    var show = false, label = '';
+    if(document.body.classList.contains('view') && !overlayBusy()){
+      var st = edgeState();
+      var nxt = neighborId(1);
+      if(nxt && st.atBottom){ show = true; label = '继续 · ' + (secLabel(nxt) || '下一板块'); }
     }
+    pill.classList.toggle('show', show);
+    if(show && pillTxtEl && pillTxtEl.textContent !== label) pillTxtEl.textContent = label;
+  }
+  function schedulePill(){
+    if(pillScheduled) return;
+    pillScheduled = true;
+    requestAnimationFrame(function(){ pillScheduled = false; refreshPill(); });
   }
   pill = document.createElement('button');
   pill.type = 'button'; pill.className = 'sec-next';
   pill.innerHTML = '<span class="txt">继续</span><span class="arw" aria-hidden="true">↓</span>';
+  pillTxtEl = pill.querySelector('.txt');
   pill.setAttribute('aria-label', '进入下一板块');
   pill.addEventListener('click', function(){ var n = neighborId(1); if(n) showView(n); });
   document.body.appendChild(pill);
-  window.addEventListener('scroll', refreshPill, {passive:true});
-  window.addEventListener('resize', refreshPill);
+  window.addEventListener('scroll', schedulePill, {passive:true});
+  window.addEventListener('resize', function(){ invalidateEdge(); schedulePill(); });
   refreshPill();
 
   window.__showView = showView;
