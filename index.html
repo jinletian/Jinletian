@@ -51,6 +51,11 @@
     --ph-shadow:0 8px 30px -14px rgba(0,0,0,.20);
     --ph-shadow-hi:0 22px 54px -16px rgba(0,0,0,.30);
     --toast-shadow:0 18px 50px -14px rgba(0,0,0,.28);
+    /* —— 安静的内容表面（取代到处使用的 frosted 面板；玻璃仅留给浮层/导航等真正悬浮的 UI）—— */
+    --surface:rgba(255,255,255,.82);
+    --surface-brd:rgba(0,0,0,.07);
+    --surface-shadow:0 1px 2px rgba(0,0,0,.04),0 16px 40px -22px rgba(0,0,0,.22);
+    --surface-hover:rgba(255,255,255,.92);
     /* —— 圆角 —— */
     --r-xl:32px;--r-lg:24px;--r-md:16px;--r-sm:12px;
     --pill:980px;
@@ -94,12 +99,20 @@
     --ph-shadow:0 8px 30px -14px rgba(0,0,0,.70);
     --ph-shadow-hi:0 22px 54px -16px rgba(0,0,0,.85);
     --toast-shadow:0 18px 50px -14px rgba(0,0,0,.75);
+    --surface:rgba(255,255,255,.055);
+    --surface-brd:rgba(255,255,255,.09);
+    --surface-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 44px -20px rgba(0,0,0,.62);
+    --surface-hover:rgba(255,255,255,.08);
     --lb-bar:rgba(18,18,20,.66);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
   body{
-    background:var(--bg);
+    background:
+      radial-gradient(62% 52% at 14% -4%, rgba(0,113,227,.055), transparent 56%),
+      radial-gradient(54% 46% at 92% 6%, rgba(255,149,0,.045), transparent 56%),
+      radial-gradient(78% 60% at 78% 104%, rgba(88,86,214,.07), transparent 60%),
+      var(--bg);
     color:var(--fg);
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC",sans-serif;
     font-weight:400;
@@ -281,16 +294,7 @@
   #nav nav a::after{content:"";position:absolute;left:0;bottom:-2px;height:2px;width:0;background:var(--accent);border-radius:2px;transition:width .4s var(--spring)}
   #nav nav a:hover,#nav nav a.active{color:var(--fg)}
   #nav nav a.active::after{width:100%}
-  /* 未滚动（透明悬浮于照片上）时，导航文字提亮防与背景混 */
-  #nav:not(.scrolled) .logo-mark{background:#fff}
-  #nav:not(.scrolled) .logo-word b{color:#fff}
-  #nav:not(.scrolled) .logo-word i{color:rgba(255,255,255,.72)}
-  #nav:not(.scrolled) nav a{color:rgba(255,255,255,.84)}
-  #nav:not(.scrolled) nav a:hover,#nav:not(.scrolled) nav a.active{color:#fff}
-  #nav:not(.scrolled) .theme-toggle{color:rgba(255,255,255,.84);background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18)}
-  #nav:not(.scrolled) .theme-toggle:hover{color:#fff}
-  #nav:not(.scrolled) .unlock{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.26);border-color:rgba(255,255,255,.22)}
-  #nav:not(.scrolled) .unlock:hover{background:rgba(255,255,255,.22)}
+  /* 导航文字统一采用主题色（深/浅随主题），玻璃条始终半透明悬浮，任何背景下都清晰可读 */
   .nav-right{display:flex;align-items:center;gap:10px}
   /* 浅色 / 深色切换钮 */
   .theme-toggle{
@@ -344,9 +348,9 @@
   .hero-content .eyebrow{margin-bottom:22px;color:rgba(255,255,255,.82);text-shadow:0 1px 14px rgba(0,0,0,.32)}
   .hero h1{
     font-family:inherit;font-weight:700;
-    font-size:clamp(42px,7.2vw,84px);line-height:1.06;letter-spacing:-.03em;
+    font-size:clamp(44px,8vw,92px);line-height:1.03;letter-spacing:-.04em;
     color:#fff;
-    text-shadow:0 2px 24px rgba(0,0,0,.32);
+    text-shadow:0 2px 24px rgba(0,0,0,.34);
   }
   .hero .lead{
     margin-top:24px;font-size:clamp(15px,1.8vw,18px);color:rgba(255,255,255,.9);max-width:560px;font-weight:400;line-height:1.7;
@@ -380,7 +384,7 @@
   .section-head{margin-bottom:54px}
   .section-head h2,.placeholder h2{
     font-family:inherit;font-weight:700;
-    font-size:clamp(32px,4.6vw,52px);line-height:1.08;letter-spacing:-.025em;margin:16px 0 14px;
+    font-size:clamp(34px,5.4vw,62px);line-height:1.03;letter-spacing:-.035em;margin:18px 0 16px;
   }
   .section-head h2 .count{
     font-size:.36em;vertical-align:super;color:var(--dim);
@@ -461,11 +465,10 @@
 
   /* ================= 留言板 · 想对我说的 ================= */
   #board .composer{
-    border:1px solid var(--glass-brd);border-radius:var(--r-lg);
-    background:var(--glass-bg);
-    backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
-    box-shadow:var(--glass-hl),var(--glass-shadow);
-    padding:22px;margin-bottom:38px;transition:border-color .3s var(--ease),box-shadow .4s var(--ease);
+    border:1px solid var(--surface-brd);border-radius:var(--r-lg);
+    background:var(--surface);
+    box-shadow:var(--surface-shadow);
+    padding:22px;margin-bottom:38px;transition:border-color .3s var(--ease),box-shadow .4s var(--ease),background .3s var(--ease);
   }
   #board .composer:hover{border-color:var(--line)}
   #board .composer-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
@@ -516,9 +519,8 @@
   @keyframes msgIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
   #board .msg{
     display:flex;gap:14px;padding:20px;border-radius:var(--r-lg);
-    border:1px solid var(--glass-brd);background:var(--glass-bg);
-    backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);
-    box-shadow:var(--glass-hl),var(--glass-shadow);
+    border:1px solid var(--surface-brd);background:var(--surface);
+    box-shadow:var(--surface-shadow);
     transition:border-color .3s var(--ease),box-shadow .4s var(--ease),transform .5s var(--spring),border-radius .55s var(--spring);
   }
   #board .msg:hover{border-color:var(--line);transform:translateY(-2px);border-radius:var(--r-xl);box-shadow:var(--glass-hl),0 16px 44px -16px rgba(0,0,0,.25)}
@@ -830,11 +832,11 @@
   .journal-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin-top:8px}
   .journal-card{
     position:relative;display:flex;flex-direction:column;overflow:hidden;cursor:pointer;
-    background:var(--glass-bg);border:1px solid var(--glass-brd);border-radius:var(--r-lg);
-    box-shadow:0 10px 30px -16px rgba(0,0,0,.28);
-    transition:transform .5s var(--spring),box-shadow .4s var(--ease),border-color .3s var(--ease);
+    background:var(--surface);border:1px solid var(--surface-brd);border-radius:var(--r-lg);
+    box-shadow:var(--surface-shadow);
+    transition:transform .5s var(--spring),box-shadow .4s var(--ease),border-color .3s var(--ease),background .3s var(--ease);
   }
-  .journal-card:hover{transform:translateY(-6px);box-shadow:0 22px 48px -20px rgba(0,0,0,.34);border-color:var(--accent-soft)}
+  .journal-card:hover{transform:translateY(-6px);box-shadow:0 24px 52px -20px rgba(0,0,0,.30);border-color:var(--surface-brd);background:var(--surface-hover)}
   .journal-card .cover{position:relative;aspect-ratio:16/10;background:var(--fill-2);overflow:hidden}
   .journal-card .cover img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s var(--ease)}
   .journal-card:hover .cover img{transform:scale(1.05)}
@@ -943,8 +945,8 @@
   #library .lib-chip:active{transform:scale(.96)}
   #library .lib-chip.active{background:var(--accent);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 8px 22px -12px var(--accent-shadow)}
   #library .lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px}
-  .lib-card{position:relative;display:flex;flex-direction:column;overflow:hidden;cursor:pointer;background:var(--glass-bg);border:1px solid var(--glass-brd);border-radius:var(--r-lg);box-shadow:0 10px 30px -16px rgba(0,0,0,.28);transition:transform .5s var(--spring),box-shadow .4s var(--ease),border-color .3s var(--ease)}
-  .lib-card:hover{transform:translateY(-6px);box-shadow:0 22px 48px -20px rgba(0,0,0,.34);border-color:var(--accent-soft)}
+  .lib-card{position:relative;display:flex;flex-direction:column;overflow:hidden;cursor:pointer;background:var(--surface);border:1px solid var(--surface-brd);border-radius:var(--r-lg);box-shadow:var(--surface-shadow);transition:transform .5s var(--spring),box-shadow .4s var(--ease),border-color .3s var(--ease),background .3s var(--ease)}
+  .lib-card:hover{transform:translateY(-6px);box-shadow:0 24px 52px -20px rgba(0,0,0,.30);border-color:var(--surface-brd);background:var(--surface-hover)}
   .lib-banner{position:relative;height:104px;overflow:hidden;background:
     radial-gradient(130% 130% at 0% 0%, hsl(var(--h) 78% 62% / .34), transparent 58%),
     radial-gradient(130% 130% at 100% 100%, hsl(calc(var(--h) + 38) 80% 55% / .30), transparent 60%),
@@ -962,9 +964,9 @@
   .lib-empty{text-align:center;padding:46px 16px;color:var(--faint);font-size:13.5px}
   /* 图书馆 · 按分类分组折叠（默认折叠，点击组名展开） */
   #library .lib-groups{display:flex;flex-direction:column;gap:16px}
-  #library .lib-group{border-radius:var(--r-lg);overflow:hidden;background:var(--glass-bg);
-    border:1px solid var(--glass-brd);box-shadow:0 10px 30px -18px rgba(0,0,0,.25);
-    backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%)}
+  #library .lib-group{border-radius:var(--r-lg);overflow:hidden;background:var(--surface);
+    border:1px solid var(--surface-brd);box-shadow:var(--surface-shadow);
+    transition:border-color .3s var(--ease),background .3s var(--ease),box-shadow .4s var(--ease)}
   #library .lib-group-head{width:100%;display:flex;align-items:center;gap:12px;padding:16px 20px;
     background:transparent;border:0;cursor:pointer;font-family:inherit;color:var(--fg);text-align:left;-webkit-tap-highlight-color:transparent}
   #library .lib-group-head:focus-visible{outline:2px solid var(--accent);outline-offset:-3px;border-radius:var(--r-lg)}
@@ -1041,7 +1043,7 @@
       inset 0 -2px 0 rgba(255,255,255,.14),inset 0 -26px 34px -22px rgba(0,0,0,.50),inset 0 20px 28px -18px rgba(255,255,255,.12)}
   /* 各玻璃面的底色交由 .lgx-b1 承担（元素自身背景清空，保证层序正确） */
   #nav.scrolled{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
-  #nav.scrolled>.lgx-b1{background:var(--nav-bg)}
+  #nav>.lgx-b1{background:var(--nav-bg)}
   .modal-card{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:7px;--lgx-sat:1.9}
   .modal-card>.lgx-b1{background:var(--glass-bg)}
   .modal.open .modal-card{filter:none}          /* filter 会形成背景根，须清零 */
@@ -1058,34 +1060,12 @@
   #nav>.lgx-b3,.lb-bar>.lgx-b3{
     -webkit-mask-image:linear-gradient(180deg,#000 0,#000 14%,transparent 32%,transparent 68%,#000 86%,#000 100%);
     mask-image:linear-gradient(180deg,#000 0,#000 14%,transparent 32%,transparent 68%,#000 86%,#000 100%)}
-  /* 导航未滚动（透明叠在照片上）时不显示折射层 */
-  #nav:not(.scrolled)>.lgx{display:none}
+  /* 导航折射层常驻（玻璃条始终半透明悬浮），不再按滚动态开关 */
   @media(prefers-reduced-motion:reduce){.lgfx>.lgx-hl{transition:none}}
 
-  /* ================= 板块视图：点击进入，一次只显示一个板块 =================
-     长页面（图书馆有 129 篇）改为"点击导航进入对应板块"，避免无止境下滑。 */
-  body.view main>section:not(.view-active){display:none}
-  body.view main>section.view-active{animation:viewIn .55s var(--ease)}
-  @keyframes viewIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-  @media(prefers-reduced-motion:reduce){body.view main>section.view-active{animation:none}
-    .nav-menu.open{animation:none}}
-  /* 板块间滚动/滑动切换：滚到板块底部继续下滑 → 下一板块（顶部继续上滑 → 上一板块） */
-  body.view .scroll-cue{display:none}   /* 由底部「继续」提示接管 */
-  .sec-next{position:fixed;left:50%;bottom:18px;transform:translate(-50%,14px);z-index:40;
-    display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 16px;border-radius:17px;
-    background:var(--glass-bg);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);
-    border:1px solid var(--glass-brd);box-shadow:var(--glass-shadow);
-    font-family:inherit;font-size:12.5px;font-weight:500;color:var(--dim);cursor:pointer;
-    opacity:0;visibility:hidden;
-    transition:opacity .35s var(--ease),transform .45s var(--spring),visibility .35s;
-    -webkit-tap-highlight-color:transparent}
-  .sec-next.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
-  .sec-next:hover{color:var(--fg)}
-  .sec-next .arw{display:inline-block;animation:secNudge 1.7s var(--ease) infinite}
-  @keyframes secNudge{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
-  @media(prefers-reduced-motion:reduce){.sec-next .arw{animation:none}}
-  @media(max-width:640px){.sec-next{bottom:14px;height:32px;font-size:12px;padding:0 14px}}
-  /* 边界滚动完全交给脚本接管；弹层内部滚动不串到背后页面 */
+  /* ================= 整页自然滚动（锚点导航） =================
+     取消板块隔离与自定义滚动拦截，恢复整页自然划动 + 锚点平滑跳转；
+     导航玻璃条常驻，文字随主题取色，任何背景下都清晰可读。 */
   body{overscroll-behavior-y:none}
   .modal-card,.lb-panel{overscroll-behavior:contain}
   /* 手机端菜单（<=640px 隐藏横向导航，改用汉堡 + 玻璃面板） */
@@ -1095,14 +1075,14 @@
     transition:transform .35s var(--spring),opacity .25s var(--ease)}
   .nav-burger span:nth-child(1){top:13.5px}
   .nav-burger span:nth-child(2){bottom:13.5px}
-  #nav:not(.scrolled) .nav-burger span{background:#ffffff}
   #nav.menu-open .nav-burger span:nth-child(1){transform:translateY(3.5px) rotate(45deg)}
   #nav.menu-open .nav-burger span:nth-child(2){transform:translateY(-3.5px) rotate(-45deg)}
   .nav-menu{position:absolute;top:100%;left:10px;right:10px;margin-top:8px;z-index:6;
     background:var(--glass-bg);backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);
     border:1px solid var(--glass-brd);border-radius:20px;box-shadow:var(--glass-hl),var(--glass-shadow);
     padding:8px;display:none;flex-direction:column;gap:2px}
-  .nav-menu.open{display:flex;animation:viewIn .35s var(--ease)}
+  .nav-menu.open{display:flex;animation:menuPop .32s var(--ease)}
+  @keyframes menuPop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
   .nav-menu a{padding:12px 14px;border-radius:13px;font-size:14.5px;font-weight:500;color:var(--fg);
     display:flex;align-items:center;justify-content:space-between}
   .nav-menu a::after{content:"\203A";color:var(--dim);font-size:17px;line-height:1}
@@ -2703,14 +2683,10 @@ function onScroll(){
   progress.style.width = (h>0 ? (y/h*100) : 0) + '%';
   nav.classList.toggle('scrolled', y > 40);
 
-  // 导航高亮（视图模式下由当前板块决定，不再滚动侦测）
+  // 导航高亮（按滚动位置侦测当前板块）
   let activeId = 'home';
-  if(document.body.classList.contains('view')){
-    activeId = window.__currentView || 'home';
-  } else {
-    for(const s of sections){
-      if(y + 120 >= s.offsetTop) activeId = s.id;
-    }
+  for(const s of sections){
+    if(y + 120 >= s.offsetTop) activeId = s.id;
   }
   navLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href') === '#'+activeId));
 
@@ -3470,21 +3446,14 @@ function initLibrary(){
 
   render();
 }
-/* ---------- 板块视图：点击导航进入对应板块（避免超长页面滚动） ---------- */
+/* ---------- 导航：锚点平滑滚动 + 汉堡菜单（整页自然滚动） ----------
+   取消板块隔离与自定义滚动拦截，恢复整页自然划动；点击导航 / Logo / hero
+   按钮由浏览器按 CSS scroll-behavior 平滑跳到对应板块。 */
 (function(){
-  /* 视图模式下关闭视口平滑滚动：切板块的位移由 viewIn 动画负责；
-     平滑滚动会让 scrollTo(0,0) 拖 1.5s 与入场动画叠加发糯，
-     还会让底部边缘判定抓到缓动中间的 scrollY。 */
-  document.documentElement.style.scrollBehavior = 'auto';
   var navEl = document.getElementById('nav');
   var burger = document.getElementById('navBurger');
   var menu = document.getElementById('navMenu');
   var navLinks = [...document.querySelectorAll('#nav nav a, .nav-menu a, a.logo')];
-  /* 所有指向板块的锚点都纳入视图切换（含 hero 的「浏览图片集」等按钮；弹层内的除外） */
-  var links = [...document.querySelectorAll('a[href^="#"]')].filter(function(a){
-    return !a.closest('.modal, .lightbox');
-  });
-  var current = 'home';
 
   function isSection(id){
     var el = document.getElementById(id);
@@ -3500,37 +3469,6 @@ function initLibrary(){
     if(burger) burger.setAttribute('aria-expanded','false');
     if(window.scrollY <= 40) navEl.classList.remove('scrolled');
   }
-  function showView(id, opts){
-    opts = opts || {};
-    if(!isSection(id)) return;
-    current = id; window.__currentView = id;
-    document.body.classList.add('view');
-    document.querySelectorAll('main > section').forEach(function(s){
-      s.classList.toggle('view-active', s.id === id);
-    });
-    setActive(id);
-    window.scrollTo(0, 0);
-    if(typeof invalidateEdge === 'function') invalidateEdge();   // 文档高度已变，边界缓存作废
-    var sec = document.getElementById(id);
-    if(!sec.dataset.viewed){                 // 首次进入才播放入场动画
-      sec.dataset.viewed = '1';
-      sec.querySelectorAll('.reveal').forEach(function(el){
-        if(typeof io !== 'undefined'){ io.unobserve(el); el.classList.remove('in'); io.observe(el); }
-      });
-    }
-    closeMenu();
-    if(opts.hash !== false){ try{ history.replaceState(null, '', '#' + id); }catch(e){} }
-    if(typeof onScroll === 'function') onScroll();
-    if(typeof refreshPill === 'function') refreshPill();
-    if(opts.pin && typeof pinTop === 'function') pinTop();
-  }
-  links.forEach(function(a){
-    a.addEventListener('click', function(e){
-      var href = a.getAttribute('href') || '';
-      var id = href.slice(1);
-      if(href.charAt(0) === '#' && isSection(id)){ e.preventDefault(); showView(id); }
-    });
-  });
   if(burger) burger.addEventListener('click', function(e){
     e.stopPropagation();
     var open = menu.classList.toggle('open');
@@ -3545,156 +3483,25 @@ function initLibrary(){
   });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeMenu(); });
 
-  /* 初始：带 #板块 链接直接进入该板块，否则落在首页 */
-  var h = (location.hash || '').slice(1);
-  if(h && h !== 'home' && isSection(h)) showView(h, {hash:false});
-  else {
-    document.body.classList.add('view');
-    var homeSec = document.getElementById('home');
-    if(homeSec){ homeSec.classList.add('view-active'); homeSec.dataset.viewed = '1'; }
-    setActive('home');
-  }
-
-  /* ---------- 板块间滚动/滑动切换 ----------
-     视图模式下每个板块即一页：在板块底部继续下滑 → 下一板块，在顶部继续上滑 → 上一板块；
-     不足一屏的板块阈值更低（任何滚动意图都翻页）。弹层打开、指针在输入框上时不拦截。 */
-  var secOrder = [...document.querySelectorAll('main > section')].map(function(s){ return s.id; });
-  function neighborId(dir){
-    var i = secOrder.indexOf(current);
-    if(i < 0) return null;
-    var j = i + dir;
-    return (j >= 0 && j < secOrder.length) ? secOrder[j] : null;
-  }
-  function overlayBusy(){
-    return document.body.classList.contains('locked') ||
-      !!document.querySelector('.modal.open, .lightbox.open, #nav.menu-open');
-  }
-  /* 滚动边界带 200ms 缓存：scrollHeight 会强制布局，而 wheel 是非被动监听、
-     每次滚轮都读会把滚动阻塞在主线程上（表现为发卡）。切板块/改尺寸时失效。 */
-  var edgeMax = -1, edgeMaxAt = 0;
-  function edgeState(){
-    var de = document.documentElement, y = window.scrollY;
-    var now = Date.now();
-    if(edgeMax < 0 || now - edgeMaxAt > 200){ edgeMax = de.scrollHeight - de.clientHeight; edgeMaxAt = now; }
-    var max = edgeMax;
-    return { max: max, atBottom: max <= 2 || y >= max - 2, atTop: y <= 2 };
-  }
-  function invalidateEdge(){ edgeMax = -1; }
-  var edgeAccum = 0, edgeDir = 0, edgeLockUntil = 0;
-  function edgeFeed(dir, delta, ev){
-    if(overlayBusy()){ edgeAccum = 0; edgeDir = 0; return false; }
-    if(ev && ev.target && ev.target.closest && ev.target.closest('input,textarea,select,[contenteditable]')){
-      edgeAccum = 0; return false;
-    }
-    var st = edgeState();
-    var pinned = (dir > 0 && st.atBottom) || (dir < 0 && st.atTop);
-    if(!pinned){ edgeAccum = 0; edgeDir = 0; return false; }
-    if(edgeDir !== dir){ edgeDir = dir; edgeAccum = 0; }
-    edgeAccum += Math.min(Math.abs(delta), 140);
-    var need = st.max <= 2 ? 34 : 92;      // 不足一屏：更低阈值
-    if(edgeAccum >= need && Date.now() > edgeLockUntil){
-      edgeAccum = 0; edgeLockUntil = Date.now() + 850;
-      var nxt = neighborId(dir);
-      if(nxt){ showView(nxt, {pin:true}); return true; }   // 已切换：调用方须阻止默认滚动
-    }
-    return false;
-  }
-  /* 翻页后把新板块钉在顶部：吞掉触摸惯性（fling）与滚轮余冲——
-     fling 在 touchend 之后才启动，单次 scrollTo 拦不住，须逐帧压制。
-     任何新输入（滚轮/触摸/按键）立即解除钉扎，用户可马上继续滚动。 */
-  var pinRaf = 0, pinUntil = 0;
-  function pinTop(){
-    pinUntil = performance.now() + 900;
-    if(pinRaf) return;
-    var step = function(){
-      if(performance.now() > pinUntil){ pinRaf = 0; return; }
-      if(window.scrollY > 0) window.scrollTo(0, 0);
-      pinRaf = requestAnimationFrame(step);
-    };
-    pinRaf = requestAnimationFrame(step);
-  }
-  function unpin(){ if(pinRaf){ cancelAnimationFrame(pinRaf); pinRaf = 0; } }
-  /* 非被动监听：切换发生时阻止默认滚动——否则这一格滚动量会在
-     处理器返回后作用到新板块上，使新板块从几十上百像素处开始。 */
-  window.addEventListener('wheel', function(e){
-    unpin();
-    if(e.ctrlKey || !e.deltaY) return;         // 捏合缩放 / 纯横滑不拦
-    if(edgeFeed(e.deltaY > 0 ? 1 : -1, e.deltaY, e)) e.preventDefault();
-  }, {passive:false});
-  var tLastY = null, tConsumed = false;
-  window.addEventListener('touchstart', function(e){
-    unpin(); tLastY = e.touches[0].clientY; tConsumed = false;
-  }, {passive:true});
-  window.addEventListener('touchmove', function(e){
-    if(tLastY == null) return;
-    var y = e.touches[0].clientY;
-    var dy = tLastY - y;                     // 正 = 上滑 = 往下翻页
-    tLastY = y;
-    if(tConsumed){ e.preventDefault(); return; }   // 本手势已被翻页消耗，剩余移动不再滚动
-    if(Math.abs(dy) > 2 && edgeFeed(dy > 0 ? 1 : -1, Math.abs(dy), e)){ tConsumed = true; e.preventDefault(); }
-  }, {passive:false});
-  window.addEventListener('touchend', function(){
-    tLastY = null; tConsumed = false; edgeAccum = 0; edgeDir = 0;
-  }, {passive:true});
-  window.addEventListener('keydown', function(e){
-    unpin();
-    if(overlayBusy()) return;
-    var tag = (document.activeElement || {}).tagName;
-    if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON' || tag === 'SELECT') return;
-    var st = edgeState();
-    if((e.key === 'PageDown' || e.key === ' ') && st.atBottom){
-      var n = neighborId(1); if(n){ e.preventDefault(); showView(n, {pin:true}); }
-    } else if(e.key === 'PageUp' && st.atTop){
-      var p = neighborId(-1); if(p){ e.preventDefault(); showView(p, {pin:true}); }
-    }
+  /* 锚点：点击导航 / Logo / hero 按钮 → 平滑滚动到对应板块（CSS 负责平滑），并收起移动端菜单 */
+  var links = [...document.querySelectorAll('a[href^="#"]')].filter(function(a){
+    return !a.closest('.modal, .lightbox');
+  });
+  links.forEach(function(a){
+    a.addEventListener('click', function(){ closeMenu(); });
   });
 
-  /* 底部「继续」提示：到板块底部才出现；可点击，也示意可以继续滚 */
-  var pill = null;
-  function secLabel(id){
-    var a = document.querySelector('#nav nav a[href="#' + id + '"], .nav-menu a[href="#' + id + '"]');
-    return a ? a.textContent.trim() : '';
+  /* 初始：带 #板块 链接则平滑滚到该板块，否则停留在首页 */
+  var h = (location.hash || '').slice(1);
+  if(h && isSection(h)){
+    requestAnimationFrame(function(){
+      var el = document.getElementById(h);
+      if(el) el.scrollIntoView();
+      setActive(h);
+    });
+  } else {
+    setActive('home');
   }
-  /* pill 刷新按帧合并（scroll 事件比帧密），且文案只在变化时写——
-     滚动中反复写 textContent 会持续作废布局，是底部滚动发卡的元凶之一。 */
-  var pillTxtEl = null, pillLabelCache = {}, pillScheduled = false;
-  function secLabel(id){
-    var v = pillLabelCache[id];
-    if(v === undefined){
-      var a = document.querySelector('#nav nav a[href="#' + id + '"], .nav-menu a[href="#' + id + '"]');
-      v = a ? a.textContent.trim() : '';
-      pillLabelCache[id] = v;
-    }
-    return v;
-  }
-  function refreshPill(){
-    if(!pill) return;
-    var show = false, label = '';
-    if(document.body.classList.contains('view') && !overlayBusy()){
-      var st = edgeState();
-      var nxt = neighborId(1);
-      if(nxt && st.atBottom){ show = true; label = '继续 · ' + (secLabel(nxt) || '下一板块'); }
-    }
-    pill.classList.toggle('show', show);
-    if(show && pillTxtEl && pillTxtEl.textContent !== label) pillTxtEl.textContent = label;
-  }
-  function schedulePill(){
-    if(pillScheduled) return;
-    pillScheduled = true;
-    requestAnimationFrame(function(){ pillScheduled = false; refreshPill(); });
-  }
-  pill = document.createElement('button');
-  pill.type = 'button'; pill.className = 'sec-next';
-  pill.innerHTML = '<span class="txt">继续</span><span class="arw" aria-hidden="true">↓</span>';
-  pillTxtEl = pill.querySelector('.txt');
-  pill.setAttribute('aria-label', '进入下一板块');
-  pill.addEventListener('click', function(){ var n = neighborId(1); if(n) showView(n); });
-  document.body.appendChild(pill);
-  window.addEventListener('scroll', schedulePill, {passive:true});
-  window.addEventListener('resize', function(){ invalidateEdge(); schedulePill(); });
-  refreshPill();
-
-  window.__showView = showView;
 })();
 
 /* ---------- 液态玻璃 · 三层折射 + 指针交互（iOS 26 风格） ----------
