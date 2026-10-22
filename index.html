@@ -1050,6 +1050,25 @@
   @keyframes viewIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
   @media(prefers-reduced-motion:reduce){body.view main>section.view-active{animation:none}
     .nav-menu.open{animation:none}}
+  /* 板块间滚动/滑动切换：滚到板块底部继续下滑 → 下一板块（顶部继续上滑 → 上一板块） */
+  body.view .scroll-cue{display:none}   /* 由底部「继续」提示接管 */
+  .sec-next{position:fixed;left:50%;bottom:18px;transform:translate(-50%,14px);z-index:40;
+    display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 16px;border-radius:17px;
+    background:var(--glass-bg);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);
+    border:1px solid var(--glass-brd);box-shadow:var(--glass-shadow);
+    font-family:inherit;font-size:12.5px;font-weight:500;color:var(--dim);cursor:pointer;
+    opacity:0;visibility:hidden;
+    transition:opacity .35s var(--ease),transform .45s var(--spring),visibility .35s;
+    -webkit-tap-highlight-color:transparent}
+  .sec-next.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+  .sec-next:hover{color:var(--fg)}
+  .sec-next .arw{display:inline-block;animation:secNudge 1.7s var(--ease) infinite}
+  @keyframes secNudge{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+  @media(prefers-reduced-motion:reduce){.sec-next .arw{animation:none}}
+  @media(max-width:640px){.sec-next{bottom:14px;height:32px;font-size:12px;padding:0 14px}}
+  /* 边界滚动完全交给脚本接管；弹层内部滚动不串到背后页面 */
+  body{overscroll-behavior-y:none}
+  .modal-card,.lb-panel{overscroll-behavior:contain}
   /* 手机端菜单（<=640px 隐藏横向导航，改用汉堡 + 玻璃面板） */
   .nav-burger{display:none;width:34px;height:34px;border:none;border-radius:11px;background:var(--fill);
     position:relative;flex:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -3392,10 +3411,18 @@ function initLibrary(){
 }
 /* ---------- 板块视图：点击导航进入对应板块（避免超长页面滚动） ---------- */
 (function(){
+  /* 视图模式下关闭视口平滑滚动：切板块的位移由 viewIn 动画负责；
+     平滑滚动会让 scrollTo(0,0) 拖 1.5s 与入场动画叠加发糯，
+     还会让底部边缘判定抓到缓动中间的 scrollY。 */
+  document.documentElement.style.scrollBehavior = 'auto';
   var navEl = document.getElementById('nav');
   var burger = document.getElementById('navBurger');
   var menu = document.getElementById('navMenu');
-  var links = [...document.querySelectorAll('#nav nav a, .nav-menu a, a.logo')];
+  var navLinks = [...document.querySelectorAll('#nav nav a, .nav-menu a, a.logo')];
+  /* 所有指向板块的锚点都纳入视图切换（含 hero 的「浏览图片集」等按钮；弹层内的除外） */
+  var links = [...document.querySelectorAll('a[href^="#"]')].filter(function(a){
+    return !a.closest('.modal, .lightbox');
+  });
   var current = 'home';
 
   function isSection(id){
@@ -3403,7 +3430,7 @@ function initLibrary(){
     return !!(el && el.tagName === 'SECTION');
   }
   function setActive(id){
-    links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === '#' + id); });
+    navLinks.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === '#' + id); });
   }
   function closeMenu(){
     if(!menu) return;
@@ -3432,6 +3459,8 @@ function initLibrary(){
     closeMenu();
     if(opts.hash !== false){ try{ history.replaceState(null, '', '#' + id); }catch(e){} }
     if(typeof onScroll === 'function') onScroll();
+    if(typeof refreshPill === 'function') refreshPill();
+    if(opts.pin && typeof pinTop === 'function') pinTop();
   }
   links.forEach(function(a){
     a.addEventListener('click', function(e){
@@ -3463,6 +3492,123 @@ function initLibrary(){
     if(homeSec){ homeSec.classList.add('view-active'); homeSec.dataset.viewed = '1'; }
     setActive('home');
   }
+
+  /* ---------- 板块间滚动/滑动切换 ----------
+     视图模式下每个板块即一页：在板块底部继续下滑 → 下一板块，在顶部继续上滑 → 上一板块；
+     不足一屏的板块阈值更低（任何滚动意图都翻页）。弹层打开、指针在输入框上时不拦截。 */
+  var secOrder = [...document.querySelectorAll('main > section')].map(function(s){ return s.id; });
+  function neighborId(dir){
+    var i = secOrder.indexOf(current);
+    if(i < 0) return null;
+    var j = i + dir;
+    return (j >= 0 && j < secOrder.length) ? secOrder[j] : null;
+  }
+  function overlayBusy(){
+    return document.body.classList.contains('locked') ||
+      !!document.querySelector('.modal.open, .lightbox.open, #nav.menu-open');
+  }
+  function edgeState(){
+    var de = document.documentElement;
+    var max = de.scrollHeight - de.clientHeight;
+    return { max: max, atBottom: max <= 2 || window.scrollY >= max - 2, atTop: window.scrollY <= 2 };
+  }
+  var edgeAccum = 0, edgeDir = 0, edgeLockUntil = 0;
+  function edgeFeed(dir, delta, ev){
+    if(overlayBusy()){ edgeAccum = 0; edgeDir = 0; return false; }
+    if(ev && ev.target && ev.target.closest && ev.target.closest('input,textarea,select,[contenteditable]')){
+      edgeAccum = 0; return false;
+    }
+    var st = edgeState();
+    var pinned = (dir > 0 && st.atBottom) || (dir < 0 && st.atTop);
+    if(!pinned){ edgeAccum = 0; edgeDir = 0; return false; }
+    if(edgeDir !== dir){ edgeDir = dir; edgeAccum = 0; }
+    edgeAccum += Math.min(Math.abs(delta), 140);
+    var need = st.max <= 2 ? 34 : 92;      // 不足一屏：更低阈值
+    if(edgeAccum >= need && Date.now() > edgeLockUntil){
+      edgeAccum = 0; edgeLockUntil = Date.now() + 850;
+      var nxt = neighborId(dir);
+      if(nxt){ showView(nxt, {pin:true}); return true; }   // 已切换：调用方须阻止默认滚动
+    }
+    return false;
+  }
+  /* 翻页后把新板块钉在顶部：吞掉触摸惯性（fling）与滚轮余冲——
+     fling 在 touchend 之后才启动，单次 scrollTo 拦不住，须逐帧压制。
+     任何新输入（滚轮/触摸/按键）立即解除钉扎，用户可马上继续滚动。 */
+  var pinRaf = 0, pinUntil = 0;
+  function pinTop(){
+    pinUntil = performance.now() + 900;
+    if(pinRaf) return;
+    var step = function(){
+      if(performance.now() > pinUntil){ pinRaf = 0; return; }
+      if(window.scrollY > 0) window.scrollTo(0, 0);
+      pinRaf = requestAnimationFrame(step);
+    };
+    pinRaf = requestAnimationFrame(step);
+  }
+  function unpin(){ if(pinRaf){ cancelAnimationFrame(pinRaf); pinRaf = 0; } }
+  /* 非被动监听：切换发生时阻止默认滚动——否则这一格滚动量会在
+     处理器返回后作用到新板块上，使新板块从几十上百像素处开始。 */
+  window.addEventListener('wheel', function(e){
+    unpin();
+    if(e.ctrlKey || !e.deltaY) return;         // 捏合缩放 / 纯横滑不拦
+    if(edgeFeed(e.deltaY > 0 ? 1 : -1, e.deltaY, e)) e.preventDefault();
+  }, {passive:false});
+  var tLastY = null, tConsumed = false;
+  window.addEventListener('touchstart', function(e){
+    unpin(); tLastY = e.touches[0].clientY; tConsumed = false;
+  }, {passive:true});
+  window.addEventListener('touchmove', function(e){
+    if(tLastY == null) return;
+    var y = e.touches[0].clientY;
+    var dy = tLastY - y;                     // 正 = 上滑 = 往下翻页
+    tLastY = y;
+    if(tConsumed){ e.preventDefault(); return; }   // 本手势已被翻页消耗，剩余移动不再滚动
+    if(Math.abs(dy) > 2 && edgeFeed(dy > 0 ? 1 : -1, Math.abs(dy), e)){ tConsumed = true; e.preventDefault(); }
+  }, {passive:false});
+  window.addEventListener('touchend', function(){
+    tLastY = null; tConsumed = false; edgeAccum = 0; edgeDir = 0;
+  }, {passive:true});
+  window.addEventListener('keydown', function(e){
+    unpin();
+    if(overlayBusy()) return;
+    var tag = (document.activeElement || {}).tagName;
+    if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON' || tag === 'SELECT') return;
+    var st = edgeState();
+    if((e.key === 'PageDown' || e.key === ' ') && st.atBottom){
+      var n = neighborId(1); if(n){ e.preventDefault(); showView(n, {pin:true}); }
+    } else if(e.key === 'PageUp' && st.atTop){
+      var p = neighborId(-1); if(p){ e.preventDefault(); showView(p, {pin:true}); }
+    }
+  });
+
+  /* 底部「继续」提示：到板块底部才出现；可点击，也示意可以继续滚 */
+  var pill = null;
+  function secLabel(id){
+    var a = document.querySelector('#nav nav a[href="#' + id + '"], .nav-menu a[href="#' + id + '"]');
+    return a ? a.textContent.trim() : '';
+  }
+  function refreshPill(){
+    if(!pill) return;
+    if(overlayBusy() || !document.body.classList.contains('view')){ pill.classList.remove('show'); return; }
+    var st = edgeState();
+    var nxt = neighborId(1);
+    if(nxt && st.atBottom){
+      pill.querySelector('.txt').textContent = '继续 · ' + (secLabel(nxt) || '下一板块');
+      pill.classList.add('show');
+    } else {
+      pill.classList.remove('show');
+    }
+  }
+  pill = document.createElement('button');
+  pill.type = 'button'; pill.className = 'sec-next';
+  pill.innerHTML = '<span class="txt">继续</span><span class="arw" aria-hidden="true">↓</span>';
+  pill.setAttribute('aria-label', '进入下一板块');
+  pill.addEventListener('click', function(){ var n = neighborId(1); if(n) showView(n); });
+  document.body.appendChild(pill);
+  window.addEventListener('scroll', refreshPill, {passive:true});
+  window.addEventListener('resize', refreshPill);
+  refreshPill();
+
   window.__showView = showView;
 })();
 
