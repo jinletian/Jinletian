@@ -1028,20 +1028,49 @@
   .modal.open .modal-card{filter:none}          /* filter 会形成背景根，须清零 */
   .lb-bar{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:8px;--lgx-sat:1.7}
   .lb-bar>.lgx-b1{background:var(--lb-bar)}
-  .unlock{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:6px;--lgx-sat:1.5}
-  .unlock>.lgx-b1{background:var(--accent)}
-  #nav:not(.scrolled) .unlock>.lgx-b1{background:rgba(255,255,255,.14)}
-  .unlock.on>.lgx-b1{background:var(--ok-soft)}
+  /* 导航条只保留克制的顶部高光：满圈亮边在窄条上会显得突兀 */
+  #nav>.lgx-sp{background:linear-gradient(180deg,rgba(255,255,255,.18),transparent 46%)}
+  #nav>.lgx-rim{box-shadow:inset 0 1px 0 rgba(255,255,255,.55)}
+  :root[data-theme="dark"] #nav>.lgx-rim{box-shadow:inset 0 1px 0 rgba(255,255,255,.30)}
   /* 横条形玻璃面：radial 蒙版在宽扁盒子里会失效，改用上下边缘线性蒙版 */
-  #nav>.lgx-b2,.lb-bar>.lgx-b2,.unlock>.lgx-b2{
+  #nav>.lgx-b2,.lb-bar>.lgx-b2{
     -webkit-mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.62) 26%,transparent 50%,transparent 50%,rgba(0,0,0,.62) 74%,#000 100%);
     mask-image:linear-gradient(180deg,#000 0,rgba(0,0,0,.62) 26%,transparent 50%,transparent 50%,rgba(0,0,0,.62) 74%,#000 100%)}
-  #nav>.lgx-b3,.lb-bar>.lgx-b3,.unlock>.lgx-b3{
+  #nav>.lgx-b3,.lb-bar>.lgx-b3{
     -webkit-mask-image:linear-gradient(180deg,#000 0,#000 14%,transparent 32%,transparent 68%,#000 86%,#000 100%);
     mask-image:linear-gradient(180deg,#000 0,#000 14%,transparent 32%,transparent 68%,#000 86%,#000 100%)}
   /* 导航未滚动（透明叠在照片上）时不显示折射层 */
   #nav:not(.scrolled)>.lgx{display:none}
   @media(prefers-reduced-motion:reduce){.lgfx>.lgx-hl{transition:none}}
+
+  /* ================= 板块视图：点击进入，一次只显示一个板块 =================
+     长页面（图书馆有 129 篇）改为"点击导航进入对应板块"，避免无止境下滑。 */
+  body.view main>section:not(.view-active){display:none}
+  body.view main>section.view-active{animation:viewIn .55s var(--ease)}
+  @keyframes viewIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){body.view main>section.view-active{animation:none}
+    .nav-menu.open{animation:none}}
+  /* 手机端菜单（<=640px 隐藏横向导航，改用汉堡 + 玻璃面板） */
+  .nav-burger{display:none;width:34px;height:34px;border:none;border-radius:11px;background:var(--fill);
+    position:relative;flex:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .nav-burger span{position:absolute;left:10px;right:10px;height:1.6px;border-radius:2px;background:var(--fg);
+    transition:transform .35s var(--spring),opacity .25s var(--ease)}
+  .nav-burger span:nth-child(1){top:13.5px}
+  .nav-burger span:nth-child(2){bottom:13.5px}
+  #nav:not(.scrolled) .nav-burger span{background:#ffffff}
+  #nav.menu-open .nav-burger span:nth-child(1){transform:translateY(3.5px) rotate(45deg)}
+  #nav.menu-open .nav-burger span:nth-child(2){transform:translateY(-3.5px) rotate(-45deg)}
+  .nav-menu{position:absolute;top:100%;left:10px;right:10px;margin-top:8px;z-index:6;
+    background:var(--glass-bg);backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);
+    border:1px solid var(--glass-brd);border-radius:20px;box-shadow:var(--glass-hl),var(--glass-shadow);
+    padding:8px;display:none;flex-direction:column;gap:2px}
+  .nav-menu.open{display:flex;animation:viewIn .35s var(--ease)}
+  .nav-menu a{padding:12px 14px;border-radius:13px;font-size:14.5px;font-weight:500;color:var(--fg);
+    display:flex;align-items:center;justify-content:space-between}
+  .nav-menu a::after{content:"\203A";color:var(--dim);font-size:17px;line-height:1}
+  .nav-menu a:active{background:var(--fill)}
+  .nav-menu a.active{color:var(--accent)}
+  @media(max-width:640px){.nav-burger{display:block}}
 </style>
 <script>
 /* 主题预置：在首屏绘制前确定浅色/深色，避免主题闪烁 */
@@ -1093,6 +1122,16 @@
       <a href="#about">关于</a>
       <a href="#contact">联系</a>
     </nav>
+    <button class="nav-burger" id="navBurger" type="button" aria-label="打开菜单" aria-expanded="false"><span></span><span></span></button>
+    <div class="nav-menu" id="navMenu" aria-hidden="true">
+      <a href="#home">首页</a>
+      <a href="#gallery">图片集</a>
+      <a href="#journal">我的日志</a>
+      <a href="#library">图书馆</a>
+      <a href="#board">想对我说的</a>
+      <a href="#about">关于</a>
+      <a href="#contact">联系</a>
+    </div>
   <div class="nav-right">
     <button class="theme-toggle" id="themeBtn" type="button" aria-label="切换到深色">
       <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 14.2A8.6 8.6 0 0 1 9.8 3.4a8.6 8.6 0 1 0 10.8 10.8z"/></svg>
@@ -2626,10 +2665,14 @@ function onScroll(){
   progress.style.width = (h>0 ? (y/h*100) : 0) + '%';
   nav.classList.toggle('scrolled', y > 40);
 
-  // 导航高亮
+  // 导航高亮（视图模式下由当前板块决定，不再滚动侦测）
   let activeId = 'home';
-  for(const s of sections){
-    if(y + 120 >= s.offsetTop) activeId = s.id;
+  if(document.body.classList.contains('view')){
+    activeId = window.__currentView || 'home';
+  } else {
+    for(const s of sections){
+      if(y + 120 >= s.offsetTop) activeId = s.id;
+    }
   }
   navLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href') === '#'+activeId));
 
@@ -3347,12 +3390,88 @@ function initLibrary(){
 
   render();
 }
+/* ---------- 板块视图：点击导航进入对应板块（避免超长页面滚动） ---------- */
+(function(){
+  var navEl = document.getElementById('nav');
+  var burger = document.getElementById('navBurger');
+  var menu = document.getElementById('navMenu');
+  var links = [...document.querySelectorAll('#nav nav a, .nav-menu a, a.logo')];
+  var current = 'home';
+
+  function isSection(id){
+    var el = document.getElementById(id);
+    return !!(el && el.tagName === 'SECTION');
+  }
+  function setActive(id){
+    links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === '#' + id); });
+  }
+  function closeMenu(){
+    if(!menu) return;
+    menu.classList.remove('open'); menu.setAttribute('aria-hidden','true');
+    navEl.classList.remove('menu-open');
+    if(burger) burger.setAttribute('aria-expanded','false');
+    if(window.scrollY <= 40) navEl.classList.remove('scrolled');
+  }
+  function showView(id, opts){
+    opts = opts || {};
+    if(!isSection(id)) return;
+    current = id; window.__currentView = id;
+    document.body.classList.add('view');
+    document.querySelectorAll('main > section').forEach(function(s){
+      s.classList.toggle('view-active', s.id === id);
+    });
+    setActive(id);
+    window.scrollTo(0, 0);
+    var sec = document.getElementById(id);
+    if(!sec.dataset.viewed){                 // 首次进入才播放入场动画
+      sec.dataset.viewed = '1';
+      sec.querySelectorAll('.reveal').forEach(function(el){
+        if(typeof io !== 'undefined'){ io.unobserve(el); el.classList.remove('in'); io.observe(el); }
+      });
+    }
+    closeMenu();
+    if(opts.hash !== false){ try{ history.replaceState(null, '', '#' + id); }catch(e){} }
+    if(typeof onScroll === 'function') onScroll();
+  }
+  links.forEach(function(a){
+    a.addEventListener('click', function(e){
+      var href = a.getAttribute('href') || '';
+      var id = href.slice(1);
+      if(href.charAt(0) === '#' && isSection(id)){ e.preventDefault(); showView(id); }
+    });
+  });
+  if(burger) burger.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = menu.classList.toggle('open');
+    menu.setAttribute('aria-hidden', open ? 'false' : 'true');
+    navEl.classList.toggle('menu-open', open);
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if(open) navEl.classList.add('scrolled');
+  });
+  document.addEventListener('click', function(e){
+    if(!menu || !menu.classList.contains('open')) return;
+    if(!menu.contains(e.target) && !burger.contains(e.target)) closeMenu();
+  });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeMenu(); });
+
+  /* 初始：带 #板块 链接直接进入该板块，否则落在首页 */
+  var h = (location.hash || '').slice(1);
+  if(h && h !== 'home' && isSection(h)) showView(h, {hash:false});
+  else {
+    document.body.classList.add('view');
+    var homeSec = document.getElementById('home');
+    if(homeSec){ homeSec.classList.add('view-active'); homeSec.dataset.viewed = '1'; }
+    setActive('home');
+  }
+  window.__showView = showView;
+})();
+
 /* ---------- 液态玻璃 · 三层折射 + 指针交互（iOS 26 风格） ----------
    玻璃元素自身的 backdrop-filter 会形成"背景根"，导致其子层采不到页面背景；
    因此注入兄弟子层并把磨砂下沉到 .lgx-b1，各层独立采样页面，形成透镜剖面。 */
 (function(){
   var LAYERS=['lgx-b1','lgx-b2','lgx-b3','lgx-sp','lgx-hl','lgx-rim'];
-  var SEL='#nav, .modal-card, .lb-bar, .unlock';
+  var SEL='#nav, .modal-card, .lb-bar';
   function enhance(el){
     if(el.__lgx) return; el.__lgx=1;
     el.classList.add('lgfx');
