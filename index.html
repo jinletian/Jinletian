@@ -864,6 +864,8 @@
   .comment-form{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
   .comment-form .gate{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     background:var(--fill-2);border-radius:var(--r-md);padding:13px 16px}
+  /* 关键：.gate 的 display:flex 会盖过 hidden 属性，登录后必须让 [hidden] 真正隐藏 */
+  .comment-form .gate[hidden]{display:none}
   .comment-form .gate span{font-size:13px;color:var(--dim)}
   .comment-form textarea{width:100%;min-height:74px;margin-top:0;padding:12px 14px;border-radius:var(--r-sm);
     background:var(--fill);border:1px solid transparent;color:var(--fg);font-size:14px;font-family:inherit;outline:none;resize:vertical;
