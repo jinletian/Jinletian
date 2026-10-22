@@ -902,6 +902,62 @@
     .article-pad{padding:22px 20px 26px}
     .article-title{font-size:22px}
   }
+
+  /* ================= 我的图书馆 ================= */
+  #library .lib-toolbar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:26px}
+  #library .lib-search-wrap{position:relative;flex:1;min-width:220px;max-width:440px}
+  #library .lib-search-wrap svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--faint);pointer-events:none}
+  #library .lib-search{width:100%;padding:12px 16px 12px 44px;border-radius:var(--pill);background:var(--fill);border:1px solid transparent;color:var(--fg);font-size:14px;font-family:inherit;outline:none;transition:border-color .3s var(--ease),box-shadow .3s var(--ease),background .3s}
+  #library .lib-search:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);background:var(--glass-bg)}
+  #library .lib-search::placeholder{color:var(--ph)}
+  #library .lib-chips{display:flex;gap:8px;flex-wrap:wrap}
+  #library .lib-chip{font-family:inherit;font-size:13px;font-weight:500;padding:9px 18px;border-radius:var(--pill);cursor:pointer;color:var(--dim);background:var(--fill);border:1px solid transparent;transition:transform .4s var(--spring),background .25s,color .25s,border-color .25s}
+  #library .lib-chip:hover{color:var(--fg)}
+  #library .lib-chip:active{transform:scale(.96)}
+  #library .lib-chip.active{background:var(--accent);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 8px 22px -12px var(--accent-shadow)}
+  #library .lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px}
+  .lib-card{position:relative;display:flex;flex-direction:column;overflow:hidden;cursor:pointer;background:var(--glass-bg);border:1px solid var(--glass-brd);border-radius:var(--r-lg);box-shadow:0 10px 30px -16px rgba(0,0,0,.28);transition:transform .5s var(--spring),box-shadow .4s var(--ease),border-color .3s var(--ease)}
+  .lib-card:hover{transform:translateY(-6px);box-shadow:0 22px 48px -20px rgba(0,0,0,.34);border-color:var(--accent-soft)}
+  .lib-banner{position:relative;height:104px;overflow:hidden;background:
+    radial-gradient(130% 130% at 0% 0%, hsl(var(--h) 78% 62% / .34), transparent 58%),
+    radial-gradient(130% 130% at 100% 100%, hsl(calc(var(--h) + 38) 80% 55% / .30), transparent 60%),
+    var(--fill-2)}
+  .lib-banner::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.06))}
+  .lib-banner .lib-mark{position:absolute;right:12px;bottom:-22px;font-size:100px;font-weight:800;line-height:1;color:hsl(var(--h) 70% 45% / .20);pointer-events:none;font-family:inherit;user-select:none}
+  .lib-banner .lib-cat{position:absolute;left:14px;top:13px;font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:4px 11px;border-radius:var(--pill);color:var(--fg);background:rgba(255,255,255,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.5)}
+  :root[data-theme="dark"] .lib-banner .lib-cat{background:rgba(20,20,22,.5);border-color:rgba(255,255,255,.16);color:var(--fg)}
+  .lib-body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:9px;flex:1;min-width:0}
+  .lib-title{font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.3;color:var(--fg);margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .lib-summary{font-size:13px;line-height:1.6;color:var(--dim);margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+  .lib-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px;font-size:12px;color:var(--faint)}
+  .lib-meta .lib-words{display:inline-flex;align-items:center;gap:5px}
+  .lib-empty{grid-column:1/-1;text-align:center;padding:46px 16px;color:var(--faint);font-size:13.5px}
+  /* 阅读弹层 */
+  .lib-reader{width:min(760px,100%);max-height:calc(100vh - 48px);overflow:auto;padding:0}
+  .lib-reader-head{display:flex;align-items:center;gap:12px;padding:24px 30px 0}
+  .lib-reader-head .lib-cat{font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:var(--pill);color:var(--accent);background:var(--accent-soft)}
+  .lib-reader-head .lib-date{font-size:12.5px;color:var(--faint)}
+  .lib-reader-title{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.28;color:var(--fg);margin:14px 30px 0}
+  .lib-reader-body{margin:18px 30px 8px;font-size:15.5px;line-height:1.9;color:var(--fg);word-break:break-word}
+  .lib-reader-body h2{font-size:20px;font-weight:700;margin:26px 0 10px;letter-spacing:-.01em}
+  .lib-reader-body h3{font-size:17.5px;font-weight:700;margin:22px 0 8px}
+  .lib-reader-body h4{font-size:15.5px;font-weight:700;margin:18px 0 6px}
+  .lib-reader-body p{margin:0 0 14px}
+  .lib-reader-body strong{font-weight:700}
+  .lib-reader-body em{font-style:italic}
+  .lib-reader-body .lb-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  .lib-reader-body .lb-table td{border:1px solid var(--line);padding:8px 10px;vertical-align:top}
+  .lib-reader-body .lb-fig{margin:16px 0;text-align:center}
+  .lib-reader-body .lb-fig img{max-width:100%;border-radius:var(--r-md);box-shadow:var(--glass-shadow)}
+  .lib-reader-foot{padding:14px 30px 28px;border-top:1px solid var(--line);margin-top:14px;font-size:12.5px;color:var(--faint);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+  @media(max-width:560px){
+    #library .lib-toolbar{flex-direction:column;align-items:stretch}
+    #library .lib-search-wrap{max-width:none}
+    #library .lib-grid{grid-template-columns:1fr}
+    .lib-reader-head,.lib-reader-title,.lib-reader-body,.lib-reader-foot{padding-left:20px;padding-right:20px}
+    .lib-reader-title{font-size:22px}
+  }
 </style>
 <script>
 /* 主题预置：在首屏绘制前确定浅色/深色，避免主题闪烁 */
@@ -944,6 +1000,7 @@
       <a href="#home" class="active">首页</a>
       <a href="#gallery">图片集</a>
       <a href="#journal">我的日志</a>
+      <a href="#library">图书馆</a>
       <a href="#board">想对我说的</a>
       <a href="#" id="adminNavLink" hidden>管理</a>
       <a href="#about">关于</a>
@@ -1003,6 +1060,44 @@
     </div>
     <div class="journal-list" id="journalList"></div>
   </section>
+
+  <!-- 我的图书馆 -->
+  <section class="section" id="library">
+    <div class="section-head reveal">
+      <p class="eyebrow">MY LIBRARY</p>
+      <h2>我的图书馆 <span class="count" id="libCount">0</span></h2>
+      <p class="section-desc">这里收录了我的随笔与读书笔记，是一座正在整理的小型资料库。可按分类筛选、搜索关键词，点开任意一篇即可阅读全文。</p>
+    </div>
+    <div class="lib-toolbar">
+      <div class="lib-search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.2"/><path d="M20 20l-3.4-3.4"/></svg>
+        <input class="lib-search" id="libSearch" type="search" placeholder="搜索标题或内容…" aria-label="搜索图书馆">
+      </div>
+      <div class="lib-chips" id="libChips">
+        <button class="lib-chip active" data-cat="all" type="button">全部</button>
+        <button class="lib-chip" data-cat="随笔" type="button">随笔</button>
+        <button class="lib-chip" data-cat="读书笔记" type="button">读书笔记</button>
+      </div>
+    </div>
+    <div class="lib-grid" id="libGrid"></div>
+  </section>
+
+  <!-- 阅读弹层 -->
+  <div class="modal" id="libReader" aria-hidden="true">
+    <div class="modal-card article-card lib-reader" role="dialog" aria-modal="true" aria-labelledby="libReaderTitle">
+      <button class="modal-x" id="libReaderX" type="button" aria-label="关闭">×</button>
+      <div class="lib-reader-head">
+        <span class="lib-cat" id="libReaderCat"></span>
+        <span class="lib-date" id="libReaderDate"></span>
+      </div>
+      <h2 class="lib-reader-title" id="libReaderTitle"></h2>
+      <div class="lib-reader-body" id="libReaderBody"></div>
+      <div class="lib-reader-foot">
+        <span id="libReaderWords"></span>
+        <span>我的图书馆 · 随笔与读书笔记资料库</span>
+      </div>
+    </div>
+  </div>
 
   <!-- 想对我说的（留言板 · 云端） -->
   <section class="section" id="board">
@@ -1306,6 +1401,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="assets/library/library-data.js"></script>
 <script>
 /* ============ 图片清单（内联，按编号 01-25） ============ */
 const PHOTOS = [{id:'01',w:5712,h:4284,lq:'data:image/webp;base64,UklGRgABAABXRUJQVlA4IPQAAAAQBgCdASogABgAPu1srFEppiQiqAqpMB2JZQAM7jBYjAQiZRYZoKk2vwIjkIXiTQmM/+yIAV/pM3AA/smys5CTbmDDoSsSgKrX6Bt+raY8uOopgZF0+DYyCIoAWn0aD11ZeCTY+1boLCF3D3npvGoB8v2C5f3y1M93UfOlcyX0IUK9yXs+BDwKP2DddRSGYfaRwxWa8lrL4BaQzu411qU+lubwuCFLjk/Y5DeBvrgg9P4S6GE5em0Mz+C3p+OFzf2uKEWXQFT34A2kX02G1r5t4Q4klwLvuJdTMiDG4fO/EOgh3r3AwgGOXas/a4IAvIq98AAA'},{id:'02',w:3991,h:2993,lq:'data:image/webp;base64,UklGRu4AAABXRUJQVlA4IOIAAABQBgCdASogABgAPu1kqk2ppaQiMAgBMB2JQBjmZdPADSBNFDLwBO9nRhJTxhO/NyGwmDr+e3AOfA8GAAD7pAbKAzcXLQ5bnKfnj/C3hpqJm4A9khr9vE/T0iVZ6k9ah3Fgi6Feg3wDrSEueQxju2nD9525AIc3nrbPFlI01SnPU15RUulgxB3OfbhVs7DiufkCvQlhq8cRkSAe3scRqJbkQTn7VY2+1WcOnukiq31qtpfi6WIXStm0ihM7yWcaZlVmjIwLTii8t309XQzstljf/DJsXQW7Bvl1N53h4ECkAAAA'},{id:'03',w:3448,h:5168,lq:'data:image/webp;base64,UklGRuQAAABXRUJQVlA4INgAAABQBQCdASoVACAAPu1sq08ppiOiMBgIATAdiWMAsR9CwXSrrFL1TkkDXu6OZMSQUXm03gAA/idTvdRMSPVYMPqCfFcOTQfUA2O9YDWluN6/NjMDvi1zuGlEuMrPbCPCTOHs02++bNRe+QmWLur7Ms9l2/gyMuY2JOmgxADpELuJxApyyz0G3tUAsw10R53AaM21LXcRL6/ea310r3R60Be6CxbVJEI1a4Zhdb9sHOJ2OIyoCo2LZc07orJ3g+1n12gW0AsZPtf4iZ2uGJVIjs/OEgfNFrGNAAA='},{id:'04',w:5304,h:7952,lq:'data:image/webp;base64,UklGRt4AAABXRUJQVlA4INIAAABwBQCdASoVACAAPu1kq06ppaQiKA1RMB2JbAC1Gy/BpAx3s+OkxjMk5DGyMVY8IV8s73kAAP7DXdZkcdQauDLxDHo2M4fKsMLy4tTCF2JUZbsIi3ElegQ0S3Z3OJk4DFrtb8f0FJJ2f7zbAA37yVl1VJFLppFbYH4AsdKOb/RCv/AFBNRwioHDt8Wdu90wm9OW/l8kLRhnYYy+dZeW+kbIZWyx4quhhM/hzeteEbEFbIABA2mibwaTjV5kmvTUavx1kc8QcLfBXUQqWOPFrsfUAAA='},{id:'05',w:1440,h:1920,lq:'data:image/webp;base64,UklGRgABAABXRUJQVlA4IPQAAADwBQCdASoYACAAPu1gp02ppSOiMAgBMB2JZQDLpzCboAg3SM5xrfIcI0qAVs3A89TaVQuuO+MiAAD+WmkhNlRlJgS7gTsmNUb1g7vd9KdVH69s0EyoTl7d6+bQ0Z6nmvdvfSEWOKEeGLl5DAiwNQ4UxwKX36AN0bAGmkLgF2g4ZVJiq3j0mpyNrMAi9pN3wq2oNbjV3ik84G+fX9KAGkxITaRX+XMkXe+CIZijuW97rIboffpInU3zNY4RAh8OOSEK9Uz/n3pCifSrtUuInz4m0zh1no4OZKkI/blvO9o+Lh1zYUhNvMfS3fFJORsBNdcXgAAA'},{id:'06',w:4032,h:3024,lq:'data:image/webp;base64,UklGRhgBAABXRUJQVlA4IAwBAACQBQCdASogABgAPu1qrFEppaQiqAqpMB2JZQC/OYubUDsuF5CEag5POi7xxUGK0hRWGLv2YAD+0E5k37oFI1xYeOYC05LSmkCmrCXz8UVq3476QBuQ3+9uLfNnrzlBQrpU8QNzXmuBl54OvpnO3QMXdQqzeY2O4Ew+pEyAmFw+9M4nOWNiPtthbSYSAJJsM9nbgsmIjprKTY4EeyQxQEgNFAMb3bz+vaNJ94zCuRGoKXwG5t0H00dfE3l6EJ/YlVkk73cOPt9LWuyz2ZB6gKAo3rNvmAnLHHjglLC2Jhy8shsHdoGJ+UfbRZFVh3TkrkWEwWgeNyaAysaLNNVhsXbNeEgrxLxaaBGAAAAA'},{id:'07',w:4032,h:3024,lq:'data:image/webp;base64,UklGRkQBAABXRUJQVlA4IDgBAACwBgCdASogABgAPu1qqk8ppiOiMBgIATAdiWwAnSBiakD3dLzBI1oE+dKIJ8C5qmMr0ar0gvRUdCYwVTxjkAD+50CENtkGhW3vf5TuQxSfFMQxjZXw7K5+VBgkkBHNEhNeU5uENKRaN5f4aWseKtfHTaOekXB/6GZoejzA5o0dQ0MAa5i4vcZeDf78k6RgekHZ3fOJiuKCc1iY/BxuB7n/B1I3yYQ2K6GO0GH6lbu8sOMgA2A7Mg8b3gycmDPtMZOnxLqkPHEYHBqm/UvYJ/Cw+le1K7VEWOsz9H6nSgXBs+VHSO3cWN2Qexro5tsVsMsF31mn0mLwWLavhXnzI9QFxTLr3MePVG0JEzi4A51hW/Ozj1E5W4WtqbfB/8mGkUvl0erf0k3qQDw1GCYPfNxVZdHJ+4cAAAA='},{id:'08',w:4896,h:3672,lq:'data:image/webp;base64,UklGRioBAABXRUJQVlA4IB4BAAAQBgCdASogABgAPu1mqk+ppSOiMBgIATAdiWkAA+RrK1BbCV1Qui4drSz2OgoKMFff46dbV7hbPagA/u1KvhrF4b+0gV2hcUB09zkLQ1k0e9HDdizxlm9NWCdH9WS0iPoMCfG8Kgj7EJFgT1ufnI7sTLjQU3+gXIuKs+69SQFXrBlOaA8knaZRJM+NS9/CONAg2OJ7PfZOlaWGwvzGOH82IUC4yuQYUVuceOPyjhbZb/foFAptyKkiJTjyQPymcMWi2KSIMut94kFAWtZRYufqnPwExu3HoPnrxXfjDlfniRJ1lPcHthuC/5OM8Up92K9l0sy5RL9J9/pCcEacwwcR9XHmVUB0+SSawppaRMBHcQkfMCPts+x/L/zNkCAA'},{id:'09',w:4032,h:3024,lq:'data:image/webp;base64,UklGRtQAAABXRUJQVlA4IMgAAADwBQCdASogABgAPu1gqE2ppSOiMAgBMB2JYgCxHt8DAXiJwdAB2ZelwFNlh2+vZWcFk7wmKboN1gDJF+lvNU0oqJXJ7porgU+hAllL5BLBMK26QS4w7ijyt3+8VDRiFVypiWQ68rgb7/P2YQXfW+1EG3bJyYrCEBTJ9x1htsOIF3xZjRAnBIRk3XlquSNlp/DVXQbtCoLC3AySMj+5Q0Azi2eXxXtPQFtQX9Qc6vKDv96LhEUyHbQcE9DvmZvBhivfFrW/0oAAAA=='},{id:'10',w:5120,h:3416,lq:'data:image/webp;base64,UklGRugAAABXRUJQVlA4INwAAAAwBQCdASogABUAPu1qr1CppaQiqAqpMB2JaQATwBQhEDj0hVNrQzoZfgoBmR/fEiNfaADOPz0Ld2ulDx5p8Qm7zvZhbFZZhbvai571esNCNUwFdOBGVZMmcp/Y67CmsHuTzKhkiTfV9Q8BxpY3m4A6o6m7L9W3WoHXGCemJWVJWDbWmhU9UNNxy/ax89gj3j/8KfGC3D2WBxP0k/a0pJtdweAdG1mZHP9Op72U5P4AjXsss3IMmsUtIgMZcEDj6XJSGZGJYrpDiNZEuJ5KVHPvD4k6uc+27n6ttAAA'},{id:'11',w:4896,h:3672,lq:'data:image/webp;base64,UklGRhABAABXRUJQVlA4IAQBAACQBQCdASogABgAPu1orlCppaQiqAqpMB2JQBdmary5RFjQtNw7omIA8NM05/y7dr3F9y2JwAD+8hNTi9KLTXfkjqMeGLzwZiscX1vBCbHL2qYxQWq8xduUk8rLA9Pqtsj8BGH59/Od0WJIE95JrSJDM+IXIIr42cXthGiCtcypaNOsWXSupYd5Ak5fJ2srgYcfDlUNzrX9uyUMmhTiKot75T0feMAm5/zSYhRT6EBylFdiDWWPCuXLZa99EGQwtssjUmGtXjffUCPjllx1RM6G4zBc9bmEJckfhvOq0hK8OCVqeWZiviln29bW073W4PBo1TMUWcZQv8MDEQQw9MsbhnAAAA=='},{id:'12',w:5506,h:4284,lq:'data:image/webp;base64,UklGRngBAABXRUJQVlA4IGwBAABwBwCdASogABkAPu1oq08ppiOiMBgIATAdiWwAnTKEcCLgmybHomIDXJME9PG7CfyEZRy+CFt3/PBnJ8MfWCi5ZsYpOAD+8RyhITPVTe3FSrzNSDVczTqiau2zpYsb0P8v64RbT3k7SL4H/H3ZRcZugKjEvrWEJj0Q77DFQ/ohsYZMHnoBi5XM0Fu6QNztIsMoOA2NOSavWp9M6RczcU1MY8kEZoicc0BhshDYro8krZ8RMyqvXINWkv++luemWgZYuBBeJwUUeS8blv79cevRvLu7G8jG7jlXQQFO85ci8I+SPk4aXm2Au94K7pERGyW+ouz4zhHhLr8PA/C1z8z+BZLHkp88BMT3IKowB++7iWzgTUKmkzNZ7jz/xlkTJsb8NpIjjNtWRNlYly+YlMpfNoy+KOqI85H4vzOMq6e3enhOsC4bowE7mmQESIsJPQckKSKzXzts9SeTaMqzlUmkyW5sMV/9g7ilwAAA'},{id:'13',w:5292,h:3845,lq:'data:image/webp;base64,UklGRh4BAABXRUJQVlA4IBIBAAAQBgCdASogABcAPu1qrlCppaQiqAqpMB2JbACdMoRwMIAbKIbCLQo+Wm3kf6aVlOwtogmeREBhRgAA/pgS99xC/j2bmDRiWqdYHkW5yCFiwiu2Peebugo99IK9IAi/H6+KkqoqIm5F6W0cQ6dvv6Orik+ARzTMlRevw+VKXS+9cI35mOTT5NdOxRNWT+Zao3D9+RTGWFxBNazQ790vudkZQs5Lv3ODyjq81UbHu3nvPGPJc7zN7vmXv/USIKvWAPFzITb+SA6BvMyCtveKEusEVfLEcbHGt/UY1LRME+1XGaDdo1xIUuNmeYUB8VojwtfHD8TY5ahuBJyT3Uh+Z0mpqO/ff72lJKMZrUabfeROAAAA'},{id:'14',w:3851,h:2888,lq:'data:image/webp;base64,UklGRkoBAABXRUJQVlA4ID4BAABQBwCdASogABgAPu1qrlCppaQiqAqpMB2JaACxDKt6A5nLUQC6AdckiFfm7Hew8zzvTu1zc3cx0v/pSuPoSvjFs/wAAP5mQOW2YjMzclrrZm1v4he5sDmFQVfR8wIfIMhdlNtMfgfI+YKuLUTPZ5FakiBtS6x/wv7PMHpHZQ1MfMPkoi+MkAhAfYVTq1mH23ddvApr6Q4roR867LJc047SWPJp1mZRcyFsYSpNi7X/Ib+wdTDswuFos7eQZi//p5+8Dxa+ge5e7SR/hoXX1nudlC0TWrSoIMnxLGu4XUpYTHwDfmhfEa5bSx2lTKG9mvfzp5GVY02mwHZnPPR6ky4/y+hnhsQ7b1RVUktOsSkdD5Fewj1tsJ5GDL4x8hUJDl06Py3jV0pt7PcKAIRjuuElbrsaiPJGWk3BEJ78AAA='},{id:'15',w:3227,h:3024,lq:'data:image/webp;base64,UklGRjABAABXRUJQVlA4ICQBAADQBgCdASogAB4APu1gqU2ppSQiMBgMATAdiWkAEgBgggAHXA7/DVA3oErFd+kMAlJlnxHKnRhHfxK6Ie54UYAA/vzhKkQy5+exfXrO+eQsajt+o8hFzz2kBO8/sWtrK2xgeB287zP1avKR2VeSyg9B+m3/V1ntn98JrRZJXrAa940vcCBl04o1ABXFykhjv6S63GdLDzDrk0vkAw1ViXkmlR18O6oCm7o+hlyjDDxrwcEdxldfm2QKfwf0IVQO122sNyTGzdYrytPOcsTAivkSfXwXccGyYlPHqewrjt5vPRyy1sAA0LGf03dwToCrfGBnH/CKEri97vywXwGiW7ff+EXt9QyTulc6ExGPuzTi4QUACsyuVG+FAek3kCeJPSiyreAA'},{id:'16',w:4000,h:6000,lq:'data:image/webp;base64,UklGRqwAAABXRUJQVlA4IKAAAACQBQCdASoVACAAPu1irVAppSQisBgIATAdiWcAzNA0cPL4VKUfborhNK5kNT9hdd+Wvz+WgAD+8y7j7d+mOIQwix86OhBe/2SKgknLZcBemMKwn/YNBxecJtk/fJq5apJPwbBQBfIzYU3FlHt+b3xOJDXwZYnmMpzynOnPtiTw+fupaGPkXOBB/+BGU2196V+Qi4Dxaqup1vijrHp7kgAA'},{id:'17',w:4032,h:3024,lq:'data:image/webp;base64,UklGRhYBAABXRUJQVlA4IAoBAACQBgCdASogABgAPu1irFAppSQisBgIATAdiUATpmRFIAWunbTlZRuW6gAF6hvrSwNrk6c+2vi+Gl44bm2YAP7TV/mOZplwEFWaWSK1c55lbEOqzHHMisSS2WlfgGV+eeqqTOVPdkevBZUgmifg1bsuI/eWj2YEvY2QxM33Yz2UzZtGg2SWJWBEHnU2T9+qqYw9d8nzXcHdyZQm407uVv5ntnvsrYPhyXZRDUeCc1HZXmi4TYmOfWWNKZ+kMOeiKWOwk8fh28iLqd5bI94ZPIcwDr4B5Ir0Q8CJIZqFMq56AVtQKES9c+0vfb9++ZwmayUgo9oUvSR3+KQZHKkpXJOq/upxnylGDTAAAA=='},{id:'18',w:1440,h:1080,lq:'data:image/webp;base64,UklGRigBAABXRUJQVlA4IBwBAADQBgCdASogABgAPu1kqU2ppaQiMAgBMB2JagCdB2pcWKLxNJDF3g84YkaHDKV0emwk0AfOtUUPihaN/XyI4fAA/vB3S6cPWwofde3u/ErRfgRXjooAVhxIGQtdS2s9ALR2SjpIcDJ2FeqOyexCWrZ7u5p2YxhSz3+rkRp+knn8QeBLANfXMFKPUojFQZyzbjnHcP6M3w8E8gZp/exZ62/W5txwftMtnM1vlLyamFqs/GgjyI6EQ++bNYO4d1FUvje3O5pLLLujZZFNdPFFtj4n+0BL7HQYFU+Tqgda+Wa99wxHaKZpNHEt3Og8RSjqv1gfTnjawj3ZIoOVZ4A35YbS85/ixRBuHFBhPsAlEm1Z1SmtrTOFEh0v5AAAAA=='},{id:'19',w:3088,h:2316,lq:'data:image/webp;base64,UklGRp4AAABXRUJQVlA4IJIAAADwBACdASogABgAPu1sq1EppaOiqAqpMB2JQBOmZfgqeEvOSgLvPn7sRUz7sgMhx+AA/q+MbqUU0e9gM7fdlyW8IWL/lCVuiEAU0SC3szhO6NgmEmi5eu4jX1GYWiV0H385cIh3MvlFWKWGANfnfUrhvhozBVvgC5jdSuRYYICFD6O0ccuf2P2pAJo8tSKGZKgAAA=='},{id:'20',w:4032,h:3024,lq:'data:image/webp;base64,UklGRugAAABXRUJQVlA4INwAAADQBQCdASogABgAPu1qqFAppiOiqA1RMB2JZgCdMyGBlgkIVCBE9cwSyY72OIQSIUq4WzAeJbQAAP5aEZ4Con8b7f2OD8F/Hsrtt6dtsWzNsyOxZR5M1dyh9zfw3vvbCAq5J+IxZFmeXpf4iL0BTVFcQTJJpoLPLCtJYQXLPxoqasXoWrPEkRYQGXkDSVhCk545dzQz6JSjZef1CqCwW876/ENGAZZQziEQ2Gp8vafhFwYdprsUH7QAbgtJRYql8iUoTBpux5ynI3Yg4h8qhWSdYuQzq+Y49EfEoFgA'},{id:'21',w:6000,h:4000,lq:'data:image/webp;base64,UklGRkwBAABXRUJQVlA4IEABAABwBgCdASogABUAPu1epk2ppKMiMAgBMB2JbACdMoMxvYBMgmdRpzaPjQcmW4LE498QN4t5BWSmjNvkFgAA8FGumxBDjmS5mqL3l+8eGjFqK8dt4qWWfI7FFdZ/B79qH+Sy9RzIN1n8WU0ZTz466PtW3K2+T4Y3b8qIQiad8okWIHM/CnbqJdrA10uwZcYKIiZzgsmrPGQNfqaIMTsg9XxS7rzDsLm4B3M4tjNBaQtJkhBo5T4Mpvbs2/+djrkw+yRZJgLSi7aEF3S+q7YDhDlxSM0nyWcEWRJfL065h7R+LOJ5UPaa/QY8s2JlyeuXH1NIC3eeKG6ZmaWRpKtA+DGTkOPqsqcun6/NrSgW57fNBdSAjL74ppM0r1C8hpjMyN5WYlUSwSKEXS0xgdmyVc+lf//2+1Dcb0sj5/TTVCwAAA=='},{id:'22',w:1920,h:1440,lq:'data:image/webp;base64,UklGRggBAABXRUJQVlA4IPwAAABwBgCdASogABgAPu1opU4ppiMiMBgMATAdiWgApzUHuAIoB16mXwZqxPgbPv1eDQhkqLEOIR/k3VZwiGAA/rBR7wgBtsHTkldhW7sHqZzkjUHXn6X+ZpqkbnsYLzoD/KzO3cFJCXEabUoKTVmY3ORuFC8uSj9KPvDUm4QPF9iguqYi4q3JZQJiPF1dR8iGB1zdP6k8wRah0a3v1COpa5Pzt7kgPen1SwWpCMNtA5MrCILU7Px8fc9bIJtvDNTGXrqfZzE31hBRNzd6AZem6WUdpkRd4efv4PXeThRpOBMyu6GVY7665nzYM8a2j4mmPYNZF1rmbz0mP144AAA='},{id:'23',w:1920,h:1440,lq:'data:image/webp;base64,UklGRkABAABXRUJQVlA4IDQBAADwBgCdASogABgAPu1qrVCppaQiqAqpMB2JYgC7IMiYA+gUgDraM21HZ2ONx1wdBrvkPBVYzeyMwFN3JucCkrpsAP7xxUfZZjw5OlF7YeYPJRwgmKaYWkqvCJhiL/mfjMNnBJqTMRvG8V/bQfJuulCFy9croRLb0cjsaq5K0+gLgj3ymwUFHHlcbZ/c9QSVs0/DHzm4VvZ+xssyoj8Y9q4/bbmA5z0oTaROEcC42hwfUxL2C+kqzdSFZxjzMuAlzLbcGB2GeWT3PgzBSsX0yTyp1lbCs0/F6Y/+VgL891tBvA/LUxs/YT5DUywt2VtEcOa2T9al/AeanEi/PIHf1PRWhZGjllYX4lD2RQyoaZ811C7PGZhM9T9vAs8Y6UfzgI5W/L2032Df/4kNYiu/VRMQ1tAUAA=='},{id:'24',w:3448,h:5168,lq:'data:image/webp;base64,UklGRpYAAABXRUJQVlA4IIoAAACQBACdASoVACAAPu1iqk+ppSOiMBgIATAdiWMAygAPVcfEm6mYummcsNPLSIAA/fvhDel4mItkaceAeh3/erJs0qPctGM3070HxAuXilEzugYcGviWRgJw/3pUgQ3GKzHZqn+d3rIwVrJJsNkBjzIGrNWtZeYNjPk78drb+jigFz5ew3GqtT2kAAA='},{id:'25',w:4032,h:3024,lq:'data:image/webp;base64,UklGRgoBAABXRUJQVlA4IP4AAACQBQCdASogABgAPu1ur1IppiQiqAgBMB2JQBdgZYMOi9wRrxSNc5v6TZGt/fLBiZk9B9fLvAD++D7IRGze1aQCQMZc/njzQHpWoPEqQmP4kTNWIALJQdqz2dxPjbUrItwtKX7FIWVzICS7eRckuPnWuqfG2i0GyQOLLlx1B4cOM4g4aYmUOUWS+VJPECIfno+nWYLUW7X2PaH+wkA2LhOIWmsDGTg9bcUpcaAm6wNrSSQuEcWfyhrQwdauJmTeSS/WCqavZT73c09qmwiOqFFNU1rWXCwUJP+N1jidlu01b3/8vbPB4sdFqonyY6dDlmyyoDZhm2L6OzaYGkTgAA=='}];
@@ -3042,6 +3138,107 @@ document.addEventListener('keydown', e=>{
 
 /* 启动：拉取日志列表（游客/登录用户均可浏览，登录态下携带 token 以反映点赞） */
 if(apiReady()) loadJournal();
+
+/* ============ 我的图书馆 ============ */
+function initLibrary(){
+  const grid = document.getElementById('libGrid');
+  const search = document.getElementById('libSearch');
+  const chips = document.getElementById('libChips');
+  const countEl = document.getElementById('libCount');
+  const data = (window.LIBRARY_DATA && window.LIBRARY_DATA.items) || [];
+  if(countEl) countEl.textContent = data.length;
+  if(!grid) return;
+  if(!data.length){ grid.innerHTML = '<div class="lib-empty">图书馆资料正在整理中，敬请期待。</div>'; return; }
+
+  let curCat = 'all';
+  let curQ = '';
+
+  const fmtWords = w => w >= 1000 ? (w/1000).toFixed(1).replace(/\.0$/,'') + 'k' : ('' + w);
+  const escAttr = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const firstChar = t => { const m = (t||'').trim(); const r = m.match(/[㐀-鿿A-Za-z0-9]/); return r ? r[0] : '·'; };
+
+  function matches(it){
+    if(curCat !== 'all' && it.category !== curCat) return false;
+    if(curQ){
+      const q = curQ.toLowerCase();
+      if(!(it.title.toLowerCase().includes(q) || (it.summary||'').toLowerCase().includes(q) || (it.category||'').toLowerCase().includes(q))) return false;
+    }
+    return true;
+  }
+  function sortItems(list){
+    return list.slice().sort((a,b)=>{
+      const da = a.date || '0000', db = b.date || '0000';
+      if(da !== db) return db < da ? -1 : 1;          // 日期降序
+      return (a.title||'').localeCompare(b.title||'', 'zh');
+    });
+  }
+  function excerpt(it){
+    let s = (it.summary||'').trim();
+    const t = (it.title||'').trim();
+    if(t && s.startsWith(t)) s = s.slice(t.length).trim();
+    if(!s){
+      if((it.bodyHtml||'').includes('<img')) return '图片篇章 · 点击阅读';
+      return '（暂无简介）';
+    }
+    return s;
+  }
+  function cardHTML(it){
+    const mark = firstChar(it.title);
+    const dateTxt = it.date || '日期不详';
+    return `<article class="lib-card reveal" data-id="${escAttr(it.id)}" style="--h:${it.hue}">
+      <div class="lib-banner">
+        <span class="lib-cat">${escAttr(it.category)}</span>
+        <span class="lib-mark">${escAttr(mark)}</span>
+      </div>
+      <div class="lib-body">
+        <h3 class="lib-title">${escAttr(it.title)}</h3>
+        <p class="lib-summary">${escAttr(excerpt(it))}</p>
+        <div class="lib-meta">
+          <span class="lib-date">${escAttr(dateTxt)}</span>
+          <span class="lib-words">${fmtWords(it.words)} 字</span>
+        </div>
+      </div>
+    </article>`;
+  }
+  function render(){
+    const list = sortItems(data.filter(matches));
+    if(!list.length){ grid.innerHTML = '<div class="lib-empty">没有找到匹配的篇章，换个关键词试试。</div>'; return; }
+    grid.innerHTML = list.map(cardHTML).join('');
+    grid.querySelectorAll('.lib-card.reveal').forEach(c=>{ if(typeof io !== 'undefined') io.observe(c); else c.classList.add('in'); });
+  }
+
+  search.addEventListener('input', ()=>{ curQ = search.value.trim(); render(); });
+  chips.addEventListener('click', e=>{
+    const btn = e.target.closest('.lib-chip'); if(!btn) return;
+    curCat = btn.dataset.cat;
+    chips.querySelectorAll('.lib-chip').forEach(b=> b.classList.toggle('active', b===btn));
+    render();
+  });
+
+  /* 阅读弹层 */
+  const libReaderEl = document.getElementById('libReader');
+  const libReaderBody = document.getElementById('libReaderBody');
+  function openReader(id){
+    const it = data.find(x=>x.id===id); if(!it) return;
+    document.getElementById('libReaderCat').textContent = it.category;
+    document.getElementById('libReaderDate').textContent = it.date ? ('写于 ' + it.date) : '日期不详';
+    document.getElementById('libReaderTitle').textContent = it.title;
+    libReaderBody.innerHTML = it.bodyHtml || '<p style="color:var(--dim)">（暂无正文）</p>';
+    document.getElementById('libReaderWords').textContent = '约 ' + it.words + ' 字';
+    libReaderEl.classList.add('open'); libReaderEl.setAttribute('aria-hidden','false');
+    const panel = libReaderEl.querySelector('.lib-reader'); if(panel) panel.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeReader(){ libReaderEl.classList.remove('open'); libReaderEl.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+  grid.addEventListener('click', e=>{ const c = e.target.closest('.lib-card'); if(c) openReader(c.dataset.id); });
+  document.getElementById('libReaderX').addEventListener('click', closeReader);
+  libReaderEl.addEventListener('click', e=>{ if(e.target === libReaderEl) closeReader(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape' && libReaderEl.classList.contains('open')) closeReader(); });
+
+  render();
+}
+if(window.LIBRARY_DATA) initLibrary();
+else window.addEventListener('DOMContentLoaded', ()=>{ if(window.LIBRARY_DATA) initLibrary(); });
 </script>
 </body>
 </html>
