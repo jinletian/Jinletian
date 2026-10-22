@@ -1545,6 +1545,8 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- HEIC/HEIF 跨浏览器解码（libheif-wasm）：defer 并行加载，wasm 仅在真正上传 HEIC 时才下载 -->
+<script src="assets/libheif/libheif.js" defer></script>
 <script src="assets/library/library-data.js"></script>
 <script>
 /* ============ 图片清单（内联，按编号 01-25） ============ */
@@ -2178,31 +2180,107 @@ function renderAvatar(el, dataUrl, name){
   }
 }
 
-/* 图片压缩：最长边 max，输出 webp Blob */
+/* 图片压缩：最长边 max，输出 webp Blob。
+   解码策略：先用浏览器原生 <img> 解码（JPG/PNG/WebP/AVIF，以及原生支持 HEIC 的 Safari/macOS Chrome）；
+   原生失败（Firefox / Windows Chrome 等不支持 HEIC 的环境）再走 libheif-wasm 兜底数 HEIC/HEIF；
+   两者都失败才给出“转成 JPG/PNG”的友好提示。 */
 function isHeicName(name){ return /\.(heic|heif)$/i.test(name || ''); }
-function compressImage(file, max, q){
+
+/* ---- HEIC/HEIF 解码（libheif-wasm，跨浏览器兜底） ---- */
+let _libheifPromise = null;
+function libheifWasmURL(f){
+  // 与 libheif.js 同目录；用 baseURI 拼绝对地址，避免深层锚点（/Jinletian/#x）解析错位
+  try{ return new URL('assets/libheif/' + f, document.baseURI).href; }
+  catch(_){ return 'assets/libheif/' + f; }
+}
+async function loadLibheif(){
+  if(_libheifPromise) return _libheifPromise;
+  _libheifPromise = (async ()=>{
+    // 1) 确保 libheif.js（Emscripten 运行时）已就绪
+    if(typeof window.libheif !== 'function'){
+      await new Promise((res, rej)=>{
+        const s = document.createElement('script');
+        s.src = libheifWasmURL('libheif.js');
+        s.onload = res;
+        s.onerror = ()=>rej(new Error('libheif 脚本加载失败'));
+        document.head.appendChild(s);
+      });
+    }
+    if(typeof window.libheif !== 'function') throw new Error('libheif 未加载');
+    // 2) 自行 fetch wasm（绕过 Emscripten 默认的同步 XHR，避免“sync fetching failed”）
+    const wasmBinary = await fetch(libheifWasmURL('libheif.wasm')).then(r=>{
+      if(!r.ok) throw new Error('libheif.wasm 加载失败：' + r.status);
+      return r.arrayBuffer();
+    });
+    // 3) 传入 wasmBinary，跳过网络取 wasm
+    return window.libheif({ locateFile: libheifWasmURL, wasmBinary });
+  })();
+  // 失败则清空缓存，下次重试（而非永久缓存 rejected promise）
+  _libheifPromise.catch(()=>{ _libheifPromise = null; });
+  return _libheifPromise;
+}
+async function decodeHeicToCanvas(file){
+  const lib = await loadLibheif();
+  const buf = await file.arrayBuffer();
+  const decoder = new lib.HeifDecoder();
+  const images = decoder.decode(buf);
+  if(!images || !images.length) throw new Error('HEIC 解析失败：未找到图像');
+  const image = images[0];
+  const w = image.get_width(), h = image.get_height();
+  if(!w || !h) throw new Error('HEIC 尺寸读取失败');
+  const cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const ctx = cv.getContext('2d');
+  const imageData = ctx.createImageData(w, h);   // 预分配 RGBA 缓冲，供 libheif 填充
+  await new Promise((res, rej)=>{
+    image.display(imageData, (out)=>{ out ? res(out) : rej(new Error('HEIC 像素解码失败')); });
+  });
+  ctx.putImageData(imageData, 0, 0);
+  return cv;
+}
+
+/* 浏览器原生解码（JPG/PNG/WebP/AVIF/原生支持 HEIC 的浏览器） */
+function nativelyDecode(file){
   return new Promise((resolve, reject)=>{
-    // 放宽校验：HEIC/HEIF 等手机照片常报告空 MIME，按扩展名放行（浏览器能解码即可压缩）
-    const isImageLike = (file.type && file.type.startsWith('image/')) ||
-      /\.(heic|heif|avif|webp|png|jpe?g|gif|bmp)$/i.test(file.name || '');
-    if(!isImageLike) return reject(new Error('请选择图片文件'));
-    if(file.size > 10*1024*1024) return reject(new Error('图片不能超过 10MB'));
     const url = URL.createObjectURL(file);
     const img = new Image();
-    img.onload = ()=>{
-      const scale = Math.min(1, max / Math.max(img.width, img.height));
-      const w = Math.max(1, Math.round(img.width*scale)), h = Math.max(1, Math.round(img.height*scale));
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      c.toBlob(b=>{
-        URL.revokeObjectURL(url);
-        b ? resolve(b) : reject(new Error('图片压缩失败'));
-      }, 'image/webp', q);
-    };
-    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error(isHeicName(file.name) ? '当前浏览器无法读取 HEIC/HEIF 格式，请在手机或电脑上转为 JPG/PNG 后再上传' : '图片读取失败')); };
+    let done = false;
+    const cleanup = ()=>{ try{ URL.revokeObjectURL(url); }catch(_){} };
+    img.onload = ()=>{ if(done) return; done = true; cleanup(); resolve(img); };
+    img.onerror = ()=>{ if(done) return; done = true; cleanup(); reject(new Error('native-decode-failed')); };
     img.src = url;
+    setTimeout(()=>{ if(done) return; done = true; cleanup(); reject(new Error('native-decode-timeout')); }, 12000);
   });
+}
+/* 把已解码的 canvas/img 缩放并压成 webp Blob（最长边 max） */
+function canvasToWebp(src, max, q){
+  const sw = (src.naturalWidth || src.width), sh = (src.naturalHeight || src.height);
+  const scale = Math.min(1, max / Math.max(sw, sh));
+  const w = Math.max(1, Math.round(sw*scale)), h = Math.max(1, Math.round(sh*scale));
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  c.getContext('2d').drawImage(src, 0, 0, w, h);
+  return new Promise((resolve, reject)=>{
+    c.toBlob(b=> b ? resolve(b) : reject(new Error('图片压缩失败')), 'image/webp', q);
+  });
+}
+function compressImage(file, max, q){
+  const isImageLike = (file.type && file.type.startsWith('image/')) ||
+    /\.(heic|heif|avif|webp|png|jpe?g|gif|bmp)$/i.test(file.name || '');
+  if(!isImageLike) return Promise.reject(new Error('请选择图片文件'));
+  if(file.size > 10*1024*1024) return Promise.reject(new Error('图片不能超过 10MB'));
+
+  async function run(){
+    // 1) 原生解码（最快，覆盖绝大多数格式）
+    try{ return await canvasToWebp(await nativelyDecode(file), max, q); }catch(_){ /* 落到 libheif */ }
+    // 2) libheif 兜底数 HEIC/HEIF（含原生不支持 HEIC 的浏览器）
+    try{ return await canvasToWebp(await decodeHeicToCanvas(file), max, q); }catch(_){ /* 落到友好提示 */ }
+    // 3) 全部失败
+    throw new Error(isHeicName(file.name)
+      ? '当前浏览器无法读取该 HEIC/HEIF 文件，请在手机或电脑上转为 JPG/PNG 后再上传'
+      : '图片读取失败');
+  }
+  return run();
 }
 /* 压缩并把体积压到 maxBytes 以内（逐级降质/降分辨率） */
 async function compressToLimit(file, maxEdge, quality, maxBytes){
