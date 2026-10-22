@@ -3165,8 +3165,25 @@ function initLibrary(){
     }
     return true;
   }
+  function matchScore(it){
+    if(!curQ) return 0;
+    const q = curQ.toLowerCase();
+    const t = (it.title||'').toLowerCase();
+    const s = (it.summary||'').toLowerCase();
+    const c = (it.category||'').toLowerCase();
+    if(t === q) return 0;                 // 标题完全命中
+    if(t.startsWith(q)) return 1;         // 标题开头命中
+    if(t.includes(q)) return 2;           // 标题包含
+    if(s.includes(q) || c.includes(q)) return 3;  // 仅正文/分类命中
+    return 4;
+  }
   function sortItems(list){
+    const q = curQ.trim().toLowerCase();
     return list.slice().sort((a,b)=>{
+      if(q){                              // 搜索时按相关度优先，标题命中排最前
+        const sa = matchScore(a), sb = matchScore(b);
+        if(sa !== sb) return sa - sb;
+      }
       const da = a.date || '0000', db = b.date || '0000';
       if(da !== db) return db < da ? -1 : 1;          // 日期降序
       return (a.title||'').localeCompare(b.title||'', 'zh');
@@ -3176,6 +3193,7 @@ function initLibrary(){
     let s = (it.summary||'').trim();
     const t = (it.title||'').trim();
     if(t && s.startsWith(t)) s = s.slice(t.length).trim();
+    s = s.replace(/^[\s—–\-]+/, '');   // 去掉被剥离副标题后残留的破折号
     if(!s){
       if((it.bodyHtml||'').includes('<img')) return '图片篇章 · 点击阅读';
       return '（暂无简介）';
