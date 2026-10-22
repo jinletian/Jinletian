@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Jinletian · 个人主页</title>
 <meta name="description" content="Jinletian 的个人主页与图片集" />
+<link rel="icon" type="image/png" sizes="32x32" href="assets/logo/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="assets/logo/favicon-192.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="assets/logo/favicon-180.png" />
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <style>
@@ -252,16 +255,36 @@
     box-shadow:0 6px 24px -12px rgba(0,0,0,.18);
     padding-top:10px;padding-bottom:10px;
   }
-  .logo{font-family:inherit;font-size:19px;letter-spacing:-.01em;font-weight:700}
-  .logo b{color:var(--accent);font-weight:700}
+  /* —— 签名 Logo：手写签名 + 姓名 组合标识 —— */
+  .logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;flex:none;
+    -webkit-tap-highlight-color:transparent}
+  .logo-mark{display:block;height:40px;width:47px;flex:none;
+    background:linear-gradient(135deg,#0b6bf2 0%,#3d5bf0 46%,#7b5cf0 100%);
+    background-size:170% 170%;background-position:0% 0%;
+    -webkit-mask-image:url('assets/logo/signature-mask.png');
+    mask-image:url('assets/logo/signature-mask.png');
+    -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+    -webkit-mask-position:center;mask-position:center;
+    -webkit-mask-size:contain;mask-size:contain;
+    transition:transform .5s var(--spring),background-position .9s var(--ease)}
+  .logo-word{display:flex;flex-direction:column;gap:1px;line-height:1.1}
+  .logo-word b{font-size:13.5px;font-weight:600;letter-spacing:.10em;color:var(--fg)}
+  .logo-word i{font-style:normal;font-size:7.5px;font-weight:600;letter-spacing:.22em;
+    color:var(--dim);white-space:nowrap}
+  .logo:hover .logo-mark{transform:translateY(-1px) scale(1.035);background-position:100% 100%}
+  .logo:active .logo-mark{transform:scale(.95)}
+  @supports not ((mask-image:none) or (-webkit-mask-image:none)){ .logo-mark{display:none} }
+  :root[data-theme="dark"] .logo-mark{
+    background:linear-gradient(135deg,#5ac8fa 0%,#7aa2ff 46%,#b39dff 100%)}
   #nav nav{display:flex;gap:clamp(14px,2.4vw,34px);align-items:center}
   #nav nav a{font-size:12.5px;color:var(--dim);position:relative;padding:4px 0;transition:.25s;letter-spacing:.01em;font-weight:400}
   #nav nav a::after{content:"";position:absolute;left:0;bottom:-2px;height:2px;width:0;background:var(--accent);border-radius:2px;transition:width .4s var(--spring)}
   #nav nav a:hover,#nav nav a.active{color:var(--fg)}
   #nav nav a.active::after{width:100%}
   /* 未滚动（透明悬浮于照片上）时，导航文字提亮防与背景混 */
-  #nav:not(.scrolled) .logo{color:#fff}
-  #nav:not(.scrolled) .logo b{color:#fff}
+  #nav:not(.scrolled) .logo-mark{background:#fff}
+  #nav:not(.scrolled) .logo-word b{color:#fff}
+  #nav:not(.scrolled) .logo-word i{color:rgba(255,255,255,.72)}
   #nav:not(.scrolled) nav a{color:rgba(255,255,255,.84)}
   #nav:not(.scrolled) nav a:hover,#nav:not(.scrolled) nav a.active{color:#fff}
   #nav:not(.scrolled) .theme-toggle{color:rgba(255,255,255,.84);background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18)}
@@ -790,6 +813,10 @@
 
   @media(max-width:640px){
     #nav nav{display:none}
+    .logo{gap:8px}
+    .logo-mark{height:33px;width:39px}
+    .logo-word b{font-size:12.5px;letter-spacing:.06em}
+    .logo-word i{display:none}
     .lightbox{padding:60px 12px}
     .lb-prev,.lb-next{width:44px;height:44px;font-size:24px}
     .lb-prev{left:6px}.lb-next{right:6px}
@@ -996,7 +1023,10 @@
 
 <!-- ================= 导航 ================= -->
 <header id="nav">
-  <a class="logo" href="#home">Jin<b>letian</b></a>
+  <a class="logo" href="#home" aria-label="金乐添 · 回到首页">
+    <span class="logo-mark" aria-hidden="true"></span>
+    <span class="logo-word"><b>金乐添</b><i>JIN LETIAN</i></span>
+  </a>
     <nav>
       <a href="#home" class="active">首页</a>
       <a href="#gallery">图片集</a>
