@@ -37,6 +37,8 @@
     --nav-bg:rgba(255,255,255,.78);
     /* —— 液态玻璃（浅色 = 白磨砂） —— */
     --glass-bg:rgba(255,255,255,.66);
+    /* 模态框专用：更实的磨砂，保证浮在亮图/hero 上时正文文字清晰可读（玻璃感仍在） */
+    --modal-glass:rgba(255,255,255,.90);
     --glass-brd:rgba(0,0,0,.08);
     --glass-hl:inset 0 1px 0 rgba(255,255,255,.90),inset 0 -1px 0 rgba(0,0,0,.02);
     --glass-shadow:0 12px 40px -14px rgba(0,0,0,.18);
@@ -89,6 +91,8 @@
     --hero-wash:rgba(10,132,255,.12);
     --nav-bg:rgba(16,16,18,.72);
     --glass-bg:rgba(28,28,30,.66);
+    /* 模态框专用：更实的磨砂（深色下也更不透明，保证文字清晰） */
+    --modal-glass:rgba(26,26,29,.90);
     --glass-brd:rgba(255,255,255,.12);
     --glass-hl:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(255,255,255,.04);
     --glass-shadow:0 12px 40px -12px rgba(0,0,0,.70);
@@ -705,7 +709,7 @@
   .modal.open{opacity:1;visibility:visible}
   .modal-card{
     position:relative;width:min(420px,100%);margin:auto;
-    background:var(--glass-bg);
+    background:var(--modal-glass);
     backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);
     border:1px solid var(--glass-brd);border-radius:var(--r-lg);padding:34px 30px;
     box-shadow:var(--glass-hl),var(--modal-shadow);
@@ -1042,8 +1046,8 @@
   /* 各玻璃面的底色交由 .lgx-b1 承担（元素自身背景清空，保证层序正确） */
   #nav.scrolled{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
   #nav>.lgx-b1{background:var(--nav-bg)}
-  .modal-card{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:7px;--lgx-sat:1.9}
-  .modal-card>.lgx-b1{background:var(--glass-bg)}
+  .modal-card{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:9px;--lgx-sat:1.9}
+  .modal-card>.lgx-b1{background:var(--modal-glass)}
   .modal.open .modal-card{filter:none}          /* filter 会形成背景根，须清零 */
   .lb-bar{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:8px;--lgx-sat:1.7}
   .lb-bar>.lgx-b1{background:var(--lb-bar)}
@@ -1452,7 +1456,7 @@
     </div>
     <!-- 留言管理 -->
     <div id="adminPaneMsgs">
-      <p class="auth-hint">作为站长，你可以删除任意留言（包括他人的）。删除后所有人立即可见。</p>
+      <p class="auth-hint">作为站长，你可以删除任意留言（包括他人的）。删除后所有人立即可见；点每行的「点赞人」可查看是谁点的赞。</p>
       <div class="admin-list" id="adminMsgList"></div>
     </div>
     <!-- 图片管理 -->
@@ -1474,6 +1478,7 @@
         <button type="button" class="btn primary" id="adminNewJournalBtn">写新日志</button>
         <span class="admin-hint">仅站长可发布；支持封面图（自动压缩至 1.5MB 内）。</span>
       </div>
+      <p class="auth-hint">点每篇日志的「点赞人」按钮，可查看是谁给它点了赞（仅你可见）。</p>
       <div class="admin-journal" id="adminJournalList"></div>
     </div>
     <!-- 评论回收站 -->
@@ -2903,7 +2908,7 @@ async function loadAdminMsgs(){
       row.innerHTML = `
         <span class="ava" ${m.avatar ? '' : `style="background:${avatarColor(m.nickname)}"`}>${avaHtml}</span>
         <span class="info"><span class="nick">${escHtml(m.nickname)}</span><span class="sub">${escHtml(m.content || '[图片]')} · ${fmtTime(m.createdAt)}</span></span>
-        <button type="button" class="admin-mini" data-act="likers">赞 ${m.likeCount || 0}</button>
+        <button type="button" class="admin-mini" data-act="likers" title="查看是谁给这条留言点了赞">点赞人 ${m.likeCount || 0}</button>
         <button type="button" class="admin-mini danger" data-act="del">删除</button>`;
       row.querySelector('[data-act="likers"]').addEventListener('click', ()=>showLikers('message', m.id, '这条留言的点赞人'));
       row.querySelector('[data-act="del"]').addEventListener('click', async ()=>{
@@ -2934,7 +2939,7 @@ async function loadAdminPhotos(){
         <img src="${imgUrl(p.id)}" alt="已上传图片">
         <span class="size">${Math.max(1, Math.round(p.size / 1024))}KB</span>
         <span class="ops">
-          <button type="button" data-act="likers">赞 ${p.likeCount || 0}</button>
+          <button type="button" data-act="likers" title="查看是谁给这张图片点了赞">赞 ${p.likeCount || 0}</button>
           <button type="button" data-act="toggle">${p.hidden ? '上架' : '下架'}</button>
           <button type="button" data-act="del">删除</button>
         </span>`;
@@ -3071,6 +3076,7 @@ const HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 const CHAT  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v11H9l-4 3.5V16.5H4z"/></svg>';
 
 let curArticle = null;
+let articleColdTipTimer = null;   // 冷启动提示定时器（打开日志 4 秒还没出来就提示）
 
 function excerptOf(text){
   const t = String(text || '').replace(/\s+/g, ' ').trim();
@@ -3117,6 +3123,13 @@ function openArticle(id){
   articleModal.classList.add('open');
   articleModal.setAttribute('aria-hidden', 'false');
   articleTitle.textContent = '加载中…';
+  // 免费后端冷启动可能要几十秒：4 秒还没出来就给明确提示，避免用户以为卡死
+  clearTimeout(articleColdTipTimer);
+  articleColdTipTimer = setTimeout(()=>{
+    if(curArticle === id && articleTitle.textContent === '加载中…'){
+      articleTitle.textContent = '加载中…（后端正在冷启动，请稍候，会自动重试）';
+    }
+  }, 4000);
   articleBody.textContent = '';
   articleCover.innerHTML = '';
   articleAva.textContent = ''; articleAva.style.background = '';
@@ -3128,6 +3141,7 @@ function openArticle(id){
   loadArticleDetail(id);
 }
 function closeArticle(){
+  clearTimeout(articleColdTipTimer);
   articleModal.classList.remove('open');
   articleModal.setAttribute('aria-hidden', 'true');
   curArticle = null;
@@ -3135,11 +3149,13 @@ function closeArticle(){
 articleClose.addEventListener('click', closeArticle);
 articleModal.addEventListener('click', e=>{ if(e.target === articleModal) closeArticle(); });
 
-async function loadArticleDetail(id){
+async function loadArticleDetail(id, attempt){
+  attempt = attempt || 0;
   try{
     const data = await withTimeout(
       api('/api/articles/' + id, {}, !!localStorage.getItem(TOKEN_KEY)),
-      40000, '服务器响应超时（免费后端刚睡醒，正在冷启动，一般再点一次「重试」就好）');
+      40000, '服务器响应超时（免费后端刚睡醒，正在冷启动，稍候会自动重试）');
+    if(curArticle !== id) return;               // 已切走/关闭则不渲染
     const a = data.article;
     articleTitle.textContent = a.title || '';
     articleBody.textContent = a.body || '';
@@ -3151,6 +3167,13 @@ async function loadArticleDetail(id){
     renderComments(data.comments || []);
   }catch(e){
     console.warn('loadArticleDetail', e);
+    // 失败自动重试一次：冷启动/瞬时故障下，第一次多半已经把后端唤醒，第二次立刻成功
+    if(attempt < 1){
+      await new Promise(r=>setTimeout(r, 900));
+      if(curArticle === id) return loadArticleDetail(id, attempt + 1);
+      return;
+    }
+    if(curArticle !== id) return;
     articleTitle.textContent = '文章加载失败';
     articleBody.innerHTML = '';
     const tip = document.createElement('div');
@@ -3288,7 +3311,7 @@ async function loadAdminJournal(){
           <span class="j-sub">${timeAgo(a.createdAt)} · ${a.likeCount || 0} 赞 · ${a.commentCount || 0} 评论</span>
         </span>
         <span class="ops">
-          <button type="button" data-act="likers">赞 ${a.likeCount || 0}</button>
+          <button type="button" data-act="likers" title="查看是谁给这篇日志点了赞">点赞人 ${a.likeCount || 0}</button>
           <button type="button" data-act="edit">编辑</button>
           <button type="button" class="danger" data-act="del">删除</button>
         </span>`;
