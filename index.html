@@ -1451,6 +1451,7 @@
       <button type="button" class="auth-tab" id="adminTabPhotos">图片管理</button>
       <button type="button" class="auth-tab" id="adminTabUsers">账号管理</button>
       <button type="button" class="auth-tab" id="adminTabJournal">日志管理</button>
+      <button type="button" class="auth-tab" id="adminTabTrash">回收站</button>
     </div>
     <!-- 留言管理 -->
     <div id="adminPaneMsgs">
@@ -1477,6 +1478,13 @@
         <span class="admin-hint">仅站长可发布；支持封面图（自动压缩至 1.5MB 内）。</span>
       </div>
       <div class="admin-journal" id="adminJournalList"></div>
+    </div>
+    <!-- 评论回收站 -->
+    <div id="adminPaneTrash" hidden>
+      <p class="auth-hint">你删除的留言、日志、图片、评论都会先进入这里，可一键恢复，也可彻底删除。今后删除不再立即永久消失。</p>
+      <div class="admin-list" id="adminTrashList"></div>
+    </div>
+
     </div>
     <div class="modal-actions">
       <button class="btn ghost" id="adminClose">关闭</button>
@@ -1694,6 +1702,7 @@ const adminNavLink = document.getElementById('adminNavLink');
 const adminMsgList = document.getElementById('adminMsgList');
 const adminPhotoList = document.getElementById('adminPhotoList');
 const adminUserList = document.getElementById('adminUserList');
+const adminTrashList = document.getElementById('adminTrashList');
 const galleryItems = PHOTOS.map(p => ({ id: p.id, src: 'local', w: p.w, h: p.h, lq: p.lq }));
 let remotePhotos = [];
 let photoIO = null;   // 画廊入场观察器（文件末尾初始化）
@@ -2848,6 +2857,7 @@ function openAdmin(){
   loadAdminPhotos();
   loadAdminUsers();
   loadAdminJournal();
+  loadAdminTrash();
 }
 function closeAdmin(){
   adminModal.classList.remove('open');
@@ -2858,10 +2868,12 @@ function adminTab(which){
   document.getElementById('adminTabPhotos').classList.toggle('active', which === 'photos');
   document.getElementById('adminTabUsers').classList.toggle('active', which === 'users');
   document.getElementById('adminTabJournal').classList.toggle('active', which === 'journal');
+  document.getElementById('adminTabTrash').classList.toggle('active', which === 'trash');
   document.getElementById('adminPaneMsgs').hidden = which !== 'msgs';
   document.getElementById('adminPanePhotos').hidden = which !== 'photos';
   document.getElementById('adminPaneUsers').hidden = which !== 'users';
   document.getElementById('adminPaneJournal').hidden = which !== 'journal';
+  document.getElementById('adminPaneTrash').hidden = which !== 'trash';
 }
 adminNavLink.addEventListener('click', e=>{ e.preventDefault(); openAdmin(); });
 document.getElementById('adminClose').addEventListener('click', closeAdmin);
@@ -2870,6 +2882,7 @@ document.getElementById('adminTabMsgs').addEventListener('click', ()=>adminTab('
 document.getElementById('adminTabPhotos').addEventListener('click', ()=>adminTab('photos'));
 document.getElementById('adminTabUsers').addEventListener('click', ()=>adminTab('users'));
 document.getElementById('adminTabJournal').addEventListener('click', ()=>adminTab('journal'));
+document.getElementById('adminTabTrash').addEventListener('click', ()=>adminTab('trash'));
 
 function fmtTime(ts){
   const d = new Date(ts);
@@ -3261,6 +3274,75 @@ async function loadAdminJournal(){
     });
   }catch(e){
     adminJournalList.innerHTML = '<div class="admin-empty">加载失败，请稍后重试</div>';
+  }
+}
+
+async function loadAdminTrash(){
+  if(!isAdminUser()) return;
+  adminTrashList.innerHTML = '<div class="admin-empty">加载中…</div>';
+  try{
+    const types = [
+      { key:'comments', label:'日志评论' },
+      { key:'message_comments', label:'留言评论' },
+      { key:'photo_comments', label:'画廊评论' },
+      { key:'messages', label:'留言' },
+      { key:'articles', label:'日志' },
+      { key:'photos', label:'图片' },
+    ];
+    const all = [];
+    await Promise.all(types.map(async t => {
+      try{
+        const data = await api('/api/trash?type=' + t.key, {}, true);
+        (data.items || []).forEach(it => all.push({ ...it, _type: t.key, _label: t.label }));
+      }catch(e){ /* 忽略单类错误 */ }
+    }));
+    if(!all.length){ adminTrashList.innerHTML = '<div class="admin-empty">回收站是空的。删除的留言/日志/图片/评论都会先来这里，可随时恢复。</div>'; return; }
+    all.sort((a,b)=> (b.created_at||0)-(a.created_at||0));
+    adminTrashList.innerHTML = '';
+    all.forEach(c=>{
+      let title, sub, avaInner = '', avaStyle = '';
+      if(c._type === 'articles'){
+        title = c.title || '（无标题）';
+        sub = (c.nickname ? '作者 ' + c.nickname + ' · ' : '') + fmtTime(c.created_at);
+        avaStyle = `style="background:${avatarColor(c.title || 'a')}"`;
+        avaInner = escHtml((c.title || '日').trim().charAt(0));
+      } else if(c._type === 'photos'){
+        title = '图片 ' + (c.w || '?') + '×' + (c.h || '?');
+        sub = (c.nickname ? c.nickname + ' · ' : '') + fmtTime(c.created_at);
+        avaInner = `<img src="${imgUrl(c.id)}" alt="">`;
+      } else {
+        title = c.nickname || '匿名';
+        const body = (c._type === 'messages') ? (c.content || '[图片留言]') : (c.content || '');
+        sub = body + ' · ' + fmtTime(c.created_at);
+        if(c.avatar){ avaInner = `<img src="${imgUrl(c.avatar)}" alt="">`; }
+        else { avaStyle = `style="background:${avatarColor(c.nickname)}"`; avaInner = escHtml((c.nickname || '?').trim().charAt(0)); }
+      }
+      const row = document.createElement('div');
+      row.className = 'admin-row';
+      row.innerHTML = `
+        <span class="ava" ${avaStyle}>${avaInner}</span>
+        <span class="info"><span class="nick">${escHtml(title)} <span class="u-status">${escHtml(c._label)}</span></span><span class="sub">${escHtml(sub)}</span></span>
+        <button type="button" class="admin-mini" data-act="restore">恢复</button>
+        <button type="button" class="admin-mini danger" data-act="purge">彻底删除</button>`;
+      row.querySelector('[data-act="restore"]').addEventListener('click', async ()=>{
+        try{
+          await api('/api/trash/' + c._type + '/' + c.id, { method:'POST' }, true);
+          toast('已恢复');
+          loadAdminTrash();
+        }catch(e){ toast(e.message || '恢复失败'); }
+      });
+      row.querySelector('[data-act="purge"]').addEventListener('click', async ()=>{
+        if(typeof confirm === 'function' && !confirm('彻底删除后无法恢复，确定？')) return;
+        try{
+          await api('/api/trash/' + c._type + '/' + c.id, { method:'DELETE' }, true);
+          toast('已彻底删除');
+          loadAdminTrash();
+        }catch(e){ toast(e.message || '删除失败'); }
+      });
+      adminTrashList.appendChild(row);
+    });
+  }catch(e){
+    adminTrashList.innerHTML = '<div class="admin-empty">加载失败，请稍后重试</div>';
   }
 }
 
