@@ -326,12 +326,6 @@
     position:relative;min-height:100vh;display:flex;align-items:center;
     padding:0 clamp(22px,6vw,80px);overflow:hidden;
   }
-  .hero-glow{
-    position:absolute;width:720px;height:720px;border-radius:50%;pointer-events:none;
-    background:radial-gradient(circle,var(--hero-wash),transparent 62%);
-    left:50%;top:50%;transform:translate(-50%,-50%);transition:transform .35s ease-out;
-    z-index:1;filter:blur(10px);
-  }
   /* Hero 衬底：与引导页同一张照片，磨砂略强 + 阅读遮罩保证文字清晰 */
   .hero .bg-glass{backdrop-filter:blur(34px) saturate(1.5) brightness(.98);-webkit-backdrop-filter:blur(34px) saturate(1.5) brightness(.98)}
   .hero .bg-photo .layer{opacity:.62}
@@ -773,6 +767,11 @@
   .admin-mini{font-size:12px;padding:6px 12px;border-radius:var(--pill);border:1px solid var(--line);background:transparent;color:var(--dim);cursor:pointer;font-family:inherit;transition:.2s;white-space:nowrap;flex:none}
   .admin-mini:hover{color:var(--fg);background:var(--fill)}
   .admin-mini.danger:hover{color:var(--danger);background:var(--danger-soft);border-color:var(--danger)}
+  .liker-row{display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:var(--r-md);background:var(--fill-2)}
+  .liker-row .ava{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:14px;font-weight:600;color:#fff;overflow:hidden}
+  .liker-row .ava img{width:100%;height:100%;object-fit:cover;display:block}
+  .liker-row .nick{font-size:13px;font-weight:600;color:var(--fg)}
+  .liker-row .uid{margin-left:auto;font-size:11px;color:var(--faint);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
   .admin-upload{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
   .admin-hint{font-size:12px;color:var(--faint)}
   .admin-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;margin-top:16px}
@@ -867,6 +866,8 @@
   .article-meta .ava{width:30px;height:30px;border-radius:50%;overflow:hidden;display:grid;place-items:center;font-size:13px;font-weight:600;color:#fff;flex:none}
   .article-meta .ava img{width:100%;height:100%;object-fit:cover;display:block}
   .article-body{margin-top:20px;font-size:15.5px;line-height:1.85;color:var(--fg);white-space:pre-wrap;word-break:break-word}
+  .article-error{margin-top:20px;font-size:14px;line-height:1.8;color:var(--dim)}
+  .article-error .btn{margin-top:14px}
   .article-likes{display:flex;align-items:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
   .like-btn{display:inline-flex;align-items:center;gap:9px;padding:10px 20px;border-radius:var(--pill);cursor:pointer;font-family:inherit;
     background:var(--fill-2);border:1px solid var(--line);color:var(--dim);font-size:14px;font-weight:600;transition:transform .4s var(--spring),background .25s,color .25s,border-color .25s}
@@ -1028,9 +1029,6 @@
     -webkit-mask-image:radial-gradient(108% 108% at 50% 50%,transparent 74%,#000 95%,#000 100%);
     mask-image:radial-gradient(106% 106% at 50% 50%,transparent 80%,#000 96%,#000 100%)}
   .lgfx>.lgx-sp{background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.05) 15%,transparent 42%,transparent 72%,rgba(255,255,255,.09))}
-  .lgfx>.lgx-hl{opacity:0;transition:opacity .55s var(--ease);
-    background:radial-gradient(220px 170px at var(--lgx-x,34%) var(--lgx-y,14%),rgba(255,255,255,.48),transparent 68%)}
-  .lgfx.lgx-hot>.lgx-hl{opacity:1}
   .lgfx>.lgx-rim{box-shadow:inset 0 0 0 1px rgba(255,255,255,.40),inset 0 1.5px 0 rgba(255,255,255,.62),
       inset 0 -1.5px 0 rgba(255,255,255,.20),inset 0 -22px 30px -22px rgba(0,0,0,.26),inset 0 18px 26px -18px rgba(255,255,255,.16)}
   .lgfx.lgx-press>.lgx-rim{box-shadow:inset 0 0 0 1px rgba(255,255,255,.58),inset 0 2px 0 rgba(255,255,255,.82),
@@ -1061,7 +1059,7 @@
     -webkit-mask-image:linear-gradient(180deg,#000 0,#000 14%,transparent 32%,transparent 68%,#000 86%,#000 100%);
     mask-image:linear-gradient(180deg,#000 0,#000 14%,transparent 32%,transparent 68%,#000 86%,#000 100%)}
   /* 导航折射层常驻（玻璃条始终半透明悬浮），不再按滚动态开关 */
-  @media(prefers-reduced-motion:reduce){.lgfx>.lgx-hl{transition:none}}
+  @media(prefers-reduced-motion:reduce){.lgfx{transition:none}}
 
   /* ================= 整页自然滚动（锚点导航） =================
      取消板块隔离与自定义滚动拦截，恢复整页自然划动 + 锚点平滑跳转；
@@ -1169,7 +1167,6 @@
       <div class="bg-spec"></div>
       <div class="bg-shade"></div>
     </div>
-    <div class="hero-glow" id="heroGlow"></div>
     <div class="hero-content">
       <p class="eyebrow">WELCOME · 欢迎来到</p>
       <h1>你好，我是<br><span>Jinletian</span></h1>
@@ -1488,6 +1485,19 @@
     </div>
     <div class="modal-actions">
       <button class="btn ghost" id="adminClose">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 点赞人名单（仅站长） -->
+<div class="modal" id="likersModal" aria-hidden="true">
+  <div class="modal-card modal-wide">
+    <button class="modal-x" id="likersClose" type="button" aria-label="关闭">×</button>
+    <h3 id="likersTitle">点赞人</h3>
+    <p class="tabs-hint">只有站长能看到谁点了赞。</p>
+    <div class="admin-list" id="likersList"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="likersDone">关闭</button>
     </div>
   </div>
 </div>
@@ -2760,7 +2770,6 @@ composer.addEventListener('drop', e=>{
 /* ---------- 滚动：进度 / 导航 / 视差 ---------- */
 const nav = document.getElementById('nav');
 const progress = document.getElementById('progress');
-const heroGlow = document.getElementById('heroGlow');
 const sections = [...document.querySelectorAll('main section')];
 const navLinks = [...document.querySelectorAll('#nav nav a')];
 
@@ -2776,22 +2785,10 @@ function onScroll(){
     if(y + 120 >= s.offsetTop) activeId = s.id;
   }
   navLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href') === '#'+activeId));
-
-  // 视差
-  if(heroGlow && y < window.innerHeight){
-    heroGlow.style.transform = `translate(-50%, calc(-50% + ${y*0.18}px))`;
-  }
 }
 window.addEventListener('scroll', onScroll, {passive:true});
 
-/* ---------- 光标跟随光晕 ---------- */
 const hero = document.getElementById('home');
-hero.addEventListener('mousemove', e=>{
-  const r = hero.getBoundingClientRect();
-  const x = e.clientX - r.left, y = e.clientY - r.top;
-  heroGlow.style.left = x + 'px';
-  heroGlow.style.top = y + 'px';
-});
 
 /* ---------- Hero 液态玻璃：随滚动视差 + 指针折射（iOS26 风格） ---------- */
 const bgPhoto = document.querySelector('#home .bg-photo');
@@ -2906,8 +2903,10 @@ async function loadAdminMsgs(){
       row.innerHTML = `
         <span class="ava" ${m.avatar ? '' : `style="background:${avatarColor(m.nickname)}"`}>${avaHtml}</span>
         <span class="info"><span class="nick">${escHtml(m.nickname)}</span><span class="sub">${escHtml(m.content || '[图片]')} · ${fmtTime(m.createdAt)}</span></span>
-        <button type="button" class="admin-mini danger">删除</button>`;
-      row.querySelector('button').addEventListener('click', async ()=>{
+        <button type="button" class="admin-mini" data-act="likers">赞 ${m.likeCount || 0}</button>
+        <button type="button" class="admin-mini danger" data-act="del">删除</button>`;
+      row.querySelector('[data-act="likers"]').addEventListener('click', ()=>showLikers('message', m.id, '这条留言的点赞人'));
+      row.querySelector('[data-act="del"]').addEventListener('click', async ()=>{
         try{
           await api('/api/messages/' + m.id, { method: 'DELETE' });
           toast('已删除留言');
@@ -2935,9 +2934,11 @@ async function loadAdminPhotos(){
         <img src="${imgUrl(p.id)}" alt="已上传图片">
         <span class="size">${Math.max(1, Math.round(p.size / 1024))}KB</span>
         <span class="ops">
+          <button type="button" data-act="likers">赞 ${p.likeCount || 0}</button>
           <button type="button" data-act="toggle">${p.hidden ? '上架' : '下架'}</button>
           <button type="button" data-act="del">删除</button>
         </span>`;
+      cell.querySelector('[data-act="likers"]').addEventListener('click', ()=>showLikers('photo', p.id, '这张图片的点赞人'));
       cell.querySelector('[data-act="toggle"]').addEventListener('click', async ()=>{
         try{
           await api('/api/photos/' + p.id, { method: 'PATCH', body: JSON.stringify({ hidden: !p.hidden }) });
@@ -3136,7 +3137,9 @@ articleModal.addEventListener('click', e=>{ if(e.target === articleModal) closeA
 
 async function loadArticleDetail(id){
   try{
-    const data = await api('/api/articles/' + id, {}, !!localStorage.getItem(TOKEN_KEY));
+    const data = await withTimeout(
+      api('/api/articles/' + id, {}, !!localStorage.getItem(TOKEN_KEY)),
+      40000, '服务器响应超时（免费后端刚睡醒，正在冷启动，一般再点一次「重试」就好）');
     const a = data.article;
     articleTitle.textContent = a.title || '';
     articleBody.textContent = a.body || '';
@@ -3148,8 +3151,28 @@ async function loadArticleDetail(id){
     renderComments(data.comments || []);
   }catch(e){
     console.warn('loadArticleDetail', e);
-    articleBody.textContent = '文章加载失败：' + (e.message || '请稍后重试');
+    articleTitle.textContent = '文章加载失败';
+    articleBody.innerHTML = '';
+    const tip = document.createElement('div');
+    tip.className = 'article-error';
+    tip.textContent = (e.message || '请稍后重试');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn primary small';
+    btn.textContent = '重试';
+    btn.addEventListener('click', ()=>loadArticleDetail(id));
+    tip.appendChild(document.createElement('br'));
+    tip.appendChild(btn);
+    articleBody.appendChild(tip);
   }
+}
+
+/* 给 Promise 加超时：免费后端冷启动可能数十秒，超时后给出可重试的提示，而不是无限转圈 */
+function withTimeout(p, ms, msg){
+  return new Promise((resolve, reject)=>{
+    const t = setTimeout(()=>reject(new Error(msg || '请求超时')), ms);
+    p.then(v=>{ clearTimeout(t); resolve(v); }, e=>{ clearTimeout(t); reject(e); });
+  });
 }
 
 function setLike(count, liked){
@@ -3265,9 +3288,11 @@ async function loadAdminJournal(){
           <span class="j-sub">${timeAgo(a.createdAt)} · ${a.likeCount || 0} 赞 · ${a.commentCount || 0} 评论</span>
         </span>
         <span class="ops">
+          <button type="button" data-act="likers">赞 ${a.likeCount || 0}</button>
           <button type="button" data-act="edit">编辑</button>
           <button type="button" class="danger" data-act="del">删除</button>
         </span>`;
+      row.querySelector('[data-act="likers"]').addEventListener('click', ()=>showLikers('article', a.id, '《' + (a.title || '') + '》的点赞人'));
       row.querySelector('[data-act="edit"]').addEventListener('click', ()=>openJournalEditor(a.id));
       row.querySelector('[data-act="del"]').addEventListener('click', ()=>deleteJournal(a.id));
       adminJournalList.appendChild(row);
@@ -3343,6 +3368,40 @@ async function loadAdminTrash(){
     });
   }catch(e){
     adminTrashList.innerHTML = '<div class="admin-empty">加载失败，请稍后重试</div>';
+  }
+}
+
+/* ---------- 点赞人名单（仅站长）：留言 / 日志 / 图片 ---------- */
+const likersModal = document.getElementById('likersModal');
+const likersList = document.getElementById('likersList');
+const likersTitle = document.getElementById('likersTitle');
+function openLikers(){ likersModal.classList.add('open'); likersModal.setAttribute('aria-hidden', 'false'); }
+function closeLikers(){ likersModal.classList.remove('open'); likersModal.setAttribute('aria-hidden', 'true'); }
+document.getElementById('likersClose').addEventListener('click', closeLikers);
+document.getElementById('likersDone').addEventListener('click', closeLikers);
+likersModal.addEventListener('click', e=>{ if(e.target === likersModal) closeLikers(); });
+async function showLikers(type, id, label){
+  likersTitle.textContent = label || '点赞人';
+  likersList.innerHTML = '<div class="admin-empty">加载中…</div>';
+  openLikers();
+  try{
+    const data = await api('/api/likers?type=' + encodeURIComponent(type) + '&id=' + encodeURIComponent(id), {}, true);
+    const items = data.items || [];
+    if(!items.length){ likersList.innerHTML = '<div class="admin-empty">还没有人点赞</div>'; return; }
+    likersList.innerHTML = '';
+    items.forEach(u=>{
+      const row = document.createElement('div');
+      row.className = 'liker-row';
+      const avaHtml = u.avatar
+        ? `<img src="${imgUrl(u.avatar)}" alt="">`
+        : escHtml((u.nickname || '?').trim().charAt(0));
+      row.innerHTML = `
+        <span class="ava" ${u.avatar ? '' : `style="background:${avatarColor(u.nickname)}"`}>${avaHtml}</span>
+        <span class="nick">${escHtml(u.nickname)}</span>`;
+      likersList.appendChild(row);
+    });
+  }catch(e){
+    likersList.innerHTML = '<div class="admin-empty">加载失败：' + escHtml(e.message || '未知错误') + '</div>';
   }
 }
 
@@ -3438,6 +3497,7 @@ document.addEventListener('keydown', e=>{
   if(e.key !== 'Escape') return;
   if(articleModal.classList.contains('open')) closeArticle();
   if(journalEditorModal.classList.contains('open')) closeJournalEditor();
+  if(likersModal.classList.contains('open')) closeLikers();
 });
 
 /* 启动：拉取日志列表（游客/登录用户均可浏览，登录态下携带 token 以反映点赞） */
@@ -3668,7 +3728,7 @@ function initLibrary(){
    玻璃元素自身的 backdrop-filter 会形成"背景根"，导致其子层采不到页面背景；
    因此注入兄弟子层并把磨砂下沉到 .lgx-b1，各层独立采样页面，形成透镜剖面。 */
 (function(){
-  var LAYERS=['lgx-b1','lgx-b2','lgx-b3','lgx-sp','lgx-hl','lgx-rim'];
+  var LAYERS=['lgx-b1','lgx-b2','lgx-b3','lgx-sp','lgx-rim'];
   var SEL='#nav, .modal-card, .lb-bar';
   function enhance(el){
     if(el.__lgx) return; el.__lgx=1;
@@ -3685,13 +3745,7 @@ function initLibrary(){
       var sync=function(){ for(var j=0;j<ls.length;j++) ls[j].style.transform='translateY('+(-el.scrollTop)+'px)'; };
       el.addEventListener('scroll',sync,{passive:true}); sync();
     }
-    /* 交互：镜面高光跟随指针 + 按压时玻璃"压缩" */
-    el.addEventListener('pointermove',function(e){
-      var r=el.getBoundingClientRect();
-      el.style.setProperty('--lgx-x',((e.clientX-r.left)/r.width*100).toFixed(1)+'%');
-      el.style.setProperty('--lgx-y',((e.clientY-r.top)/r.height*100).toFixed(1)+'%');
-      el.classList.add('lgx-hot');
-    });
+    /* 交互：按压时玻璃"压缩"（已移除跟随指针的白色高光，保持苹果式干净） */
     el.addEventListener('pointerleave',function(){el.classList.remove('lgx-hot','lgx-press');});
     el.addEventListener('pointerdown',function(){el.classList.add('lgx-press');});
     el.addEventListener('pointerup',function(){el.classList.remove('lgx-press');});
