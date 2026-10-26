@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<!-- build: 2026-10-26 09:50 -->
+<!-- build: 2026-10-26 13:22 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Jinletian · 个人主页</title>
 <meta name="description" content="Jinletian 的个人主页与图片集" />
@@ -3785,7 +3785,11 @@ function initLibrary(){
    因此注入兄弟子层并把磨砂下沉到 .lgx-b1，各层独立采样页面，形成透镜剖面。 */
 (function(){
   var LAYERS=['lgx-b1','lgx-b2','lgx-b3','lgx-sp','lgx-rim'];
-  var SEL='#nav, .modal-card, .lb-bar';
+  var SEL='#nav, .lb-bar';
+  /* ⚠️ 弹窗（.modal-card）刻意排除在玻璃增强之外：
+     Safari 会把 z-index:-1 的玻璃层画到静态正文之上（导航因链接自带 position:relative 而幸免），
+     导致弹层"白卡 + 只剩右上角×"。弹窗改用自身 background:var(--modal-glass) + backdrop-filter
+     的原生毛玻璃：文字在正常流里，任何浏览器都不会被遮。 */
   /* backdrop-filter 支持检测：Safari 18 以下不支持 → 不做玻璃增强，
      元素保持 CSS 实底（.modal-card 有 --modal-glass，导航/灯箱栏有各自实底），
      避免"注入了层却采不到背景"或"抹了背景却没层"导致弹层不可见。 */
