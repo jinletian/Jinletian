@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
+<!-- build: 2026-10-26 09:50 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Jinletian · 个人主页</title>
 <meta name="description" content="Jinletian 的个人主页与图片集" />
@@ -1043,13 +1044,16 @@
       inset 0 -1.5px 0 rgba(255,255,255,.10),inset 0 -22px 30px -22px rgba(0,0,0,.45),inset 0 16px 24px -16px rgba(255,255,255,.08)}
   :root[data-theme="dark"] .lgfx.lgx-press>.lgx-rim{box-shadow:inset 0 0 0 1px rgba(255,255,255,.30),inset 0 2px 0 rgba(255,255,255,.55),
       inset 0 -2px 0 rgba(255,255,255,.14),inset 0 -26px 34px -22px rgba(0,0,0,.50),inset 0 20px 28px -18px rgba(255,255,255,.12)}
-  /* 各玻璃面的底色交由 .lgx-b1 承担（元素自身背景清空，保证层序正确） */
-  #nav.scrolled{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+  /* 各玻璃面的底色交由 .lgx-b1 承担（元素自身背景清空，保证层序正确）。
+     关键：透明化只在 .lgfx（JS 已注入玻璃层）时生效——
+     若玻璃层因任何原因没注入（如旧版 Safari 无 backdrop-filter 支持、脚本中断），
+     元素自动回落到上面的实底背景，保证弹层/导航永远可见。 */
+  #nav.scrolled.lgfx{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
   #nav>.lgx-b1{background:var(--nav-bg)}
-  .modal-card{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:9px;--lgx-sat:1.9}
+  .modal-card.lgfx{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:9px;--lgx-sat:1.9}
   .modal-card>.lgx-b1{background:var(--modal-glass)}
   .modal.open .modal-card{filter:none}          /* filter 会形成背景根，须清零 */
-  .lb-bar{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:8px;--lgx-sat:1.7}
+  .lb-bar.lgfx{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;--lgx-blur:8px;--lgx-sat:1.7}
   .lb-bar>.lgx-b1{background:var(--lb-bar)}
   /* 导航条只保留克制的顶部高光：满圈亮边在窄条上会显得突兀 */
   #nav>.lgx-sp{background:linear-gradient(180deg,rgba(255,255,255,.18),transparent 46%)}
@@ -1095,6 +1099,35 @@
 <script>
 /* 主题预置：在首屏绘制前确定浅色/深色，避免主题闪烁 */
 (function(){try{var t=localStorage.getItem('jl-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+</script>
+<script>
+/* 错误自诊断（排障用，正常永远不显示）：捕获运行时错误，在左下角红条展示。
+   若页面某功能坏了，截图红条内容即可定位（含文件名+行号）。 */
+(function(){
+  var errs=[];
+  function paint(){
+    var el=document.getElementById('__errbox');
+    if(!el){
+      el=document.createElement('div');el.id='__errbox';
+      el.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99999;max-width:min(430px,94vw);'
+        +'background:rgba(255,59,48,.95);color:#fff;font:11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;'
+        +'padding:9px 11px;border-radius:9px;white-space:pre-wrap;word-break:break-all;'
+        +'box-shadow:0 6px 20px rgba(0,0,0,.35);pointer-events:none';
+      (document.body||document.documentElement).appendChild(el);
+    }
+    el.textContent='⚠ JS 错误（截图发我）:\n'+errs.join('\n');
+  }
+  function cap(msg,src,line,col){
+    try{
+      var f=(src||'').split('/').pop();
+      errs.push(msg+' @'+(f||'?')+':'+line+':'+(col||0));
+      if(errs.length>6)errs.shift();
+      if(document.body)paint();else document.addEventListener('DOMContentLoaded',paint);
+    }catch(e){}
+  }
+  window.addEventListener('error',function(e){cap(e.message||String(e.error),e.filename,e.lineno,e.colno);});
+  window.addEventListener('unhandledrejection',function(e){var r=e.reason;cap((r&&r.message)||String(r),'(promise)',0,0);});
+})();
 </script>
 </head>
 <body class="locked">
@@ -3753,6 +3786,11 @@ function initLibrary(){
 (function(){
   var LAYERS=['lgx-b1','lgx-b2','lgx-b3','lgx-sp','lgx-rim'];
   var SEL='#nav, .modal-card, .lb-bar';
+  /* backdrop-filter 支持检测：Safari 18 以下不支持 → 不做玻璃增强，
+     元素保持 CSS 实底（.modal-card 有 --modal-glass，导航/灯箱栏有各自实底），
+     避免"注入了层却采不到背景"或"抹了背景却没层"导致弹层不可见。 */
+  var SUPPORTS_GLASS = !!(window.CSS && CSS.supports &&
+    (CSS.supports('backdrop-filter','blur(1px)') || CSS.supports('-webkit-backdrop-filter','blur(1px)')));
   function enhance(el){
     if(el.__lgx) return; el.__lgx=1;
     el.classList.add('lgfx');
@@ -3774,7 +3812,10 @@ function initLibrary(){
     el.addEventListener('pointerup',function(){el.classList.remove('lgx-press');});
     el.addEventListener('pointercancel',function(){el.classList.remove('lgx-press');});
   }
-  function boot(){ document.querySelectorAll(SEL).forEach(enhance); }
+  function boot(){
+    if(!SUPPORTS_GLASS) return;   // 无 backdrop-filter：全部保持实底，不注入玻璃层
+    document.querySelectorAll(SEL).forEach(enhance);
+  }
   boot();
   window.addEventListener('load', boot);
 })();
