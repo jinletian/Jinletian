@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<!-- build: 2026-10-26 13:22 -->
+<!-- build: 2026-10-27 21:45 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Jinletian · 个人主页</title>
 <meta name="description" content="Jinletian 的个人主页与图片集" />
@@ -1627,15 +1627,25 @@ async function api(path, opts = {}, needAuth = true){
       if(t) headers['Authorization'] = 'Bearer ' + t;
     }catch(e){}
   }
-  let res;
-  try{
-    res = await fetch(API_CFG.base + path, { ...opts, headers });
-  }catch(e){
-    throw apiError('网络异常，请检查网络后重试', 0);
+  let lastErr;
+  for(let attempt = 0; attempt < 3; attempt++){
+    if(attempt > 0) await new Promise(r => setTimeout(r, attempt === 1 ? 1500 : 3000)); // 失败后等待，让免费后端先唤醒
+    try{
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 60000);                              // 后端冷启动可能几十秒，给足超时
+      const res = await fetch(API_CFG.base + path, { ...opts, headers, signal: ctrl.signal, cache: 'no-store' });
+      clearTimeout(timer);
+      const data = await res.json().catch(() => null);
+      if(!res.ok) throw apiError((data && data.error) || ('请求失败（HTTP ' + res.status + '）'), res.status);
+      return data;
+    }catch(e){
+      lastErr = e;
+      // 网络层错误（含冷启动超时/断连）才重试；HTTP 错误（如 401）立即上报，不重试
+      const netErr = /TypeError|AbortError|network|failed to fetch|load failed|aborted|timed out|Operation timed out/i.test((e.name || '') + ' ' + (e.message || ''));
+      if(!netErr || attempt === 2) throw apiError('网络异常，请检查网络后重试', 0);
+    }
   }
-  const data = await res.json().catch(() => null);
-  if(!res.ok) throw apiError((data && data.error) || ('请求失败（HTTP ' + res.status + '）'), res.status);
-  return data;
+  throw apiError('网络异常，请检查网络后重试', 0);
 }
 const apiReady = () => !!API_CFG.base;
 function saveSession(token, user){
@@ -3502,7 +3512,7 @@ journalCoverInput.addEventListener('change', async ()=>{
   journalCoverInput.value = '';
   if(!f) return;
   try{
-    const blob = await compressToLimit(f, 1600, 0.82, 1.4 * 1024 * 1024);
+    const blob = await compressToLimit(f, 1440, 0.8, 1 * 1024 * 1024);
     clearJournalCover();
     pendingCoverBlob = blob;
     pendingCoverURL = URL.createObjectURL(blob);
